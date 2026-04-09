@@ -1,0 +1,2186 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가열포트 디자인 어워드 수상작 리포트 v6</title>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        
+        :root {
+            --toss-blue: #3182f6;
+            --toss-grey-bg: #f2f4f6;
+            --toss-text-main: #191f28;
+            --toss-text-sub: #4e5968;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: var(--toss-grey-bg);
+            color: var(--toss-text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        header {
+            width: 100%;
+            max-width: 1200px;
+            padding: 60px 20px 20px;
+            box-sizing: border-box;
+        }
+        
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            color: var(--toss-text-sub);
+            margin-bottom: 30px;
+        }
+
+        .filter-container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 10px 20px 30px;
+            box-sizing: border-box;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            background-color: var(--toss-grey-bg);
+            z-index: 100;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filter-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--toss-text-sub);
+            margin-left: 4px;
+        }
+
+        select {
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: none;
+            background-color: var(--white);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--toss-text-main);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            cursor: pointer;
+            outline: none;
+            min-width: 150px;
+        }
+
+        .counter-section {
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 20px 20px;
+            box-sizing: border-box;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--toss-text-sub);
+        }
+
+        .counter-highlight {
+            color: var(--toss-blue);
+            font-size: 18px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 20px 60px;
+            box-sizing: border-box;
+        }
+        
+        .card-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card {
+            background-color: var(--white);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(49, 130, 246, 0.15);
+        }
+        
+        .image-container {
+            width: 100%;
+            height: 250px;
+            overflow: hidden;
+            background-color: #f9fafb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .card:hover .image-container::after {
+            content: 'View Award Page';
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        
+        .content {
+            padding: 20px 24px 24px;
+        }
+        
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        
+        .tag {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 8px;
+            background-color: var(--toss-grey-bg);
+            color: var(--toss-text-sub);
+        }
+        
+        .tag.award {
+            background-color: #e8f3ff;
+            color: var(--toss-blue);
+        }
+
+        .tag.year {
+            background-color: #fff0e6;
+            color: #ff6b00;
+        }
+        
+        .brand {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--toss-blue);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        
+        .product-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--toss-text-main);
+            line-height: 1.4;
+        }
+
+        .no-results {
+            grid-column: 1 / -1;
+            padding: 100px 0;
+            text-align: center;
+            color: var(--toss-text-sub);
+            font-size: 18px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>가열포트 디자인 어워드</h1>
+        <p class="subtitle">전 세계 우수 디자인 수상작 (이미지를 누르면 상세 페이지로 이동합니다)</p>
+    </header>
+
+    <div class="filter-container">
+        <div class="filter-group">
+            <span class="filter-label">연도</span>
+            <select id="filter-year" onchange="filterGallery()">
+                <option value="all">전체 연도</option>
+                <option value="2026">2026년</option><option value="2025">2025년</option><option value="2024">2024년</option><option value="2023">2023년</option><option value="2022">2022년</option><option value="2021">2021년</option><option value="2020">2020년</option><option value="2019">2019년</option><option value="2018">2018년</option><option value="2017">2017년</option><option value="2016">2016년</option><option value="2015">2015년</option><option value="2014">2014년</option><option value="2013">2013년</option><option value="2012">2012년</option><option value="2011">2011년</option><option value="2010">2010년</option><option value="2008">2008년</option><option value="2006">2006년</option><option value="2005">2005년</option><option value="2003">2003년</option><option value="2000">2000년</option><option value="1998">1998년</option><option value="1962">1962년</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <span class="filter-label">어워드</span>
+            <select id="filter-award" onchange="filterGallery()">
+                <option value="all">전체 어워드</option>
+                <option value="IDEA Award">IDEA Award</option><option value="Red Dot Design Award">Red Dot Design Award</option><option value="iF Design Award">iF Design Award</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <span class="filter-label">브랜드</span>
+            <select id="filter-brand" onchange="filterGallery()">
+                <option value="all">전체 브랜드</option>
+                <option value="BALMUDA">BALMUDA</option><option value="BORK">BORK</option><option value="BUGU">BUGU</option><option value="BUYDEEM">BUYDEEM</option><option value="Bear">Bear</option><option value="Bodum">Bodum</option><option value="Bon">Bon</option><option value="Bosch">Bosch</option><option value="Braun">Braun</option><option value="Breville">Breville</option><option value="Cocinare">Cocinare</option><option value="Crastal Technology (Shenzhen) Co.">Crastal Technology (Shenzhen) Co.</option><option value="Crownful">Crownful</option><option value="De'Longhi">De'Longhi</option><option value="Donlim">Donlim</option><option value="EDENUS ART">EDENUS ART</option><option value="Fiskars">Fiskars</option><option value="Foshan Viomi Electrical Technology">Foshan Viomi Electrical Technology</option><option value="GIILLS">GIILLS</option><option value="Guangdong Xinbao Electrical Appliances Holdings Co">Guangdong Xinbao Electrical Appliances Holdings Co</option><option value="Guangzhou Inteone Home Tech">Guangzhou Inteone Home Tech</option><option value="Haier">Haier</option><option value="Jacob">Jacob</option><option value="Jiangmen Fanwei General Electric Co">Jiangmen Fanwei General Electric Co</option><option value="Joyoung">Joyoung</option><option value="Kalita">Kalita</option><option value="Kalita Co">Kalita Co</option><option value="Kenwood">Kenwood</option><option value="LE LAPIN KITCHENWARE">LE LAPIN KITCHENWARE</option><option value="Laica">Laica</option><option value="Midea">Midea</option><option value="Philips">Philips</option><option value="Reehill">Reehill</option><option value="Rowenta">Rowenta</option><option value="SHENZHEN MUHUI CULTURE CO">SHENZHEN MUHUI CULTURE CO</option><option value="SIEMENS">SIEMENS</option><option value="Shenzhen 24 Cultural and Creative Co">Shenzhen 24 Cultural and Creative Co</option><option value="Shenzhen Cocinare Technology">Shenzhen Cocinare Technology</option><option value="Shenzhen Qihe Technology">Shenzhen Qihe Technology</option><option value="Snow bear">Snow bear</option><option value="Supor">Supor</option><option value="TATUNG">TATUNG</option><option value="TOKIT">TOKIT</option><option value="Teawith">Teawith</option><option value="Thermos">Thermos</option><option value="Tiger">Tiger</option><option value="Toshiba">Toshiba</option><option value="WMF">WMF</option><option value="casabugatti">casabugatti</option><option value="fellow">fellow</option><option value="ritterwerk">ritterwerk</option><option value="tescoma">tescoma</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="counter-section">
+        총 <span id="total-count">118</span>개의 제품 중 
+        <span id="filtered-count" class="counter-highlight">118</span>개가 표시되고 있습니다.
+    </div>
+    
+    <div class="grid" id="gallery">
+        <div id="no-results" class="no-results">조건에 맞는 제품이 없습니다.</div>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/reehill-kettle/768797" target="_blank" class="card-link card-container" data-year="2026" data-award="iF Design Award" data-brand="Reehill">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMS02I026QA.info_2026_IF DESIGN_Reehill  Kettle.jpg" alt="Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2026</span>
+                    </div>
+                    <div class="brand">Reehill</div>
+                    <div class="product-name">Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/3d-surround-heating-silent-electric-kettle/745374" target="_blank" class="card-link card-container" data-year="2026" data-award="iF Design Award" data-brand="Midea">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMSSKPV6JQI.info_2026_IF DESIGN_3D Surround Heating Silent Electric Kettle.jpg" alt="3D Surround Heating Silent Electric Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2026</span>
+                    </div>
+                    <div class="brand">Midea</div>
+                    <div class="product-name">3D Surround Heating Silent Electric Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/light-delight-cooking-set/673162" target="_blank" class="card-link card-container" data-year="2025" data-award="iF Design Award" data-brand="TATUNG">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMRS0FILE3S.info_2025_IF DESIGN_LIGHT DELIGHT COOKING SET.jpg" alt="LIGHT DELIGHT COOKING SET" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2025</span>
+                    </div>
+                    <div class="brand">TATUNG</div>
+                    <div class="product-name">LIGHT DELIGHT COOKING SET</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/philips-breakfast-set-3000-series-79059" target="_blank" class="card-link card-container" data-year="2025" data-award="Red Dot Design Award" data-brand="Philips">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN9CNBGV2M0.info_2025년_Red Dot Design Award Philips Breakfast Set 3000 Series.jpg" alt="Breakfast Set 3000 Series" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2025</span>
+                    </div>
+                    <div class="brand">Philips</div>
+                    <div class="product-name">Breakfast Set 3000 Series</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/jacob-jensen-electric-kettle-79159" target="_blank" class="card-link card-container" data-year="2025" data-award="Red Dot Design Award" data-brand="Jacob">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN98830A1I4.info_2025년_Red Dot Design Award Jacob Jensen Electric Kettle.jpg" alt="Jensen Electric Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2025</span>
+                    </div>
+                    <div class="brand">Jacob</div>
+                    <div class="product-name">Jensen Electric Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/moonkettle-79145" target="_blank" class="card-link card-container" data-year="2025" data-award="Red Dot Design Award" data-brand="BALMUDA">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN94UH9NWGQ.info_2025년_Red Dot Design Award MoonKettle.jpg" alt="MoonKettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2025</span>
+                    </div>
+                    <div class="brand">BALMUDA</div>
+                    <div class="product-name">MoonKettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/wmf-master-series-67626" target="_blank" class="card-link card-container" data-year="2024" data-award="Red Dot Design Award" data-brand="WMF">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN8TGIQU8Q9.info_2024년_Red Dot Design Award WMF Master Series.jpg" alt="Master Series" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2024</span>
+                    </div>
+                    <div class="brand">WMF</div>
+                    <div class="product-name">Master Series</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/electric-kettle/642399" target="_blank" class="card-link card-container" data-year="2024" data-award="iF Design Award" data-brand="Shenzhen Qihe Technology">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMRGAC02ZZ9.info_2024_IF DESIGN_Electric kettle.jpg" alt="Electric kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2024</span>
+                    </div>
+                    <div class="brand">Shenzhen Qihe Technology</div>
+                    <div class="product-name">Electric kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/philips-kettle-double-wall-5000-and-7000-series-67490" target="_blank" class="card-link card-container" data-year="2024" data-award="Red Dot Design Award" data-brand="Philips">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN8CZX4G724.info_2024년_Red Dot Design Award Philips Kettle Double Wall 5000 and 7000 Series.jpg" alt="Kettle Double Wall 5000 and 7000 Series" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2024</span>
+                    </div>
+                    <div class="brand">Philips</div>
+                    <div class="product-name">Kettle Double Wall 5000 and 7000 Series</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/philips-double-wall-kettle-5000-7000-series/615340" target="_blank" class="card-link card-container" data-year="2024" data-award="iF Design Award" data-brand="Philips">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNV9RFT42XS.info_2024_IF DESIGN_Philips Double Wall Kettle 5000  7000 Series.jpg" alt="Double Wall Kettle 5000 7000 Series" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2024</span>
+                    </div>
+                    <div class="brand">Philips</div>
+                    <div class="product-name">Double Wall Kettle 5000 7000 Series</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/peak-electric-kettle/620595" target="_blank" class="card-link card-container" data-year="2024" data-award="iF Design Award" data-brand="Midea">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMTFZ1I6L9D.info_2024_IF DESIGN_peak electric kettle.jpg" alt="peak electric kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2024</span>
+                    </div>
+                    <div class="brand">Midea</div>
+                    <div class="product-name">peak electric kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/le-lapin-kitchenware/644576" target="_blank" class="card-link card-container" data-year="2024" data-award="iF Design Award" data-brand="LE LAPIN KITCHENWARE">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNWOFN5Z6DA.info_2024_IF DESIGN_Le Lapin Kitchenware.png" alt="LE LAPIN KITCHENWARE" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2024</span>
+                    </div>
+                    <div class="brand">LE LAPIN KITCHENWARE</div>
+                    <div class="product-name">LE LAPIN KITCHENWARE</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/eco-barista-kettle-g929-67428" target="_blank" class="card-link card-container" data-year="2024" data-award="Red Dot Design Award" data-brand="Jiangmen Fanwei General Electric Co">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN8H9095MLQ.info_2024년_Red Dot Design Award Eco Barista Kettle G929.jpg" alt="Eco Barista Kettle G929" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2024</span>
+                    </div>
+                    <div class="brand">Jiangmen Fanwei General Electric Co</div>
+                    <div class="product-name">Eco Barista Kettle G929</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/tbox-mini-67624" target="_blank" class="card-link card-container" data-year="2024" data-award="Red Dot Design Award" data-brand="Guangzhou Inteone Home Tech">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN91751U26K.info_2024년_Red Dot Design Award Tbox Mini.jpg" alt="Tbox Mini" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2024</span>
+                    </div>
+                    <div class="brand">Guangzhou Inteone Home Tech</div>
+                    <div class="product-name">Tbox Mini</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/giills-3/623496" target="_blank" class="card-link card-container" data-year="2024" data-award="iF Design Award" data-brand="GIILLS">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMTOXMEBQBO.info_2024_IF DESIGN_GIILLS 3.jpg" alt="3" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2024</span>
+                    </div>
+                    <div class="brand">GIILLS</div>
+                    <div class="product-name">3</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/eclettica/612077" target="_blank" class="card-link card-container" data-year="2024" data-award="iF Design Award" data-brand="De'Longhi">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNV35M6GSS2.info_2024_IF DESIGN_Eclettica.jpg" alt="Eclettica" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2024</span>
+                    </div>
+                    <div class="brand">De'Longhi</div>
+                    <div class="product-name">Eclettica</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/cocinare-flow-i7-infinity-coffee-kettle-67450" target="_blank" class="card-link card-container" data-year="2024" data-award="Red Dot Design Award" data-brand="Cocinare">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN8PGQQXOFX.info_2024년_Red Dot Design Award Cocinare FLOW i7 infinity Coffee Kettle.jpg" alt="FLOW i7 infinity Coffee Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2024</span>
+                    </div>
+                    <div class="brand">Cocinare</div>
+                    <div class="product-name">FLOW i7 infinity Coffee Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/breville-edge-series-67432" target="_blank" class="card-link card-container" data-year="2024" data-award="Red Dot Design Award" data-brand="Breville">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN8MC1DERO2.info_2024년_Red Dot Design Award Breville Edge Series.jpg" alt="Edge Series" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2024</span>
+                    </div>
+                    <div class="brand">Breville</div>
+                    <div class="product-name">Edge Series</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/giulietta-61880" target="_blank" class="card-link card-container" data-year="2023" data-award="Red Dot Design Award" data-brand="casabugatti">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN8970RCIR5.info_2023년_레드 닷 디자인 어워드 줄리에타.jpg" alt="레드 닷 디자인 어워드 줄리에타" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2023</span>
+                    </div>
+                    <div class="brand">casabugatti</div>
+                    <div class="product-name">레드 닷 디자인 어워드 줄리에타</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/toshiba-safety-kettle-series/563406" target="_blank" class="card-link card-container" data-year="2023" data-award="iF Design Award" data-brand="Toshiba">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNUMBNP3O6K.info_2023_IF DESIGN_Toshiba safety kettle series.jpg" alt="safety kettle series" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2023</span>
+                    </div>
+                    <div class="brand">Toshiba</div>
+                    <div class="product-name">safety kettle series</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/toshiba-family-safety-kettle-set/563402" target="_blank" class="card-link card-container" data-year="2023" data-award="iF Design Award" data-brand="Toshiba">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMPF57J9TZT.info_2023_IF DESIGN_Toshiba family safety kettle set.png" alt="family safety kettle set" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2023</span>
+                    </div>
+                    <div class="brand">Toshiba</div>
+                    <div class="product-name">family safety kettle set</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/toshiba-family-safety-kettle-set/563402" target="_blank" class="card-link card-container" data-year="2023" data-award="iF Design Award" data-brand="Toshiba">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNTET3SB2NI.info_2023_IF DESIGN_Toshiba family safety kettle set.jpg" alt="family safety kettle set" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2023</span>
+                    </div>
+                    <div class="brand">Toshiba</div>
+                    <div class="product-name">family safety kettle set</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/toshiba-teasim-safety-kettle-set/563397" target="_blank" class="card-link card-container" data-year="2023" data-award="iF Design Award" data-brand="Toshiba">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMTXZR87IQC.info_2023_IF DESIGN_Toshiba Teasim safety kettle set.jpg" alt="Teasim safety kettle set" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2023</span>
+                    </div>
+                    <div class="brand">Toshiba</div>
+                    <div class="product-name">Teasim safety kettle set</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/toshiba-teasim-safety-kettle-set/563397" target="_blank" class="card-link card-container" data-year="2023" data-award="iF Design Award" data-brand="Toshiba">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNT9WICCO09.info_2023_IF DESIGN_Toshiba Teasim safety kettle set.jpg" alt="Teasim safety kettle set" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2023</span>
+                    </div>
+                    <div class="brand">Toshiba</div>
+                    <div class="product-name">Teasim safety kettle set</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/ptq/566449" target="_blank" class="card-link card-container" data-year="2023" data-award="iF Design Award" data-brand="Tiger">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNUR1Y4L66I.info_2023_IF DESIGN_PTQ.jpg" alt="PTQ" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2023</span>
+                    </div>
+                    <div class="brand">Tiger</div>
+                    <div class="product-name">PTQ</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/cocinare-gooseneck-coffee-kettle-cek-201/553224" target="_blank" class="card-link card-container" data-year="2023" data-award="iF Design Award" data-brand="Shenzhen Cocinare Technology">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNT0S62K6OK.info_2023_IF DESIGN_Cocinare Gooseneck Coffee Kettle CEK-201.jpg" alt="Cocinare Gooseneck Coffee Kettle CEK-201" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2023</span>
+                    </div>
+                    <div class="brand">Shenzhen Cocinare Technology</div>
+                    <div class="product-name">Cocinare Gooseneck Coffee Kettle CEK-201</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/dawn-dusk-collection/552505" target="_blank" class="card-link card-container" data-year="2023" data-award="iF Design Award" data-brand="Kenwood">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNSM307G7VP.info_2023_IF DESIGN_Dawn  Dusk Collection.jpg" alt="Dawn Dusk Collection" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2023</span>
+                    </div>
+                    <div class="brand">Kenwood</div>
+                    <div class="product-name">Dawn Dusk Collection</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/tbox-mini/573037" target="_blank" class="card-link card-container" data-year="2023" data-award="iF Design Award" data-brand="Guangzhou Inteone Home Tech">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNUXCE8U0BF.info_2023_IF DESIGN_Tbox mini.jpg" alt="Tbox mini" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2023</span>
+                    </div>
+                    <div class="brand">Guangzhou Inteone Home Tech</div>
+                    <div class="product-name">Tbox mini</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/jingyue-loop-handle-kettle/571936" target="_blank" class="card-link card-container" data-year="2023" data-award="iF Design Award" data-brand="Guangzhou Inteone Home Tech">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNUU5VW2I5N.info_2023_IF DESIGN_Jingyue loop-handle kettle.jpg" alt="Jingyue loop-handle kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2023</span>
+                    </div>
+                    <div class="brand">Guangzhou Inteone Home Tech</div>
+                    <div class="product-name">Jingyue loop-handle kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.idsa.org/awards-recognition/idea/idea-gallery/giills-3/" target="_blank" class="card-link card-container" data-year="2023" data-award="IDEA Award" data-brand="GIILLS">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMX6XAJNHQX.info_2023_IDEA Award_a person holding a black bag.png" alt="a person holding a black bag" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">IDEA Award</span>
+                        <span class="tag year">2023</span>
+                    </div>
+                    <div class="brand">GIILLS</div>
+                    <div class="product-name">a person holding a black bag</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/forget-scientific-intelligent-kettle/547647" target="_blank" class="card-link card-container" data-year="2023" data-award="iF Design Award" data-brand="EDENUS ART">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMSDLRSBR0G.info_2023_IF DESIGN_Forget · Scientific intelligent kettle.jpg" alt="Forget · Scientific intelligent kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2023</span>
+                    </div>
+                    <div class="brand">EDENUS ART</div>
+                    <div class="product-name">Forget · Scientific intelligent kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/water-kettle-61808" target="_blank" class="card-link card-container" data-year="2023" data-award="Red Dot Design Award" data-brand="Crownful">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMSTSXBNU5H2M.info_2023_Water Kettle.jpg" alt="Water Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2023</span>
+                    </div>
+                    <div class="brand">Crownful</div>
+                    <div class="product-name">Water Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/multifunction-electric-kettle/329293" target="_blank" class="card-link card-container" data-year="2022" data-award="iF Design Award" data-brand="Thermos">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNQ7NP3SHE2.info_2022_IF DESIGN_Multifunction Electric Kettle.jpg" alt="Multifunction Electric Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2022</span>
+                    </div>
+                    <div class="brand">Thermos</div>
+                    <div class="product-name">Multifunction Electric Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/philips-5000-series-eco-conscious-edition-56134" target="_blank" class="card-link card-container" data-year="2022" data-award="Red Dot Design Award" data-brand="Philips">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN74T3MFGLM.info_2022년_Red Dot Design Award Philips 5000 Series – Eco Conscious Edition.jpg" alt="5000 Series – Eco Conscious Edition" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2022</span>
+                    </div>
+                    <div class="brand">Philips</div>
+                    <div class="product-name">5000 Series – Eco Conscious Edition</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/zero/331933" target="_blank" class="card-link card-container" data-year="2022" data-award="iF Design Award" data-brand="Midea">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMSKPSC9NPW.info_2022_IF DESIGN_zero.jpg" alt="zero" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2022</span>
+                    </div>
+                    <div class="brand">Midea</div>
+                    <div class="product-name">zero</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/mini-health-kettle/333646" target="_blank" class="card-link card-container" data-year="2022" data-award="iF Design Award" data-brand="Midea">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMT374X3PYG.info_2022_IF DESIGN_MINI Health Kettle.jpg" alt="MINI Health Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2022</span>
+                    </div>
+                    <div class="brand">Midea</div>
+                    <div class="product-name">MINI Health Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/visione-56122" target="_blank" class="card-link card-container" data-year="2022" data-award="Red Dot Design Award" data-brand="Laica">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN700JO8GBJ.info_2022년_Red Dot Design Award Visione.jpg" alt="Visione" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2022</span>
+                    </div>
+                    <div class="brand">Laica</div>
+                    <div class="product-name">Visione</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/kalita-kedp-x1-56088" target="_blank" class="card-link card-container" data-year="2022" data-award="Red Dot Design Award" data-brand="Kalita Co">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN79J53S9J0.info_2022년_Red Dot Design Award Kalita KEDP-X1.jpg" alt="Kalita KEDP-X1" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2022</span>
+                    </div>
+                    <div class="brand">Kalita Co</div>
+                    <div class="product-name">Kalita KEDP-X1</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/kalita-kedp-x1/343350" target="_blank" class="card-link card-container" data-year="2022" data-award="iF Design Award" data-brand="Kalita">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNS8GH6V2SY.info_2022_IF DESIGN_Kalita KEDP-X1.jpg" alt="KEDP-X1" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2022</span>
+                    </div>
+                    <div class="brand">Kalita</div>
+                    <div class="product-name">KEDP-X1</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/physical-insulated-electric-kettle-w970/343199" target="_blank" class="card-link card-container" data-year="2022" data-award="iF Design Award" data-brand="Joyoung">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNRVJTR9Q34.info_2022_IF DESIGN_Physical insulated electric kettle W970.jpg" alt="Physical insulated electric kettle W970" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2022</span>
+                    </div>
+                    <div class="brand">Joyoung</div>
+                    <div class="product-name">Physical insulated electric kettle W970</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/stacked-tea-maker/336663" target="_blank" class="card-link card-container" data-year="2022" data-award="iF Design Award" data-brand="Bear">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNRQWHYLZXW.info_2022_IF DESIGN_Stacked tea maker.jpg" alt="Stacked tea maker" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2022</span>
+                    </div>
+                    <div class="brand">Bear</div>
+                    <div class="product-name">Stacked tea maker</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/tokit-smart-kettle/300740" target="_blank" class="card-link card-container" data-year="2021" data-award="iF Design Award" data-brand="TOKIT">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNN62RADNYS.info_2021_IF DESIGN_TOKIT Smart Kettle.jpg" alt="Smart Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2021</span>
+                    </div>
+                    <div class="brand">TOKIT</div>
+                    <div class="product-name">Smart Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/thermostatic-portable-electric-kettle/300777" target="_blank" class="card-link card-container" data-year="2021" data-award="iF Design Award" data-brand="Snow bear">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNNAB15B022.info_2021_IF DESIGN_Thermostatic portable electric kettle.jpg" alt="Thermostatic portable electric kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2021</span>
+                    </div>
+                    <div class="brand">Snow bear</div>
+                    <div class="product-name">Thermostatic portable electric kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/radian/311010" target="_blank" class="card-link card-container" data-year="2021" data-award="iF Design Award" data-brand="Shenzhen 24 Cultural and Creative Co">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNO95YIHWHP.info_2021_IF DESIGN_Radian.jpg" alt="Radian" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2021</span>
+                    </div>
+                    <div class="brand">Shenzhen 24 Cultural and Creative Co</div>
+                    <div class="product-name">Radian</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/stainless-steel-electric-kettle/311154" target="_blank" class="card-link card-container" data-year="2021" data-award="iF Design Award" data-brand="Reehill">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNOF6XXCF1D.info_2021_IF DESIGN_Stainless steel electric kettle.jpg" alt="Stainless steel electric kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2021</span>
+                    </div>
+                    <div class="brand">Reehill</div>
+                    <div class="product-name">Stainless steel electric kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/philips-filtration-dispenser-lego/300967" target="_blank" class="card-link card-container" data-year="2021" data-award="iF Design Award" data-brand="Philips">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNNFAJG15S9.info_2021_IF DESIGN_Philips Filtration dispenser - Lego.jpg" alt="Filtration dispenser - Lego" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2021</span>
+                    </div>
+                    <div class="brand">Philips</div>
+                    <div class="product-name">Filtration dispenser - Lego</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/electric-kettle-for-baby/310006" target="_blank" class="card-link card-container" data-year="2021" data-award="iF Design Award" data-brand="Haier">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNNPDT3HYLS.info_2021_IF DESIGN_Electric Kettle for baby.jpg" alt="Electric Kettle for baby" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2021</span>
+                    </div>
+                    <div class="brand">Haier</div>
+                    <div class="product-name">Electric Kettle for baby</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/casarte-electric-kettle-50530" target="_blank" class="card-link card-container" data-year="2021" data-award="Red Dot Design Award" data-brand="Haier">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN6R2T9A2TH.info_2021년_Red Dot Design Award Casarte Electric Kettle.jpg" alt="Casarte Electric Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2021</span>
+                    </div>
+                    <div class="brand">Haier</div>
+                    <div class="product-name">Casarte Electric Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/bugu-smart-kettle/313273" target="_blank" class="card-link card-container" data-year="2021" data-award="iF Design Award" data-brand="BUGU">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNPT8KWZQCC.info_2021_IF DESIGN_BUGU smart kettle.jpg" alt="smart kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2021</span>
+                    </div>
+                    <div class="brand">BUGU</div>
+                    <div class="product-name">smart kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/philips-nourishing-kettle-avance-collection-45143" target="_blank" class="card-link card-container" data-year="2020" data-award="Red Dot Design Award" data-brand="Philips">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN6ITWVEHR2.info_2020년_Red Dot Design Award Philips Nourishing Kettle Avance Collection.jpg" alt="Nourishing Kettle Avance Collection" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2020</span>
+                    </div>
+                    <div class="brand">Philips</div>
+                    <div class="product-name">Nourishing Kettle Avance Collection</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/fairy-boatnew-chinese-series/273336" target="_blank" class="card-link card-container" data-year="2020" data-award="iF Design Award" data-brand="Midea">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNM8I77UA5W.info_2021_IF DESIGN_“Fairy Boat”New Chinese Series.jpg" alt="“Fairy Boat”New Chinese Series" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2020</span>
+                    </div>
+                    <div class="brand">Midea</div>
+                    <div class="product-name">“Fairy Boat”New Chinese Series</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/milight-series/274279" target="_blank" class="card-link card-container" data-year="2020" data-award="iF Design Award" data-brand="Midea">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNMEY5FYKSE.info_2021_IF DESIGN_Milight series.jpg" alt="Milight series" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2020</span>
+                    </div>
+                    <div class="brand">Midea</div>
+                    <div class="product-name">Milight series</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/just-right-45115" target="_blank" class="card-link card-container" data-year="2020" data-award="Red Dot Design Award" data-brand="Midea">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN4ZY06IUA6.info_2020년_Red Dot Design Award Just Right.jpg" alt="Just Right" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2020</span>
+                    </div>
+                    <div class="brand">Midea</div>
+                    <div class="product-name">Just Right</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/kalita-electric-drip-kettle-45127" target="_blank" class="card-link card-container" data-year="2020" data-award="Red Dot Design Award" data-brand="Kalita Co">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN5EWIXSUWZ.info_2020년_Red Dot Design Award Kalita Electric Drip Kettle.jpg" alt="Kalita Electric Drip Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2020</span>
+                    </div>
+                    <div class="brand">Kalita Co</div>
+                    <div class="product-name">Kalita Electric Drip Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/k06-z2-portable-folded-electric-kettle/285648" target="_blank" class="card-link card-container" data-year="2020" data-award="iF Design Award" data-brand="Joyoung">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNMO6U8X98S.info_2021_IF DESIGN_K06-Z2 Portable folded Electric Kettle.jpg" alt="K06-Z2 Portable folded Electric Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2020</span>
+                    </div>
+                    <div class="brand">Joyoung</div>
+                    <div class="product-name">K06-Z2 Portable folded Electric Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/k06-z2-45181" target="_blank" class="card-link card-container" data-year="2020" data-award="Red Dot Design Award" data-brand="Joyoung">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN4QAZJF0OM.info_2020년_Red Dot Design Award K06-Z2.jpg" alt="K06-Z2" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2020</span>
+                    </div>
+                    <div class="brand">Joyoung</div>
+                    <div class="product-name">K06-Z2</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/mini-tea-maker-46573" target="_blank" class="card-link card-container" data-year="2020" data-award="Red Dot Design Award" data-brand="Guangdong Xinbao Electrical Appliances Holdings Co">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNE5WW75EMH.info_2020년_Red Dot Design Award MINI tea maker.jpg" alt="MINI tea maker" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2020</span>
+                    </div>
+                    <div class="brand">Guangdong Xinbao Electrical Appliances Holdings Co</div>
+                    <div class="product-name">MINI tea maker</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/pour-over-coffee-maker-kettle-45170" target="_blank" class="card-link card-container" data-year="2020" data-award="Red Dot Design Award" data-brand="Donlim">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN6N0FC5E88.info_2020년_Red Dot Design Award Pour-over Coffee Maker  Kettle.jpg" alt="Pour-over Coffee Maker Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2020</span>
+                    </div>
+                    <div class="brand">Donlim</div>
+                    <div class="product-name">Pour-over Coffee Maker Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/bugu-electric-kettle/271224" target="_blank" class="card-link card-container" data-year="2020" data-award="iF Design Award" data-brand="BUGU">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNM4NPL2ZZ5.info_2021_IF DESIGN_BUGU Electric Kettle.jpg" alt="Electric Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2020</span>
+                    </div>
+                    <div class="brand">BUGU</div>
+                    <div class="product-name">Electric Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.idsa.org/awards-recognition/idea/idea-gallery/stagg-ekg-electric-water-kettle/" target="_blank" class="card-link card-container" data-year="2019" data-award="IDEA Award" data-brand="fellow">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMXH2NLHXE3.info_2019_IDEA Award_Stagg EKG, Electric Water Kettle.jpg" alt="Stagg EKG, Electric Water Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">IDEA Award</span>
+                        <span class="tag year">2019</span>
+                    </div>
+                    <div class="brand">fellow</div>
+                    <div class="product-name">Stagg EKG, Electric Water Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/jacqueline-37295" target="_blank" class="card-link card-container" data-year="2019" data-award="Red Dot Design Award" data-brand="casabugatti">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN14MKNNSWP.info_2019년_Red Dot Design Award Jacqueline.jpg" alt="Jacqueline" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2019</span>
+                    </div>
+                    <div class="brand">casabugatti</div>
+                    <div class="product-name">Jacqueline</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/teawith-kettle-37003" target="_blank" class="card-link card-container" data-year="2019" data-award="Red Dot Design Award" data-brand="Teawith">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN10WFCIRFK.info_2019년_Red Dot Design Award Teawith Kettle.jpg" alt="Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2019</span>
+                    </div>
+                    <div class="brand">Teawith</div>
+                    <div class="product-name">Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/mechanical-electric-kettle/259837" target="_blank" class="card-link card-container" data-year="2019" data-award="iF Design Award" data-brand="Supor">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNLWXBSOXQL.info_2019_IF DESIGN_Mechanical electric  Kettle.jpg" alt="Mechanical electric Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2019</span>
+                    </div>
+                    <div class="brand">Supor</div>
+                    <div class="product-name">Mechanical electric Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/displaying-electric-kettle/259835" target="_blank" class="card-link card-container" data-year="2019" data-award="iF Design Award" data-brand="Supor">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNLG8A15ZQ1.info_2019_IF DESIGN_Displaying Electric kettle.jpg" alt="Displaying Electric kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2019</span>
+                    </div>
+                    <div class="brand">Supor</div>
+                    <div class="product-name">Displaying Electric kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/water-boiler-and-warmer-power501/257135" target="_blank" class="card-link card-container" data-year="2019" data-award="iF Design Award" data-brand="Midea">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNKU7AH81O3.info_2019_IF DESIGN_Water Boiler And Warmer (Power501).jpg" alt="Water Boiler And Warmer (Power501)" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2019</span>
+                    </div>
+                    <div class="brand">Midea</div>
+                    <div class="product-name">Water Boiler And Warmer (Power501)</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/mk-he1532/257036" target="_blank" class="card-link card-container" data-year="2019" data-award="iF Design Award" data-brand="Midea">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNKOW52E3M7.info_2019_IF DESIGN_MK-HE1532.jpg" alt="MK-HE1532" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2019</span>
+                    </div>
+                    <div class="brand">Midea</div>
+                    <div class="product-name">MK-HE1532</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/glass-kettle-37324" target="_blank" class="card-link card-container" data-year="2019" data-award="Red Dot Design Award" data-brand="Midea">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN1OVDMCU8R.info_2019년_Red Dot Design Award Glass Kettle.jpg" alt="Glass Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2019</span>
+                    </div>
+                    <div class="brand">Midea</div>
+                    <div class="product-name">Glass Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/pour-over-coffee-maker-kettle/259361" target="_blank" class="card-link card-container" data-year="2019" data-award="iF Design Award" data-brand="Guangdong Xinbao Electrical Appliances Holdings Co">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNLBTNBFXWS.info_2019_IF DESIGN_Pour-over coffee maker  kettle.jpg" alt="Pour-over coffee maker kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2019</span>
+                    </div>
+                    <div class="brand">Guangdong Xinbao Electrical Appliances Holdings Co</div>
+                    <div class="product-name">Pour-over coffee maker kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/filter-kettle/260028" target="_blank" class="card-link card-container" data-year="2019" data-award="iF Design Award" data-brand="Guangdong Xinbao Electrical Appliances Holdings Co">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNM101TADO8.info_2019_IF DESIGN_Filter Kettle.jpg" alt="Filter Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2019</span>
+                    </div>
+                    <div class="brand">Guangdong Xinbao Electrical Appliances Holdings Co</div>
+                    <div class="product-name">Filter Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/thermostatic-kettle/255100" target="_blank" class="card-link card-container" data-year="2019" data-award="iF Design Award" data-brand="Foshan Viomi Electrical Technology">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNKJ3IO8CDE.info_2019_IF DESIGN_Thermostatic Kettle.jpg" alt="Thermostatic Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2019</span>
+                    </div>
+                    <div class="brand">Foshan Viomi Electrical Technology</div>
+                    <div class="product-name">Thermostatic Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/electric-travelling-kettle-37386" target="_blank" class="card-link card-container" data-year="2019" data-award="Red Dot Design Award" data-brand="Donlim">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN1B6IANQ81.info_2019년_Red Dot Design Award Electric Travelling Kettle.jpg" alt="Electric Travelling Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2019</span>
+                    </div>
+                    <div class="brand">Donlim</div>
+                    <div class="product-name">Electric Travelling Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/bon-kettle/254983" target="_blank" class="card-link card-container" data-year="2019" data-award="iF Design Award" data-brand="Bon">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNKD3B0DWD1.info_2019_IF DESIGN_Bon Kettle.jpg" alt="Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2019</span>
+                    </div>
+                    <div class="brand">Bon</div>
+                    <div class="product-name">Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/buydeem-teamaker-k187-37805" target="_blank" class="card-link card-container" data-year="2019" data-award="Red Dot Design Award" data-brand="BUYDEEM">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNB09IKHIDA.info_2019년_Red Dot Design Award BUYDEEM Teamaker K187.jpg" alt="Teamaker K187" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2019</span>
+                    </div>
+                    <div class="brand">BUYDEEM</div>
+                    <div class="product-name">Teamaker K187</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/buydeem-teamaker-k165-37804" target="_blank" class="card-link card-container" data-year="2019" data-award="Red Dot Design Award" data-brand="BUYDEEM">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNAVLOPDAJQ.info_2019년_Red Dot Design Award BUYDEEM Teamaker K165.jpg" alt="Teamaker K165" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2019</span>
+                    </div>
+                    <div class="brand">BUYDEEM</div>
+                    <div class="product-name">Teamaker K165</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/buydeem-teamaker-k108-37338" target="_blank" class="card-link card-container" data-year="2019" data-award="Red Dot Design Award" data-brand="BUYDEEM">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN1GZG9YAA1.info_2019년_Red Dot Design Award BUYDEEM Teamaker K108.jpg" alt="Teamaker K108" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2019</span>
+                    </div>
+                    <div class="brand">BUYDEEM</div>
+                    <div class="product-name">Teamaker K108</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/president-17-l-22470-22469" target="_blank" class="card-link card-container" data-year="2018" data-award="Red Dot Design Award" data-brand="tescoma">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMZ2Q6E9KU6.info_2018년_Red Dot Design Award PRESIDENT 1.7 l.jpg" alt="PRESIDENT 1.7 l" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2018</span>
+                    </div>
+                    <div class="brand">tescoma</div>
+                    <div class="product-name">PRESIDENT 1.7 l</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/stagg-ekg-22494-22493" target="_blank" class="card-link card-container" data-year="2018" data-award="Red Dot Design Award" data-brand="fellow">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMZ7UCO5DXD.info_2018년_Red Dot Design Award Stagg EKG.jpg" alt="Stagg EKG" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2018</span>
+                    </div>
+                    <div class="brand">fellow</div>
+                    <div class="product-name">Stagg EKG</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/teawith-kettle/235597" target="_blank" class="card-link card-container" data-year="2018" data-award="iF Design Award" data-brand="Teawith">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNK9QHZVCNQ.info_2018_IF DESIGN_teawith kettle.jpg" alt="kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2018</span>
+                    </div>
+                    <div class="brand">Teawith</div>
+                    <div class="product-name">kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/special-silver-tea-kettle/231804" target="_blank" class="card-link card-container" data-year="2018" data-award="iF Design Award" data-brand="SHENZHEN MUHUI CULTURE CO">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNK4K5D9GYX.info_2018_IF DESIGN_Special silver tea kettle.jpg" alt="Special silver tea kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2018</span>
+                    </div>
+                    <div class="brand">SHENZHEN MUHUI CULTURE CO</div>
+                    <div class="product-name">Special silver tea kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/vj1501/230383" target="_blank" class="card-link card-container" data-year="2018" data-award="iF Design Award" data-brand="Midea">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNJTNXO6UMI.info_2018_IF DESIGN_VJ1501.jpg" alt="VJ1501" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2018</span>
+                    </div>
+                    <div class="brand">Midea</div>
+                    <div class="product-name">VJ1501</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/egg-kettle/230430" target="_blank" class="card-link card-container" data-year="2018" data-award="iF Design Award" data-brand="Midea">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNJY6R1XHOT.info_2018_IF DESIGN_EGG KETTLE.jpg" alt="EGG KETTLE" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2018</span>
+                    </div>
+                    <div class="brand">Midea</div>
+                    <div class="product-name">EGG KETTLE</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/kettle-viva-collection/201732" target="_blank" class="card-link card-container" data-year="2017" data-award="iF Design Award" data-brand="Philips">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNJEZ12RRJZ.info_2017_IF DESIGN_Kettle Viva Collection.jpg" alt="Kettle Viva Collection" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2017</span>
+                    </div>
+                    <div class="brand">Philips</div>
+                    <div class="product-name">Kettle Viva Collection</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/warm-loveseries/201463" target="_blank" class="card-link card-container" data-year="2017" data-award="iF Design Award" data-brand="Midea">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNJA73U1T6A.info_2017_IF DESIGN_warm loveseries.jpg" alt="warm loveseries" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2017</span>
+                    </div>
+                    <div class="brand">Midea</div>
+                    <div class="product-name">warm loveseries</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/warm-love-1-9550" target="_blank" class="card-link card-container" data-year="2017" data-award="Red Dot Design Award" data-brand="Midea">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMY2RUPNNXO.info_2017년_Red Dot Design Award warm love.jpg" alt="warm love" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2017</span>
+                    </div>
+                    <div class="brand">Midea</div>
+                    <div class="product-name">warm love</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/pure-health-kettle-9548" target="_blank" class="card-link card-container" data-year="2017" data-award="Red Dot Design Award" data-brand="Midea">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMYU0X8Y2G9.info_2017년_Red Dot Design Award Pure Health Kettle.jpg" alt="Pure Health Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2017</span>
+                    </div>
+                    <div class="brand">Midea</div>
+                    <div class="product-name">Pure Health Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/breville-soft-top-luxe-9716" target="_blank" class="card-link card-container" data-year="2017" data-award="Red Dot Design Award" data-brand="Breville">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMYYWV02ORR.info_2017년_Red Dot Design Award Breville Soft Top Luxe.jpg" alt="Soft Top Luxe" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2017</span>
+                    </div>
+                    <div class="brand">Breville</div>
+                    <div class="product-name">Soft Top Luxe</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/bork-k781/205318" target="_blank" class="card-link card-container" data-year="2017" data-award="iF Design Award" data-brand="BORK">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNJMFTJT53W.info_2017_IF DESIGN_BORK K781.jpg" alt="K781" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2017</span>
+                    </div>
+                    <div class="brand">BORK</div>
+                    <div class="product-name">K781</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/balmuda-the-pot-9686" target="_blank" class="card-link card-container" data-year="2017" data-award="Red Dot Design Award" data-brand="BALMUDA">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMY6Y91AR0R.info_2017년_Red Dot Design Award BALMUDA The Pot.jpg" alt="The Pot" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2017</span>
+                    </div>
+                    <div class="brand">BALMUDA</div>
+                    <div class="product-name">The Pot</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/balmuda-the-pot/203439" target="_blank" class="card-link card-container" data-year="2017" data-award="iF Design Award" data-brand="BALMUDA">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNJIR3RUC55.info_2017_IF DESIGN_BALMUDA The Pot.jpg" alt="The Pot" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2017</span>
+                    </div>
+                    <div class="brand">BALMUDA</div>
+                    <div class="product-name">The Pot</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/atom-kettle-33610" target="_blank" class="card-link card-container" data-year="2016" data-award="Red Dot Design Award" data-brand="Philips">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN2LW1TM141.info_2016년_Red Dot Design Award Atom Kettle.jpg" alt="Atom Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2016</span>
+                    </div>
+                    <div class="brand">Philips</div>
+                    <div class="product-name">Atom Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/atom-kettle/180806" target="_blank" class="card-link card-container" data-year="2016" data-award="iF Design Award" data-brand="Philips">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNJ5P0043CW.info_2016_IF DESIGN_Atom Kettle.jpg" alt="Atom Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2016</span>
+                    </div>
+                    <div class="brand">Philips</div>
+                    <div class="product-name">Atom Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/bork-k780/176101" target="_blank" class="card-link card-container" data-year="2016" data-award="iF Design Award" data-brand="BORK">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNIZK87VCXZ.info_2016_IF DESIGN_BORK K780.jpg" alt="K780" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2016</span>
+                    </div>
+                    <div class="brand">BORK</div>
+                    <div class="product-name">K780</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/wmf-kitchenminisr-32608" target="_blank" class="card-link card-container" data-year="2015" data-award="Red Dot Design Award" data-brand="WMF">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN2HA63VPMY.info_2015년_Red Dot Design Award WMF KITCHENminis.jpg" alt="KITCHENminis" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2015</span>
+                    </div>
+                    <div class="brand">WMF</div>
+                    <div class="product-name">KITCHENminis</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/k206-31242" target="_blank" class="card-link card-container" data-year="2014" data-award="Red Dot Design Award" data-brand="BUYDEEM">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN2CIJPYS4V.info_2014년_Red Dot Design Award K206.jpg" alt="K206" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2014</span>
+                    </div>
+                    <div class="brand">BUYDEEM</div>
+                    <div class="product-name">K206</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/fontana-5-30395" target="_blank" class="card-link card-container" data-year="2013" data-award="Red Dot Design Award" data-brand="ritterwerk">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN0QPA7V0N3.info_2013년_Red Dot Design Award fontana 5.jpg" alt="fontana 5" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2013</span>
+                    </div>
+                    <div class="brand">ritterwerk</div>
+                    <div class="product-name">fontana 5</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/wmf-lineo-30406" target="_blank" class="card-link card-container" data-year="2013" data-award="Red Dot Design Award" data-brand="WMF">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN0W8S25SY2.info_2013년_Red Dot Design Award WMF LINEO.jpg" alt="LINEO" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2013</span>
+                    </div>
+                    <div class="brand">WMF</div>
+                    <div class="product-name">LINEO</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/electric-kettle-29942" target="_blank" class="card-link card-container" data-year="2013" data-award="Red Dot Design Award" data-brand="Supor">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLN0M15I95TX.info_2013년_Red Dot Design Award Electric Kettle.jpg" alt="Electric Kettle" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2013</span>
+                    </div>
+                    <div class="brand">Supor</div>
+                    <div class="product-name">Electric Kettle</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/blanc-29272" target="_blank" class="card-link card-container" data-year="2012" data-award="Red Dot Design Award" data-brand="Kenwood">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMZY0CPUOOQ.info_2012년_Red Dot Design Award Blanc.jpg" alt="Blanc" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2012</span>
+                    </div>
+                    <div class="brand">Kenwood</div>
+                    <div class="product-name">Blanc</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/tw86103-tw-86104/65319" target="_blank" class="card-link card-container" data-year="2011" data-award="iF Design Award" data-brand="SIEMENS">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNI5ECDL9GI.info_2011_IF DESIGN_TW86103; TW 86104.jpg" alt="TW86103; TW 86104" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2011</span>
+                    </div>
+                    <div class="brand">SIEMENS</div>
+                    <div class="product-name">TW86103; TW 86104</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/tw86103-tw86104-27737" target="_blank" class="card-link card-container" data-year="2011" data-award="Red Dot Design Award" data-brand="SIEMENS">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMZS5QM1PMY.info_2011년_Red Dot Design Award TW86103, TW86104.jpg" alt="TW86103, TW86104" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2011</span>
+                    </div>
+                    <div class="brand">SIEMENS</div>
+                    <div class="product-name">TW86103, TW86104</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/breville-bke820-27105" target="_blank" class="card-link card-container" data-year="2011" data-award="Red Dot Design Award" data-brand="Breville">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMZEV6UAQFK.info_2011년_Red Dot Design Award Breville BKE820.jpg" alt="BKE820" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2011</span>
+                    </div>
+                    <div class="brand">Breville</div>
+                    <div class="product-name">BKE820</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://www.red-dot.org/ko/project/twk8611-twk8613-27740" target="_blank" class="card-link card-container" data-year="2011" data-award="Red Dot Design Award" data-brand="Bosch">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLMZMETK7J3F.info_2011년_Red Dot Design Award TWK8611, TWK8613.jpg" alt="TWK8611, TWK8613" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">Red Dot Design Award</span>
+                        <span class="tag year">2011</span>
+                    </div>
+                    <div class="brand">Bosch</div>
+                    <div class="product-name">TWK8611, TWK8613</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/bistro/67609" target="_blank" class="card-link card-container" data-year="2011" data-award="iF Design Award" data-brand="Bodum">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNI8UQODXWQ.info_2011_IF DESIGN_BISTRO.jpg" alt="BISTRO" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2011</span>
+                    </div>
+                    <div class="brand">Bodum</div>
+                    <div class="product-name">BISTRO</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/uk-kettle-hd-4632-20/55205" target="_blank" class="card-link card-container" data-year="2010" data-award="iF Design Award" data-brand="Philips">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNI2BBUVWCC.info_UK Kettle HD 4632  20.jpg" alt="UK Kettle HD 4632 20" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2010</span>
+                    </div>
+                    <div class="brand">Philips</div>
+                    <div class="product-name">UK Kettle HD 4632 20</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/kmix-skm030031034/54693" target="_blank" class="card-link card-container" data-year="2010" data-award="iF Design Award" data-brand="Kenwood">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNHYY10U4IA.info_kMix SKM030031034.jpg" alt="kMix SKM030031034" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2010</span>
+                    </div>
+                    <div class="brand">Kenwood</div>
+                    <div class="product-name">kMix SKM030031034</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/kettle-ke0802/53808" target="_blank" class="card-link card-container" data-year="2010" data-award="iF Design Award" data-brand="Crastal Technology (Shenzhen) Co.">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNHV79M762R.info_Kettle  KE0802.jpg" alt="Kettle KE0802" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2010</span>
+                    </div>
+                    <div class="brand">Crastal Technology (Shenzhen) Co.</div>
+                    <div class="product-name">Kettle KE0802</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/kettle-ke0701/53807" target="_blank" class="card-link card-container" data-year="2010" data-award="iF Design Award" data-brand="Crastal Technology (Shenzhen) Co.">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNH1PIN7062.info_Kettle KE0701.jpg" alt="Kettle KE0701" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2010</span>
+                    </div>
+                    <div class="brand">Crastal Technology (Shenzhen) Co.</div>
+                    <div class="product-name">Kettle KE0701</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/kettle-hd4685-4686/36632" target="_blank" class="card-link card-container" data-year="2008" data-award="iF Design Award" data-brand="Philips">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNGX8QRUWPA.info_Kettle HD4685-4686.jpg" alt="Kettle HD4685-4686" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2008</span>
+                    </div>
+                    <div class="brand">Philips</div>
+                    <div class="product-name">Kettle HD4685-4686</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/tw911p2/23848" target="_blank" class="card-link card-container" data-year="2006" data-award="iF Design Award" data-brand="SIEMENS">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNGGM2GZRGF.info_TW911P2.jpg" alt="TW911P2" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2006</span>
+                    </div>
+                    <div class="brand">SIEMENS</div>
+                    <div class="product-name">TW911P2</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/wk-980-puresse/24208" target="_blank" class="card-link card-container" data-year="2006" data-award="iF Design Award" data-brand="Kenwood">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNGPU8JMZEF.info_WK 980, Puresse.jpg" alt="WK 980, Puresse" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2006</span>
+                    </div>
+                    <div class="brand">Kenwood</div>
+                    <div class="product-name">WK 980, Puresse</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/ibis/24938" target="_blank" class="card-link card-container" data-year="2006" data-award="iF Design Award" data-brand="Bodum">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNGT7CSKS51.info_Ibis.jpg" alt="Ibis" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2006</span>
+                    </div>
+                    <div class="brand">Bodum</div>
+                    <div class="product-name">Ibis</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/rowenta-m-edition/2058" target="_blank" class="card-link card-container" data-year="2005" data-award="iF Design Award" data-brand="Rowenta">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNGD9IWIGIT.info_Rowenta M-Edition.jpg" alt="M-Edition" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2005</span>
+                    </div>
+                    <div class="brand">Rowenta</div>
+                    <div class="product-name">M-Edition</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/twk-8sl1-solitaire/2044" target="_blank" class="card-link card-container" data-year="2005" data-award="iF Design Award" data-brand="Bosch">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNG9QKE2NJ8.info_TWK 8SL1 Solitaire.jpg" alt="TWK 8SL1 Solitaire" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2005</span>
+                    </div>
+                    <div class="brand">Bosch</div>
+                    <div class="product-name">TWK 8SL1 Solitaire</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/philips-metal-cuby-kettle-hd-4603/22924" target="_blank" class="card-link card-container" data-year="2003" data-award="iF Design Award" data-brand="Philips">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNG658322W2.info_Philips Metal Cuby Kettle HD 4603.jpg" alt="Metal Cuby Kettle HD 4603" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2003</span>
+                    </div>
+                    <div class="brand">Philips</div>
+                    <div class="product-name">Metal Cuby Kettle HD 4603</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/hackman-toolslovegrove-99/19644" target="_blank" class="card-link card-container" data-year="2000" data-award="iF Design Award" data-brand="Fiskars">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNG2LWCRT8B.info_Hackman toolsLovegrove 99.jpg" alt="Hackman toolsLovegrove 99" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">2000</span>
+                    </div>
+                    <div class="brand">Fiskars</div>
+                    <div class="product-name">Hackman toolsLovegrove 99</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/tw-91100-wasserkocher/17505" target="_blank" class="card-link card-container" data-year="1998" data-award="iF Design Award" data-brand="SIEMENS">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNFYK0JVA0M.info_TW 91100 Wasserkocher.jpg" alt="TW 91100 Wasserkocher" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">1998</span>
+                    </div>
+                    <div class="brand">SIEMENS</div>
+                    <div class="product-name">TW 91100 Wasserkocher</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/cordless-compact-jug-kettle-hd-4634/17499" target="_blank" class="card-link card-container" data-year="1998" data-award="iF Design Award" data-brand="Philips">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNFV2V5DZ4A.info_Cordless Compact Jug Kettle HD 4634.jpg" alt="Cordless Compact Jug Kettle HD 4634" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">1998</span>
+                    </div>
+                    <div class="brand">Philips</div>
+                    <div class="product-name">Cordless Compact Jug Kettle HD 4634</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://ifdesign.com/en/winner-ranking/project/expresskocher-he-1-1962/5184" target="_blank" class="card-link card-container" data-year="1962" data-award="iF Design Award" data-brand="Braun">
+            <div class="card">
+                <div class="image-container">
+                    <img src="kettle_award_images/MMLNFN3MTKV7U.info_Expresskocher HE 1  1962.jpg" alt="Expresskocher HE 1 1962" loading="lazy">
+                </div>
+                <div class="content">
+                    <div class="tag-row">
+                        <span class="tag award">iF Design Award</span>
+                        <span class="tag year">1962</span>
+                    </div>
+                    <div class="brand">Braun</div>
+                    <div class="product-name">Expresskocher HE 1 1962</div>
+                </div>
+            </div>
+        </a>
+
+    </div>
+
+    <script>
+        function filterGallery() {
+            const yearFilter = document.getElementById('filter-year').value;
+            const awardFilter = document.getElementById('filter-award').value;
+            const brandFilter = document.getElementById('filter-brand').value;
+            
+            const containers = document.querySelectorAll('.card-container');
+            let visibleCount = 0;
+            
+            containers.forEach(container => {
+                const yearMatch = yearFilter === 'all' || container.getAttribute('data-year') === yearFilter;
+                const awardMatch = awardFilter === 'all' || container.getAttribute('data-award') === awardFilter;
+                const brandMatch = brandFilter === 'all' || container.getAttribute('data-brand') === brandFilter;
+                
+                if (yearMatch && awardMatch && brandMatch) {
+                    container.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    container.style.display = 'none';
+                }
+            });
+            
+            document.getElementById('filtered-count').textContent = visibleCount;
+            document.getElementById('no-results').style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>
