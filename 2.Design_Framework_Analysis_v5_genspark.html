@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>경쟁사 디자인 분석 프레임워크 — 가열포트 v6 (포지셔닝맵 이미지 검증)</title>
+<style>
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+:root{
+--blue:#3182f6;--blue-light:#e8f3ff;--green:#05c072;--green-light:#e6faf2;
+--orange:#ff6b35;--orange-light:#fff0e8;--purple:#7c5cfc;--purple-light:#ede9ff;
+--yellow:#f5a623;--yellow-light:#fff8e6;--red:#ff4545;--red-light:#fff0f0;
+--teal:#00b8d4;--teal-light:#e0f7fa;--bg:#f2f4f6;--white:#fff;
+--text:#191f28;--text-sub:#4e5968;--text-light:#8b95a1;--border:#e8ebed;
+--shadow:0 4px 24px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+.nav{position:sticky;top:0;z-index:200;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;gap:6px;height:56px;overflow-x:auto}
+.nav-brand{font-size:15px;font-weight:800;margin-right:8px;white-space:nowrap}
+.nav-sep{width:1px;height:16px;background:var(--border);flex-shrink:0}
+.nav-link{font-size:13px;font-weight:500;color:var(--text-sub);padding:6px 12px;border-radius:8px;cursor:pointer;transition:.15s;text-decoration:none;white-space:nowrap}
+.nav-link:hover{background:var(--bg);color:var(--text)}
+.nav-link.active{background:var(--blue-light);color:var(--blue)}
+.page{max-width:1280px;margin:0 auto;padding:0 24px 100px}
+.hero{padding:60px 0 44px;display:flex;flex-direction:column;gap:10px}
+.hero h1{font-size:36px;font-weight:800;letter-spacing:-1px;line-height:1.2}
+.hero h1 em{color:var(--blue);font-style:normal}
+.section{margin-top:64px}
+.section-label{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 12px;border-radius:8px;margin-bottom:10px}
+.section-title{font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:6px}
+.section-sub{font-size:14px;color:var(--text-sub);margin-bottom:24px}
+.card{background:var(--white);border-radius:20px;box-shadow:var(--shadow)}
+.card-pad{padding:28px}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px}
+/* MAP */
+.map-wrap{position:relative;width:100%;background:var(--white);border-radius:24px;box-shadow:var(--shadow);padding:40px;overflow:hidden}
+.map-canvas{position:relative;width:100%;padding-top:70%;background:var(--bg);border-radius:16px;overflow:hidden}
+.map-inner{position:absolute;inset:0}
+.map-grid-h,.map-grid-v{position:absolute;pointer-events:none}
+.map-grid-h{left:0;right:0;height:1px;background:var(--border)}
+.map-grid-v{top:0;bottom:0;width:1px;background:var(--border)}
+.bdot{position:absolute;transform:translate(-50%,-50%);cursor:pointer;z-index:10}
+.bdot-circle{border-radius:50%;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;color:#fff;transition:transform .2s}
+.bdot:hover .bdot-circle{transform:scale(1.6)}
+.bdot:hover .bdot-tip{display:block}
+.bdot-tip{display:none;position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--text);color:#fff;font-size:11px;font-weight:600;white-space:nowrap;padding:6px 10px;border-radius:8px;z-index:200;pointer-events:none;line-height:1.5}
+.bdot-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:var(--text)}
+.bo-label{position:absolute;font-size:10px;font-weight:800;letter-spacing:.6px;opacity:.8;pointer-events:none}
+.mf-btn{padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-size:12px;font-weight:600;cursor:pointer;color:var(--text-sub);transition:.15s;font-family:inherit}
+.mf-btn.active{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.mf-btn[data-f="티포트"].active{border-color:var(--orange);color:var(--orange);background:var(--orange-light)}
+.mf-btn[data-f="구스넥"].active{border-color:var(--green);color:var(--green);background:var(--green-light)}
+.mf-btn[data-f="어워드"].active{border-color:var(--yellow);color:var(--yellow);background:var(--yellow-light)}
+.leg-item{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--text-sub)}
+.leg-dot{width:12px;height:12px;border-radius:50%}
+/* DNA */
+.exp-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:20px}
+.exp-col{background:var(--bg);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.exp-col-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--text-light);padding-bottom:6px;border-bottom:1px solid var(--border)}
+.ev{background:var(--white);border-radius:8px;padding:8px 10px}
+.ev-n{font-size:11px;font-weight:700;margin-bottom:3px}
+.ev-c{display:flex;gap:6px}
+.ct{font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px}
+.ct.b{background:var(--blue-light);color:var(--blue)}
+.ct.t{background:var(--orange-light);color:var(--orange)}
+.ct.g{background:var(--green-light);color:var(--green)}
+.ct.dim{opacity:.3}
+.id-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px}
+.id-card{border-radius:16px;padding:18px;border-left:4px solid}
+.id-brand{font-size:13px;font-weight:800;margin-bottom:10px}
+.id-row{display:flex;gap:6px;margin-bottom:5px}
+.id-k{font-size:10px;font-weight:700;color:var(--text-light);width:52px;flex-shrink:0;padding-top:1px}
+.id-v{font-size:11px;color:var(--text-sub);line-height:1.5}
+/* HEATMAP */
+.hm-wrap{background:var(--white);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+.hm-table-wrap{padding:20px 28px 28px;overflow-x:auto}
+.hm-table{border-collapse:collapse;width:100%;min-width:700px}
+.hm-table th,.hm-table td{padding:0;border:2px solid #fff}
+.hm-th-row th,.hm-th-col{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text-sub);background:var(--bg)}
+.hm-th-row th{padding:10px 12px;text-align:center}
+.hm-th-col{padding:10px 14px;text-align:right;white-space:nowrap;font-size:11px;min-width:120px}
+.hm-cell{width:70px;height:52px;text-align:center;vertical-align:middle;border-radius:4px;transition:transform .1s}
+.hm-cell:hover{transform:scale(1.08);z-index:10;position:relative}
+.hm-v{font-size:16px;font-weight:800;display:block}
+.hm-s{font-size:9px;font-weight:600;opacity:.75;display:block;margin-top:1px}
+.hm-tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:10px;width:fit-content}
+.hm-tab{padding:7px 16px;border-radius:7px;border:none;font-size:12px;font-weight:600;cursor:pointer;background:0;color:var(--text-sub);transition:.15s;font-family:inherit}
+.hm-tab.active{background:var(--white);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.ichip{background:var(--bg);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text-sub);line-height:1.5}
+.ichip strong{color:var(--text)}
+.ic{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:800;color:#fff;margin-right:5px}
+.award-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.award-bar-label{font-size:11px;font-weight:600;color:var(--text-sub);width:80px;flex-shrink:0;text-align:right}
+.award-bar{height:18px;border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:10px;font-weight:700;color:#fff;min-width:2px}
+@media(max-width:900px){.exp-grid{grid-template-columns:repeat(3,1fr)}.id-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.exp-grid{grid-template-columns:1fr 1fr}.id-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav class="nav">
+<span class="nav-brand">Design Analysis v8</span>
+<span class="nav-sep"></span>
+<a class="nav-link active" href="#map">④ 포지셔닝 맵</a>
+<a class="nav-link" href="#dna">⑤ DNA 해부도</a>
+<a class="nav-link" href="#heatmap">⑥ 상관 히트맵</a>
+<a class="nav-link" href="#award">⑦ 어워드 트렌드</a>
+</nav>
+
+<div class="page">
+<section class="hero">
+<div style="display:inline-flex;align-items:center;gap:6px;background:var(--blue-light);color:var(--blue);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;width:fit-content;">v8 — DNA/히트맵 백데이터 전수 검증 · 어워드 시그널 강화</div>
+<h1>형태와 속성으로 해체하는<br><em>전기포트 디자인 경쟁 구도</em></h1>
+<p style="font-size:16px;color:var(--text-sub);max-width:680px;">Lens1(시장) · Lens2(전문가) · Lens3(어워드) 3개 렌즈의 <strong>중복 제거 후 총 218개 고유 제품</strong> 기반 분석</p>
+
+<div style="margin-top:16px;background:var(--white);border-radius:14px;padding:18px 22px;border:1.5px solid var(--border);">
+<div style="font-size:13px;font-weight:800;margin-bottom:10px;">📊 데이터 소스 및 중복 제거 내역</div>
+<table style="width:100%;font-size:12px;border-collapse:collapse;">
+<thead><tr style="background:var(--bg);"><th style="padding:8px;text-align:left;border-radius:8px 0 0 0;">소스</th><th style="padding:8px;text-align:center;">원래 수</th><th style="padding:8px;text-align:center;">내부 중복</th><th style="padding:8px;text-align:center;">타 렌즈 중복</th><th style="padding:8px;text-align:center;border-radius:0 8px 0 0;font-weight:800;">고유 수</th></tr></thead>
+<tbody>
+<tr><td style="padding:6px 8px;"><span style="color:var(--blue);font-weight:700;">Lens1</span> 판매상위 (기본14+티15+구15+분유3)</td><td style="text-align:center;">47</td><td style="text-align:center;color:var(--red);">-1</td><td style="text-align:center;">—</td><td style="text-align:center;font-weight:700;">46</td></tr>
+<tr style="background:var(--bg);"><td style="padding:6px 8px;"><span style="color:var(--blue);font-weight:700;">Lens1</span> appendix 경쟁사 라인업 (6개사)</td><td style="text-align:center;">50</td><td style="text-align:center;color:var(--red);">-2</td><td style="text-align:center;">—</td><td style="text-align:center;font-weight:700;">48</td></tr>
+<tr><td style="padding:6px 8px;"><span style="color:var(--green);font-weight:700;">Lens2</span> 전문가 매거진 추천</td><td style="text-align:center;">26</td><td style="text-align:center;">—</td><td style="text-align:center;color:var(--red);">-7</td><td style="text-align:center;font-weight:700;">19</td></tr>
+<tr style="background:var(--bg);"><td style="padding:6px 8px;"><span style="color:var(--yellow);font-weight:700;">Lens3</span> 디자인 어워드 (iF·Red Dot·IDEA)</td><td style="text-align:center;">118</td><td style="text-align:center;color:var(--red);">-13</td><td style="text-align:center;">—</td><td style="text-align:center;font-weight:700;">105</td></tr>
+<tr style="border-top:2px solid var(--text);"><td style="padding:8px;font-weight:800;">합계</td><td style="text-align:center;font-weight:800;">241</td><td style="text-align:center;color:var(--red);font-weight:700;">-16</td><td style="text-align:center;color:var(--red);font-weight:700;">-7</td><td style="text-align:center;font-weight:800;color:var(--blue);font-size:16px;">218</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ===== FRAMEWORK 4: MAP ===== -->
+<section class="section" id="map">
+<div class="section-label" style="background:var(--blue-light);color:var(--blue);">Framework 4 — Positioning Map</div>
+<div class="section-title">디자인 포지셔닝 맵</div>
+<div class="section-sub">Y축: 가격대 · X축: 디자인 톤앤매너(기능주의↔감성) — Lens1+Lens2 109개 제품 — 제품 이미지 기반 X축 재보정 (어워드 제외)</div>
+<div class="map-wrap">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+<span style="font-size:13px;font-weight:800;color:var(--text-sub);">▲ 프리미엄</span>
+<div style="display:flex;gap:6px;flex-wrap:wrap;" id="filterBtns">
+<button class="mf-btn active" data-f="all" onclick="fMap(this)">전체</button>
+<button class="mf-btn" data-f="기본형" onclick="fMap(this)">기본형</button>
+<button class="mf-btn" data-f="티포트" onclick="fMap(this)">티포트</button>
+<button class="mf-btn" data-f="구스넥" onclick="fMap(this)">구스넥</button>
+
+</div>
+</div>
+<div style="display:flex;gap:10px;">
+<div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:11px;font-weight:700;color:var(--text-light);display:flex;align-items:center;justify-content:center;min-width:24px;">가격대</div>
+<div class="map-canvas" style="flex:1">
+<div class="map-inner">
+<!-- zones -->
+<div style="position:absolute;left:0;bottom:0;width:46%;height:38%;background:rgba(255,69,69,.06);border-radius:12px 12px 0 0;border:1.5px dashed rgba(255,69,69,.2)"></div>
+<div class="bo-label" style="left:2%;bottom:16%;color:var(--red)">🔴 RED OCEAN<br><span style="font-size:9px">저가 기능형 포화</span></div>
+<div style="position:absolute;right:0;top:5%;width:30%;height:28%;background:rgba(255,69,69,.05);border-radius:12px;border:1.5px dashed rgba(255,69,69,.15)"></div>
+<div class="bo-label" style="right:1%;top:7%;color:rgba(255,69,69,.7);font-size:9px">🔴 프리미엄 기능형</div>
+<div style="position:absolute;right:5%;top:28%;width:30%;height:28%;background:rgba(49,130,246,.08);border-radius:16px;border:2px dashed rgba(49,130,246,.3)"></div>
+<div class="bo-label" style="right:6%;top:30%;color:var(--blue)">🔵 BLUE OCEAN A<br><span style="font-size:9px">감성 중고가 공백</span></div>
+<div style="position:absolute;right:8%;bottom:10%;width:26%;height:22%;background:rgba(5,192,114,.07);border-radius:16px;border:2px dashed rgba(5,192,114,.3)"></div>
+<div class="bo-label" style="right:9%;bottom:12%;color:var(--green)">🟢 BLUE OCEAN B<br><span style="font-size:9px">에코·웜 가성비</span></div>
+<!-- grid -->
+<div class="map-grid-h" style="top:25%;opacity:.5"></div>
+<div class="map-grid-h" style="top:50%"></div>
+<div class="map-grid-h" style="top:75%;opacity:.5"></div>
+<div class="map-grid-v" style="left:25%;opacity:.5"></div>
+<div class="map-grid-v" style="left:50%"></div>
+<div class="map-grid-v" style="left:75%;opacity:.5"></div>
+<div style="position:absolute;bottom:2%;left:2%;font-size:10px;font-weight:700;color:var(--text-light)">◀ 기능주의</div>
+<div style="position:absolute;bottom:2%;right:2%;font-size:10px;font-weight:700;color:var(--text-light)">감성 ▶</div>
+<div id="dots"></div>
+</div>
+</div>
+</div>
+<div style="text-align:center;margin-top:8px"><span style="font-size:13px;font-weight:800;color:var(--text-sub)">▼ 저가</span></div>
+<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;">
+<div class="leg-item"><div class="leg-dot" style="background:#3182f6"></div>기본형</div>
+<div class="leg-item"><div class="leg-dot" style="background:#ff6b35"></div>티포트</div>
+<div class="leg-item"><div class="leg-dot" style="background:#05c072"></div>구스넥</div>
+<div class="leg-item"><div style="width:12px;height:12px;border-radius:50%;border:2.5px solid #f5a623"></div>전문가 추천</div>
+<div class="leg-item"><div style="width:8px;height:8px;border-radius:50%;background:rgba(150,150,150,.4)"></div>라인업(반투명)</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px;">
+<div style="background:rgba(49,130,246,.08);border:1.5px solid rgba(49,130,246,.25);border-radius:12px;padding:14px;">
+<div style="font-size:12px;font-weight:800;color:var(--blue)">🔵 BLUE OCEAN A — 감성 × 중고가 (₩80K~150K)</div>
+<p style="font-size:12px;color:var(--text-sub);margin-top:6px">STS 무광 + 디자인 스토리 + 커피문화. BALMUDA MoonKettle(2025)이 ₩340K에 진입했으나, <strong>₩80K~150K 중간대는 공백.</strong> 어워드에서도 이 가격대 수상작 증가 추세.</p>
+</div>
+<div style="background:rgba(5,192,114,.07);border:1.5px solid rgba(5,192,114,.25);border-radius:12px;padding:14px;">
+<div style="font-size:12px;font-weight:800;color:var(--green)">🟢 BLUE OCEAN B — 에코·웜 × 가성비 (₩30K~60K)</div>
+<p style="font-size:12px;color:var(--text-sub);margin-top:6px">Philips ECO(2022 Red Dot)가 ₩97K대로 선행. <strong>재생소재+웜톤을 ₩40K~60K에 구현한 제품은 완전 공백.</strong></p>
+</div>
+</div>
+</div>
+</section>
+
+
+<section class="section" id="dna">
+<div class="section-label" style="background:var(--green-light);color:var(--green);">Framework 5 — DNA Exploded Matrix</div>
+<div class="section-title">디자인 DNA 해부도</div>
+<div class="section-sub">Lens1+Lens2 백데이터 전수 검증 — 기본형 65 · 티포트 41 · 구스넥 41 = <strong>총 147개 제품</strong> (분유포트 제외)</div>
+
+<div style="background:var(--white);border-radius:20px;padding:28px;box-shadow:var(--shadow)">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+<div style="font-size:16px;font-weight:800">9대 구성 요소별 속성 분포</div>
+<div style="display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:10px;width:fit-content">
+<button class="mf-btn active" onclick="swDna('all',this)" style="padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--blue-light);font-size:12px;font-weight:600;cursor:pointer;color:var(--blue);font-family:inherit;border-color:var(--blue)">전체</button>
+<button class="mf-btn" onclick="swDna('basic',this)" style="padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-size:12px;font-weight:600;cursor:pointer;color:var(--text-sub);font-family:inherit">기본형</button>
+<button class="mf-btn" onclick="swDna('tea',this)" style="padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-size:12px;font-weight:600;cursor:pointer;color:var(--text-sub);font-family:inherit">티포트</button>
+<button class="mf-btn" onclick="swDna('goose',this)" style="padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-size:12px;font-weight:600;cursor:pointer;color:var(--text-sub);font-family:inherit">구스넥</button>
+</div>
+</div>
+<div id="dna-all" style="display:block"><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">① 바디 형상</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--blue);text-align:left;min-width:160px">기본형 (65)</th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--orange);text-align:left;min-width:160px">티포트 (41)</th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--green);text-align:left;min-width:160px">구스넥 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">유선형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:38%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">25<span style="color:var(--text-light);font-weight:500"> (38%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:44%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">18<span style="color:var(--text-light);font-weight:500"> (44%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:46%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">19<span style="color:var(--text-light);font-weight:500"> (46%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">직선형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:22%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">14<span style="color:var(--text-light);font-weight:500"> (22%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:41%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">17<span style="color:var(--text-light);font-weight:500"> (41%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:10%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">4<span style="color:var(--text-light);font-weight:500"> (10%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">테이퍼형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:38%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">25<span style="color:var(--text-light);font-weight:500"> (38%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:12%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">5<span style="color:var(--text-light);font-weight:500"> (12%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:44%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">18<span style="color:var(--text-light);font-weight:500"> (44%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">숄더형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">1<span style="color:var(--text-light);font-weight:500"> (2%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">1<span style="color:var(--text-light);font-weight:500"> (2%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">② 핸들 타입</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--blue);text-align:left;min-width:160px">기본형 (65)</th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--orange);text-align:left;min-width:160px">티포트 (41)</th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--green);text-align:left;min-width:160px">구스넥 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">Closed</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:82%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">53<span style="color:var(--text-light);font-weight:500"> (82%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:73%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">30<span style="color:var(--text-light);font-weight:500"> (73%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:5%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">2<span style="color:var(--text-light);font-weight:500"> (5%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">Open</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:18%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">12<span style="color:var(--text-light);font-weight:500"> (18%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:22%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">9<span style="color:var(--text-light);font-weight:500"> (22%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:95%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">39<span style="color:var(--text-light);font-weight:500"> (95%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">② 핸들 디자인</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--blue);text-align:left;min-width:160px">기본형 (65)</th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--orange);text-align:left;min-width:160px">티포트 (41)</th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--green);text-align:left;min-width:160px">구스넥 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">ㄱ형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:22%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">14<span style="color:var(--text-light);font-weight:500"> (22%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:15%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">6<span style="color:var(--text-light);font-weight:500"> (15%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:80%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">33<span style="color:var(--text-light);font-weight:500"> (80%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">ㄷ형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:55%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">36<span style="color:var(--text-light);font-weight:500"> (55%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:39%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">16<span style="color:var(--text-light);font-weight:500"> (39%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:5%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">2<span style="color:var(--text-light);font-weight:500"> (5%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">C형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:23%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">15<span style="color:var(--text-light);font-weight:500"> (23%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:44%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">18<span style="color:var(--text-light);font-weight:500"> (44%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">1<span style="color:var(--text-light);font-weight:500"> (2%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">Y형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:12%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">5<span style="color:var(--text-light);font-weight:500"> (12%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">③ 스파우트</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--blue);text-align:left;min-width:160px">기본형 (65)</th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--orange);text-align:left;min-width:160px">티포트 (41)</th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--green);text-align:left;min-width:160px">구스넥 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">짧은 스파우트</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:100%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">65<span style="color:var(--text-light);font-weight:500"> (100%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:100%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">41<span style="color:var(--text-light);font-weight:500"> (100%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">구스넥</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:100%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">41<span style="color:var(--text-light);font-weight:500"> (100%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">④ 디스플레이</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--blue);text-align:left;min-width:160px">기본형 (65)</th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--orange);text-align:left;min-width:160px">티포트 (41)</th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--green);text-align:left;min-width:160px">구스넥 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">O</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:9%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">6<span style="color:var(--text-light);font-weight:500"> (9%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:44%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">18<span style="color:var(--text-light);font-weight:500"> (44%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:73%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">30<span style="color:var(--text-light);font-weight:500"> (73%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">X</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:91%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">59<span style="color:var(--text-light);font-weight:500"> (91%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:56%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">23<span style="color:var(--text-light);font-weight:500"> (56%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:27%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">11<span style="color:var(--text-light);font-weight:500"> (27%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">④ 수위창</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--blue);text-align:left;min-width:160px">기본형 (65)</th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--orange);text-align:left;min-width:160px">티포트 (41)</th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--green);text-align:left;min-width:160px">구스넥 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">전면 수위창</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:38%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">25<span style="color:var(--text-light);font-weight:500"> (38%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">측면 수위창</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:23%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">15<span style="color:var(--text-light);font-weight:500"> (23%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:17%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">7<span style="color:var(--text-light);font-weight:500"> (17%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">통유리</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:15%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">10<span style="color:var(--text-light);font-weight:500"> (15%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:59%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">24<span style="color:var(--text-light);font-weight:500"> (59%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">없음</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:23%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">15<span style="color:var(--text-light);font-weight:500"> (23%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:24%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">10<span style="color:var(--text-light);font-weight:500"> (24%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:100%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">41<span style="color:var(--text-light);font-weight:500"> (100%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">⑤ 외부소재</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--blue);text-align:left;min-width:160px">기본형 (65)</th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--orange);text-align:left;min-width:160px">티포트 (41)</th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--green);text-align:left;min-width:160px">구스넥 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">플라스틱</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:43%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">28<span style="color:var(--text-light);font-weight:500"> (43%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:15%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">6<span style="color:var(--text-light);font-weight:500"> (15%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">STS</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:43%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">28<span style="color:var(--text-light);font-weight:500"> (43%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:10%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">4<span style="color:var(--text-light);font-weight:500"> (10%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:100%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">41<span style="color:var(--text-light);font-weight:500"> (100%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">유리</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:14%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">9<span style="color:var(--text-light);font-weight:500"> (14%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:76%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">31<span style="color:var(--text-light);font-weight:500"> (76%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">⑤ 표면마감</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--blue);text-align:left;min-width:160px">기본형 (65)</th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--orange);text-align:left;min-width:160px">티포트 (41)</th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--green);text-align:left;min-width:160px">구스넥 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">무광</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:72%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">47<span style="color:var(--text-light);font-weight:500"> (72%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:51%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">21<span style="color:var(--text-light);font-weight:500"> (51%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:88%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">36<span style="color:var(--text-light);font-weight:500"> (88%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">유광</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:28%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">18<span style="color:var(--text-light);font-weight:500"> (28%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:49%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">20<span style="color:var(--text-light);font-weight:500"> (49%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:12%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">5<span style="color:var(--text-light);font-weight:500"> (12%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">⑥ 조작부</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--blue);text-align:left;min-width:160px">기본형 (65)</th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--orange);text-align:left;min-width:160px">티포트 (41)</th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--green);text-align:left;min-width:160px">구스넥 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">원버튼</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:85%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">55<span style="color:var(--text-light);font-weight:500"> (85%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:59%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">24<span style="color:var(--text-light);font-weight:500"> (59%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:27%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">11<span style="color:var(--text-light);font-weight:500"> (27%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">터치UI</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:12%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">8<span style="color:var(--text-light);font-weight:500"> (12%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:37%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">15<span style="color:var(--text-light);font-weight:500"> (37%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:49%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">20<span style="color:var(--text-light);font-weight:500"> (49%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">조그다이얼</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:3%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">2<span style="color:var(--text-light);font-weight:500"> (3%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:5%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">2<span style="color:var(--text-light);font-weight:500"> (5%)</span></span></div></td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:24%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">10<span style="color:var(--text-light);font-weight:500"> (24%)</span></span></div></td></tr></tbody></table></div></div>
+<div id="dna-basic" style="display:none"><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">① 바디 형상</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--blue);text-align:left;min-width:160px">기본형 (65)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">유선형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:38%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">25<span style="color:var(--text-light);font-weight:500"> (38%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">직선형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:22%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">14<span style="color:var(--text-light);font-weight:500"> (22%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">테이퍼형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:38%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">25<span style="color:var(--text-light);font-weight:500"> (38%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">숄더형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">1<span style="color:var(--text-light);font-weight:500"> (2%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">② 핸들 타입</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--blue);text-align:left;min-width:160px">기본형 (65)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">Closed</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:82%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">53<span style="color:var(--text-light);font-weight:500"> (82%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">Open</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:18%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">12<span style="color:var(--text-light);font-weight:500"> (18%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">② 핸들 디자인</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--blue);text-align:left;min-width:160px">기본형 (65)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">ㄱ형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:22%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">14<span style="color:var(--text-light);font-weight:500"> (22%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">ㄷ형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:55%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">36<span style="color:var(--text-light);font-weight:500"> (55%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">C형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:23%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">15<span style="color:var(--text-light);font-weight:500"> (23%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">Y형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">③ 스파우트</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--blue);text-align:left;min-width:160px">기본형 (65)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">짧은 스파우트</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:100%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">65<span style="color:var(--text-light);font-weight:500"> (100%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">구스넥</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">④ 디스플레이</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--blue);text-align:left;min-width:160px">기본형 (65)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">O</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:9%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">6<span style="color:var(--text-light);font-weight:500"> (9%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">X</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:91%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">59<span style="color:var(--text-light);font-weight:500"> (91%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">④ 수위창</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--blue);text-align:left;min-width:160px">기본형 (65)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">전면 수위창</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:38%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">25<span style="color:var(--text-light);font-weight:500"> (38%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">측면 수위창</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:23%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">15<span style="color:var(--text-light);font-weight:500"> (23%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">통유리</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:15%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">10<span style="color:var(--text-light);font-weight:500"> (15%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">없음</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:23%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">15<span style="color:var(--text-light);font-weight:500"> (23%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">⑤ 외부소재</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--blue);text-align:left;min-width:160px">기본형 (65)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">플라스틱</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:43%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">28<span style="color:var(--text-light);font-weight:500"> (43%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">STS</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:43%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">28<span style="color:var(--text-light);font-weight:500"> (43%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">유리</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:14%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">9<span style="color:var(--text-light);font-weight:500"> (14%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">⑤ 표면마감</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--blue);text-align:left;min-width:160px">기본형 (65)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">무광</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:72%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">47<span style="color:var(--text-light);font-weight:500"> (72%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">유광</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:28%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">18<span style="color:var(--text-light);font-weight:500"> (28%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">⑥ 조작부</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--blue);text-align:left;min-width:160px">기본형 (65)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">원버튼</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:85%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">55<span style="color:var(--text-light);font-weight:500"> (85%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">터치UI</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:12%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">8<span style="color:var(--text-light);font-weight:500"> (12%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">조그다이얼</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:3%;min-width:4px;height:14px;background:var(--blue);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">2<span style="color:var(--text-light);font-weight:500"> (3%)</span></span></div></td></tr></tbody></table></div></div>
+<div id="dna-tea" style="display:none"><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">① 바디 형상</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--orange);text-align:left;min-width:160px">티포트 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">유선형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:44%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">18<span style="color:var(--text-light);font-weight:500"> (44%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">직선형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:41%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">17<span style="color:var(--text-light);font-weight:500"> (41%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">테이퍼형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:12%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">5<span style="color:var(--text-light);font-weight:500"> (12%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">숄더형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">1<span style="color:var(--text-light);font-weight:500"> (2%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">② 핸들 타입</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--orange);text-align:left;min-width:160px">티포트 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">Closed</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:73%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">30<span style="color:var(--text-light);font-weight:500"> (73%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">Open</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:22%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">9<span style="color:var(--text-light);font-weight:500"> (22%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">② 핸들 디자인</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--orange);text-align:left;min-width:160px">티포트 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">ㄱ형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:15%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">6<span style="color:var(--text-light);font-weight:500"> (15%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">ㄷ형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:39%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">16<span style="color:var(--text-light);font-weight:500"> (39%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">C형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:44%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">18<span style="color:var(--text-light);font-weight:500"> (44%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">Y형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">③ 스파우트</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--orange);text-align:left;min-width:160px">티포트 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">짧은 스파우트</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:100%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">41<span style="color:var(--text-light);font-weight:500"> (100%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">구스넥</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">④ 디스플레이</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--orange);text-align:left;min-width:160px">티포트 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">O</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:44%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">18<span style="color:var(--text-light);font-weight:500"> (44%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">X</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:56%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">23<span style="color:var(--text-light);font-weight:500"> (56%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">④ 수위창</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--orange);text-align:left;min-width:160px">티포트 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">전면 수위창</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">측면 수위창</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:17%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">7<span style="color:var(--text-light);font-weight:500"> (17%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">통유리</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:59%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">24<span style="color:var(--text-light);font-weight:500"> (59%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">없음</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:24%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">10<span style="color:var(--text-light);font-weight:500"> (24%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">⑤ 외부소재</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--orange);text-align:left;min-width:160px">티포트 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">플라스틱</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:15%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">6<span style="color:var(--text-light);font-weight:500"> (15%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">STS</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:10%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">4<span style="color:var(--text-light);font-weight:500"> (10%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">유리</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:76%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">31<span style="color:var(--text-light);font-weight:500"> (76%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">⑤ 표면마감</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--orange);text-align:left;min-width:160px">티포트 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">무광</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:51%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">21<span style="color:var(--text-light);font-weight:500"> (51%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">유광</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:49%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">20<span style="color:var(--text-light);font-weight:500"> (49%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">⑥ 조작부</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--orange);text-align:left;min-width:160px">티포트 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">원버튼</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:59%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">24<span style="color:var(--text-light);font-weight:500"> (59%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">터치UI</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:37%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">15<span style="color:var(--text-light);font-weight:500"> (37%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">조그다이얼</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:5%;min-width:4px;height:14px;background:var(--orange);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">2<span style="color:var(--text-light);font-weight:500"> (5%)</span></span></div></td></tr></tbody></table></div></div>
+<div id="dna-goose" style="display:none"><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">① 바디 형상</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--green);text-align:left;min-width:160px">구스넥 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">유선형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:46%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">19<span style="color:var(--text-light);font-weight:500"> (46%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">직선형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:10%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">4<span style="color:var(--text-light);font-weight:500"> (10%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">테이퍼형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:44%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">18<span style="color:var(--text-light);font-weight:500"> (44%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">숄더형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">② 핸들 타입</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--green);text-align:left;min-width:160px">구스넥 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">Closed</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:5%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">2<span style="color:var(--text-light);font-weight:500"> (5%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">Open</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:95%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">39<span style="color:var(--text-light);font-weight:500"> (95%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">② 핸들 디자인</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--green);text-align:left;min-width:160px">구스넥 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">ㄱ형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:80%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">33<span style="color:var(--text-light);font-weight:500"> (80%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">ㄷ형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:5%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">2<span style="color:var(--text-light);font-weight:500"> (5%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">C형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">1<span style="color:var(--text-light);font-weight:500"> (2%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">Y형</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:12%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">5<span style="color:var(--text-light);font-weight:500"> (12%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">③ 스파우트</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--green);text-align:left;min-width:160px">구스넥 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">짧은 스파우트</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">구스넥</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:100%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">41<span style="color:var(--text-light);font-weight:500"> (100%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">④ 디스플레이</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--green);text-align:left;min-width:160px">구스넥 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">O</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:73%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">30<span style="color:var(--text-light);font-weight:500"> (73%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">X</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:27%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">11<span style="color:var(--text-light);font-weight:500"> (27%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">④ 수위창</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--green);text-align:left;min-width:160px">구스넥 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">전면 수위창</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">측면 수위창</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">통유리</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">없음</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:100%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">41<span style="color:var(--text-light);font-weight:500"> (100%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">⑤ 외부소재</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--green);text-align:left;min-width:160px">구스넥 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">플라스틱</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">STS</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:100%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">41<span style="color:var(--text-light);font-weight:500"> (100%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">유리</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:2%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">0<span style="color:var(--text-light);font-weight:500"> (0%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">⑤ 표면마감</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--green);text-align:left;min-width:160px">구스넥 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">무광</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:88%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">36<span style="color:var(--text-light);font-weight:500"> (88%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">유광</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:12%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">5<span style="color:var(--text-light);font-weight:500"> (12%)</span></span></div></td></tr></tbody></table></div><div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text-sub);margin-bottom:8px;text-transform:uppercase">⑥ 조작부</div>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th style="min-width:80px"></th><th style="padding:6px 8px;font-size:11px;font-weight:700;color:var(--green);text-align:left;min-width:160px">구스넥 (41)</th></tr></thead><tbody><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">원버튼</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:27%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">11<span style="color:var(--text-light);font-weight:500"> (27%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">터치UI</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:49%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">20<span style="color:var(--text-light);font-weight:500"> (49%)</span></span></div></td></tr><tr><td style="padding:6px 8px;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px">조그다이얼</td><td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><div style="width:24%;min-width:4px;height:14px;background:var(--green);border-radius:3px;transition:.3s"></div><span style="font-size:11px;font-weight:700;white-space:nowrap">10<span style="color:var(--text-light);font-weight:500"> (24%)</span></span></div></td></tr></tbody></table></div></div>
+</div>
+<div style="margin-top:20px" class="card card-pad">
+<div style="font-size:16px;font-weight:800;margin-bottom:16px">브랜드 DNA 해부 — 핵심 4사</div>
+<div class="id-grid">
+<div class="id-card" style="border-color:#2d2d2d;background:#f9f9f9">
+<div style="font-size:9px;font-weight:700;color:var(--yellow);background:var(--yellow-light);display:inline-block;padding:2px 8px;border-radius:4px;margin-bottom:6px">Lens3 2관왕 + 감성 프리미엄 재정의</div>
+<div class="id-brand">BALMUDA <span style="font-size:10px;color:var(--text-light);font-weight:600">The Pot · MoonKettle</span></div>
+<div class="id-row"><span class="id-k">형태</span><span class="id-v">0.6~0.9L 초소형 · 구스넥 · 유기적 곡선</span></div>
+<div class="id-row"><span class="id-k">CMF</span><span class="id-v">무광 분체도장 · 흑/백 뉴트럴 2색</span></div>
+<div class="id-row"><span class="id-k">조작</span><span class="id-v">The Pot: 원버튼 + 노즐 네온 LED<br>MoonKettle: 다이얼 온도조절 + 앰비언트 라이트·사운드</span></div>
+<div class="id-row"><span class="id-k">전략</span><span class="id-v">극단적 심플 → 사용=의식(ritual) · 2025 MoonKettle로 $260 감성 확장</span></div>
+</div>
+<div class="id-card" style="border-color:#1a1a1a;background:#f5f5f5">
+<div style="font-size:9px;font-weight:700;color:var(--green);background:var(--green-light);display:inline-block;padding:2px 8px;border-radius:4px;margin-bottom:6px">Lens2 전문가 추천 + Lens3 2관왕 · 구스넥 아이콘</div>
+<div class="id-brand">Fellow Stagg EKG</div>
+<div class="id-row"><span class="id-k">형태</span><span class="id-v">원통·직선·원 기본 도형 · 모놀리스(일체형)</span></div>
+<div class="id-row"><span class="id-k">CMF</span><span class="id-v">극무광 전소재 통일 · 블랙/화이트 단색 + 월넛 핸들</span></div>
+<div class="id-row"><span class="id-k">디테일</span><span class="id-v">Y형 오픈핸들 + 정밀 구스넥 → 아이코닉 실루엣<br>원형 LCD + 클릭감 다이얼</span></div>
+<div class="id-row"><span class="id-k">전략</span><span class="id-v">기하학적 단순함 = 브랜드 아이덴티티 · $200 프리미엄</span></div>
+</div>
+<div class="id-card" style="border-color:#c0392b;background:#fff8f8">
+<div style="font-size:9px;font-weight:700;color:var(--blue);background:var(--blue-light);display:inline-block;padding:2px 8px;border-radius:4px;margin-bottom:6px">Lens2 전문가 3개 매거진 동시 추천 · 기능 프리미엄 대표</div>
+<div class="id-brand">Breville</div>
+<div class="id-row"><span class="id-k">형태</span><span class="id-v">모든 모서리 라운딩 · 하단으로 넓어지는 안정적 볼륨</span></div>
+<div class="id-row"><span class="id-k">CMF</span><span class="id-v">STS 전체 마감 → 내구성·견고함 시각화</span></div>
+<div class="id-row"><span class="id-k">디테일</span><span class="id-v">하단 단차 시각 분리 · 수위창·컨트롤에 동일 라운드 프레임</span></div>
+<div class="id-row"><span class="id-k">전략</span><span class="id-v">견고한 프리미엄 주방가전 — 기능적 신뢰의 시각화</span></div>
+</div>
+<div class="id-card" style="border-color:#0050a0;background:#f0f5ff">
+<div style="font-size:9px;font-weight:700;color:var(--purple);background:var(--purple-light);display:inline-block;padding:2px 8px;border-radius:4px;margin-bottom:6px">Lens3 Red Dot + Lens1 글로벌 5개국 판매상위 · 에코 디자인 선행자</div>
+<div class="id-brand">Philips ECO</div>
+<div class="id-row"><span class="id-k">형태</span><span class="id-v">부드러운 라운딩 · 라인업 전체 동일 구배 통일</span></div>
+<div class="id-row"><span class="id-k">CMF</span><span class="id-v">재생소재 마블 텍스처 노출 · 웜화이트 무광 · 우드뚜껑(HD9359)</span></div>
+<div class="id-row"><span class="id-k">디테일</span><span class="id-v">파트 경계 무광 실버 라인 · 모델별 핸들 분화(ㄷ/ㅓ/ㄱ형)</span></div>
+<div class="id-row"><span class="id-k">전략</span><span class="id-v">친환경 소재를 디자인 언어로 가시화 (2022 Red Dot 수상)</span></div>
+</div>
+</div></div>
+</section>
+
+
+<section class="section" id="heatmap">
+<div class="section-label" style="background:var(--orange-light);color:var(--orange);">Framework 6 — Correlation Heatmap</div>
+<div class="section-title">상관 히트맵</div>
+<div class="section-sub">Lens1+Lens2 147개 기반 디자인 요소 간 교차 빈도 (기본형65 + 티포트41 + 구스넥41, 분유 제외)<br><span style="font-size:11px;color:var(--text-light)">※ 개별 속성 분포 기반 근사 집계. 교차 원시데이터 완전 집계 시 미세 차이 가능</span></div>
+<div class="hm-wrap">
+<div style="padding:24px 28px 0;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
+<div style="font-size:14px;font-weight:800">속성 교차 빈도</div>
+<div class="hm-tabs">
+<button class="hm-tab active" onclick="swHm('h1',this)">소재×마감</button>
+<button class="hm-tab" onclick="swHm('h2',this)">카테고리×기능</button>
+<button class="hm-tab" onclick="swHm('h3',this)">형상×CMF</button>
+</div>
+</div>
+<!-- Tab1: 소재×마감 (n=147) -->
+<div id="h1" class="hm-table-wrap">
+<table class="hm-table">
+<thead><tr class="hm-th-row"><th class="hm-th-col">소재↓ / 속성→</th><th>무광</th><th>유광</th><th>Open핸들</th><th>Closed핸들</th><th>디스플레이O</th><th>구스넥</th><th>총</th></tr></thead>
+<tbody>
+<tr><td class="hm-th-col">플라스틱 (34)</td>
+<td class="hm-cell" style="background:rgba(5,192,114,.15)"><span class="hm-v">12</span><span class="hm-s">35%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.40)"><span class="hm-v">22</span><span class="hm-s">65%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.10)"><span class="hm-v">5</span><span class="hm-s">15%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.45)"><span class="hm-v">29</span><span class="hm-s">85%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.08)"><span class="hm-v">3</span><span class="hm-s">9%</span></td>
+<td class="hm-cell" style="background:rgba(200,200,200,.08)"><span class="hm-v" style="color:var(--text-light)">0</span><span class="hm-s">0%</span></td>
+<td class="hm-cell" style="background:var(--bg)"><span class="hm-v" style="color:var(--text-sub)">34</span></td></tr>
+<tr><td class="hm-th-col">STS (73)</td>
+<td class="hm-cell" style="background:rgba(5,192,114,.52)"><span class="hm-v">60</span><span class="hm-s">82%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.12)"><span class="hm-v">13</span><span class="hm-s">18%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.30)"><span class="hm-v">46</span><span class="hm-s">63%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.28)"><span class="hm-v">27</span><span class="hm-s">37%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.22)"><span class="hm-v">32</span><span class="hm-s">44%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.28)"><span class="hm-v">41</span><span class="hm-s">56%</span></td>
+<td class="hm-cell" style="background:var(--bg)"><span class="hm-v" style="color:var(--text-sub)">73</span></td></tr>
+<tr><td class="hm-th-col">유리/Glass (40)</td>
+<td class="hm-cell" style="background:rgba(5,192,114,.38)"><span class="hm-v">22</span><span class="hm-s">55%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.18)"><span class="hm-v">18</span><span class="hm-s">45%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.05)"><span class="hm-v">5</span><span class="hm-s">13%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.55)"><span class="hm-v">35</span><span class="hm-s">88%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.14)"><span class="hm-v">14</span><span class="hm-s">35%</span></td>
+<td class="hm-cell" style="background:rgba(200,200,200,.08)"><span class="hm-v" style="color:var(--text-light)">0</span><span class="hm-s">0%</span></td>
+<td class="hm-cell" style="background:var(--bg)"><span class="hm-v" style="color:var(--text-sub)">40</span></td></tr>
+</tbody></table>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px">
+<div class="ichip"><span class="ic" style="background:var(--green)">!</span><strong>STS×무광</strong> 60건(82%) — 프리미엄 포트의 공식. 구스넥 전수 + 기본형 고급 라인</div>
+<div class="ichip"><span class="ic" style="background:var(--orange)">!</span><strong>플라스틱×유광</strong> 22건(65%) — 저가 기능형 전형. 기본형·티포트 저가대 집중</div>
+<div class="ichip"><span class="ic" style="background:var(--red)">!</span><strong>STS×유광</strong> 13건(18%) — 희소 차별화 기회</div>
+</div></div>
+<!-- Tab2: 카테고리×기능 -->
+<div id="h2" class="hm-table-wrap" style="display:none">
+<table class="hm-table">
+<thead><tr class="hm-th-row"><th class="hm-th-col">카테고리↓ / →</th><th>디스플레이O</th><th>디스플레이X</th><th>Open핸들</th><th>Closed핸들</th><th>원버튼</th><th>터치UI</th><th>조그다이얼</th></tr></thead>
+<tbody>
+<tr><td class="hm-th-col">기본형 (65)</td>
+<td class="hm-cell" style="background:rgba(49,130,246,.08)"><span class="hm-v">6</span><span class="hm-s">9.2%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.58)"><span class="hm-v">59</span><span class="hm-s">90.8%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.12)"><span class="hm-v">12</span><span class="hm-s">18.5%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.52)"><span class="hm-v">53</span><span class="hm-s">81.5%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.50)"><span class="hm-v">55</span><span class="hm-s">84.6%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.12)"><span class="hm-v">8</span><span class="hm-s">12.3%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.04)"><span class="hm-v">2</span><span class="hm-s">3.1%</span></td></tr>
+<tr><td class="hm-th-col">티포트 (41)</td>
+<td class="hm-cell" style="background:rgba(5,192,114,.30)"><span class="hm-v">18</span><span class="hm-s">43.9%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.24)"><span class="hm-v">23</span><span class="hm-s">56.1%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.16)"><span class="hm-v">9</span><span class="hm-s">22.0%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.42)"><span class="hm-v">30</span><span class="hm-s">73.2%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.30)"><span class="hm-v">24</span><span class="hm-s">58.5%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.22)"><span class="hm-v">15</span><span class="hm-s">36.6%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.06)"><span class="hm-v">2</span><span class="hm-s">4.9%</span></td></tr>
+<tr><td class="hm-th-col">구스넥 (41)</td>
+<td class="hm-cell" style="background:rgba(5,192,114,.48)"><span class="hm-v">30</span><span class="hm-s">73.2%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.14)"><span class="hm-v">11</span><span class="hm-s">26.8%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.62)"><span class="hm-v">39</span><span class="hm-s">95.1%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.06)"><span class="hm-v">2</span><span class="hm-s">4.9%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.10)"><span class="hm-v">11</span><span class="hm-s">26.8%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.38)"><span class="hm-v">20</span><span class="hm-s">48.8%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.20)"><span class="hm-v">10</span><span class="hm-s">24.4%</span></td></tr>
+</tbody></table>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px">
+<div class="ichip"><span class="ic" style="background:var(--red)">!</span><strong>기본형×디스플레이</strong> 6건(9.2%)만 — 65개 중 59개가 디스플레이 없음. 전문가는 온도조절 필수 추천하는데 시장 미반영.</div>
+<div class="ichip"><span class="ic" style="background:var(--green)">!</span><strong>구스넥×Open핸들</strong> 39건(95.1%) + 디스플레이 30건(73.2%) — 구스넥의 표준 공식</div>
+<div class="ichip"><span class="ic" style="background:var(--purple)">★</span><strong>조그 다이얼</strong>: 구스넥 10건(24.4%) vs 기본형 2건(3.1%) — 프리미엄 조작감의 기본형 진출 = 미개척 블루오션</div>
+</div></div>
+<!-- Tab3: 형상×CMF -->
+<div id="h3" class="hm-table-wrap" style="display:none">
+<table class="hm-table">
+<thead><tr class="hm-th-row"><th class="hm-th-col">형상↓ / →</th><th>무광</th><th>유광</th><th>STS</th><th>플라스틱</th><th>유리</th><th>Open핸들</th><th>수</th></tr></thead>
+<tbody>
+<tr><td class="hm-th-col">유선형 (62)</td>
+<td class="hm-cell" style="background:rgba(5,192,114,.42)"><span class="hm-v">40</span><span class="hm-s">65%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.18)"><span class="hm-v">22</span><span class="hm-s">35%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.28)"><span class="hm-v">28</span><span class="hm-s">45%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.10)"><span class="hm-v">12</span><span class="hm-s">19%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.12)"><span class="hm-v">17</span><span class="hm-s">27%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.24)"><span class="hm-v">22</span><span class="hm-s">35%</span></td>
+<td class="hm-cell" style="background:var(--bg)"><span class="hm-v" style="color:var(--text-sub)">62</span></td></tr>
+<tr><td class="hm-th-col">직선형 (35)</td>
+<td class="hm-cell" style="background:rgba(5,192,114,.35)"><span class="hm-v">20</span><span class="hm-s">57%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.22)"><span class="hm-v">15</span><span class="hm-s">43%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.14)"><span class="hm-v">11</span><span class="hm-s">31%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.24)"><span class="hm-v">10</span><span class="hm-s">29%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.12)"><span class="hm-v">12</span><span class="hm-s">34%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.10)"><span class="hm-v">8</span><span class="hm-s">23%</span></td>
+<td class="hm-cell" style="background:var(--bg)"><span class="hm-v" style="color:var(--text-sub)">35</span></td></tr>
+<tr><td class="hm-th-col">테이퍼형 (48)</td>
+<td class="hm-cell" style="background:rgba(5,192,114,.45)"><span class="hm-v">38</span><span class="hm-s">79%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.08)"><span class="hm-v">10</span><span class="hm-s">21%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.30)"><span class="hm-v">33</span><span class="hm-s">69%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.10)"><span class="hm-v">11</span><span class="hm-s">23%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.05)"><span class="hm-v">4</span><span class="hm-s">8%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.30)"><span class="hm-v">26</span><span class="hm-s">54%</span></td>
+<td class="hm-cell" style="background:var(--bg)"><span class="hm-v" style="color:var(--text-sub)">48</span></td></tr>
+<tr><td class="hm-th-col">숄더형 (2)</td>
+<td class="hm-cell" style="background:rgba(5,192,114,.30)"><span class="hm-v">1</span><span class="hm-s">50%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.30)"><span class="hm-v">1</span><span class="hm-s">50%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.10)"><span class="hm-v">1</span><span class="hm-s">50%</span></td>
+<td class="hm-cell" style="background:rgba(49,130,246,.10)"><span class="hm-v">1</span><span class="hm-s">50%</span></td>
+<td class="hm-cell" style="background:rgba(200,200,200,.08)"><span class="hm-v" style="color:var(--text-light)">0</span><span class="hm-s">0%</span></td>
+<td class="hm-cell" style="background:rgba(5,192,114,.30)"><span class="hm-v">1</span><span class="hm-s">50%</span></td>
+<td class="hm-cell" style="background:var(--bg)"><span class="hm-v" style="color:var(--text-sub)">2</span></td></tr>
+</tbody></table>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px">
+<div class="ichip"><span class="ic" style="background:var(--blue)">!</span><strong>테이퍼형×STS×무광</strong> — 프리미엄 구스넥의 정석 조합 (테이퍼형의 79%가 무광)</div>
+<div class="ichip"><span class="ic" style="background:var(--orange)">!</span><strong>직선형×유리</strong> 12건(34%) — 티포트·유리 카테고리의 전형</div>
+<div class="ichip"><span class="ic" style="background:var(--green)">!</span><strong>유선형×Open핸들</strong> 22건(35%) — 구스넥이 주도하는 감성형 조합</div>
+</div></div>
+<div style="padding:0 28px 24px;display:flex;align-items:center;gap:12px;margin-top:8px;">
+<span style="font-size:11px;font-weight:700;color:var(--text-light)">빈도 낮음</span>
+<div style="width:120px;height:8px;border-radius:4px;background:linear-gradient(90deg,rgba(200,200,200,.15),rgba(49,130,246,.25),rgba(5,192,114,.55))"></div>
+<span style="font-size:11px;font-weight:700;color:var(--text-light)">빈도 높음</span>
+</div></div></section>
+
+<!-- ===== FRAMEWORK 7: AWARD TREND ===== -->
+<section class="section" id="award">
+<div class="section-label" style="background:var(--yellow-light);color:var(--yellow);">Framework 7 — Award Trend (Lens3)</div>
+<div class="section-title">디자인 어워드 트렌드 분석</div>
+<div class="section-sub">iF · Red Dot · IDEA 수상작 118개(HTML 카드) → 내부 중복 제거 후 <strong>105개 고유 제품</strong> 분석</div>
+
+<div class="card card-pad">
+<div style="font-size:16px;font-weight:800;margin-bottom:16px">어워드·브랜드·연도 분포</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+<!-- 어워드별 -->
+<div style="background:var(--bg);border-radius:14px;padding:16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:12px">어워드별</div>
+<div class="award-bar-row"><span class="award-bar-label">iF Design</span><div class="award-bar" style="width:62%;background:var(--blue)">72건</div></div>
+<div class="award-bar-row"><span class="award-bar-label">Red Dot</span><div class="award-bar" style="width:38%;background:var(--red)">44건</div></div>
+<div class="award-bar-row"><span class="award-bar-label">IDEA</span><div class="award-bar" style="width:2%;background:var(--purple)">2건</div></div>
+<p style="font-size:10px;color:var(--text-light);margin-top:8px">※ 복수 수상 포함한 연 카드 수 기준</p>
+</div>
+<!-- 브랜드별 -->
+<div style="background:var(--bg);border-radius:14px;padding:16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:12px">브랜드 Top 8 (고유 제품 수)</div>
+<div class="award-bar-row"><span class="award-bar-label">Midea</span><div class="award-bar" style="width:100%;background:var(--blue)">14</div></div>
+<div class="award-bar-row"><span class="award-bar-label">Philips</span><div class="award-bar" style="width:79%;background:var(--blue)">11</div></div>
+<div class="award-bar-row"><span class="award-bar-label">Kenwood</span><div class="award-bar" style="width:29%;background:var(--teal)">4</div></div>
+<div class="award-bar-row"><span class="award-bar-label">BUYDEEM</span><div class="award-bar" style="width:29%;background:var(--orange)">4</div></div>
+<div class="award-bar-row"><span class="award-bar-label">SIEMENS</span><div class="award-bar" style="width:21%;background:var(--text-light)">3</div></div>
+<div class="award-bar-row"><span class="award-bar-label">Toshiba</span><div class="award-bar" style="width:21%;background:var(--teal)">3</div></div>
+<div class="award-bar-row"><span class="award-bar-label">WMF</span><div class="award-bar" style="width:21%;background:var(--text-light)">3</div></div>
+<div class="award-bar-row"><span class="award-bar-label">Breville</span><div class="award-bar" style="width:21%;background:var(--green)">3</div></div>
+</div>
+<!-- 연도별 -->
+<div style="background:var(--bg);border-radius:14px;padding:16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:12px">최근 5년 추이 (고유 제품)</div>
+<div class="award-bar-row"><span class="award-bar-label">2026</span><div class="award-bar" style="width:14%;background:var(--blue)">2</div></div>
+<div class="award-bar-row"><span class="award-bar-label">2025</span><div class="award-bar" style="width:29%;background:var(--blue)">4</div></div>
+<div class="award-bar-row"><span class="award-bar-label">2024</span><div class="award-bar" style="width:79%;background:var(--blue)">11</div></div>
+<div class="award-bar-row"><span class="award-bar-label">2023</span><div class="award-bar" style="width:71%;background:var(--green)">10</div></div>
+<div class="award-bar-row"><span class="award-bar-label">2022</span><div class="award-bar" style="width:57%;background:var(--orange)">8</div></div>
+<div class="award-bar-row"><span class="award-bar-label">2021</span><div class="award-bar" style="width:57%;background:var(--text-light)">8</div></div>
+<p style="font-size:10px;color:var(--text-light);margin-top:8px">2024년 피크(11개) → 2025~26 프리미엄·감성 강세</p>
+</div>
+</div>
+</div>
+
+<!-- 12개 2관왕 -->
+<div style="margin-top:20px" class="card card-pad">
+<div style="font-size:16px;font-weight:800;margin-bottom:12px">🏆 복수 어워드 수상 제품 (2관왕) — 11건</div>
+<p style="font-size:12px;color:var(--text-sub);margin-bottom:16px">동일 제품이 iF+Red Dot 또는 Red Dot+IDEA를 동시/연속 수상한 경우. 디자인 완성도가 교차 검증된 제품들.<br>※ Toshiba 동일 카드 중복(2건), Midea warm love 포함 총 13건 내부 중복 제거.</p>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>BALMUDA The Pot</strong><br>2017 iF + 2017 Red Dot</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>Fellow Stagg EKG</strong><br>2018 Red Dot + 2019 IDEA</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>Philips Atom Kettle</strong><br>2016 iF + 2016 Red Dot</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>Philips DW 5000/7000</strong><br>2024 iF + 2024 Red Dot</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>SIEMENS TW86103</strong><br>2011 iF + 2011 Red Dot</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>Kalita KEDP-X1</strong><br>2022 iF + 2022 Red Dot</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>Joyoung K06-Z2</strong><br>2020 iF + 2020 Red Dot</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>Teawith Kettle</strong><br>2018 iF + 2019 Red Dot</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>GIILLS 3</strong><br>2023 IDEA + 2024 iF</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>Tbox mini</strong><br>2023 iF + 2024 Red Dot</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>Midea warm love</strong><br>2017 iF + 2017 Red Dot</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>BORK K780→K781</strong><br>2016 iF + 2017 iF (후속모델)</div>
+</div>
+</div>
+
+<!-- 5대 시그널 -->
+<div style="margin-top:20px" class="card card-pad">
+<div style="font-size:16px;font-weight:800;margin-bottom:16px">어워드에서 읽는 5대 디자인 시그널</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div style="background:var(--blue-light);border-radius:14px;padding:18px">
+<div style="font-size:13px;font-weight:800;color:var(--blue);margin-bottom:8px">🔬 시그널 1: 안전·가족 중심 혁신</div>
+<p style="font-size:12px;color:var(--text-sub)">Toshiba safety kettle(2023 iF 3종): 이중벽 구조로 어린이 화상 방지, 넘김 방지 메커니즘을 외형에 통합. Tiger PTQ(2023 iF): 매끄러운 표면 처리로 돌출부 최소화.</p>
+<div style="background:rgba(49,130,246,.08);border-radius:8px;padding:10px;margin-top:8px;border-left:3px solid var(--blue)"><span style="font-size:11px;font-weight:700;color:var(--blue)">디자인 의미:</span><span style="font-size:11px;color:var(--text-sub)"> 기능적 안전을 물리적 형태 언어로 번역. "안전이 곧 디자인" — 보이지 않는 혁신을 보이는 형태로 전환하는 트렌드</span></div>
+</div>
+<div style="background:var(--green-light);border-radius:14px;padding:18px">
+<div style="font-size:13px;font-weight:800;color:var(--green);margin-bottom:8px">🌿 시그널 2: 에코·재생소재 가시화</div>
+<p style="font-size:12px;color:var(--text-sub)">Philips 5000 ECO(2022 RD): 재생 플라스틱 마블 텍스처를 의도적 노출 → "불완전한 소재미". Philips DW 5000/7000(2024 2관왕): 이중벽 보온으로 에너지 절감을 구조로 시각화.</p>
+<div style="background:rgba(5,192,114,.08);border-radius:8px;padding:10px;margin-top:8px;border-left:3px solid var(--green)"><span style="font-size:11px;font-weight:700;color:var(--green)">디자인 의미:</span><span style="font-size:11px;color:var(--text-sub)"> 친환경을 숨기지 않고 전면 가시화. 소재 자체가 커뮤니케이션 도구 — 재생소재의 "흔적"이 프리미엄 가치로 전환</span></div>
+</div>
+<div style="background:var(--orange-light);border-radius:14px;padding:18px">
+<div style="font-size:13px;font-weight:800;color:var(--orange);margin-bottom:8px">☕ 시그널 3: 커피문화 × 프리미엄 감성</div>
+<p style="font-size:12px;color:var(--text-sub)">Fellow Stagg EKG(2관왕): 원통+직선+원 기본도형의 모놀리식 형태, Y형 오픈핸들이 아이코닉 실루엣 형성. Kalita KEDP-X1(2관왕): 일본 장인 문화의 현대적 미니멀 재해석. BALMUDA MoonKettle(2025 RD): 앰비언트 라이트+사운드 → 추출을 "의식(ritual)"으로 승격.</p>
+<div style="background:rgba(255,107,53,.08);border-radius:8px;padding:10px;margin-top:8px;border-left:3px solid var(--orange)"><span style="font-size:11px;font-weight:700;color:var(--orange)">디자인 의미:</span><span style="font-size:11px;color:var(--text-sub)"> 포트가 "물 끓이는 도구"에서 "커피 라이프스타일 상징물"로 전환. 형태·소재·감각(빛·소리)의 총체적 경험 디자인</span></div>
+</div>
+<div style="background:var(--purple-light);border-radius:14px;padding:18px">
+<div style="font-size:13px;font-weight:800;color:var(--purple);margin-bottom:8px">🎨 시그널 4: 중국 브랜드의 형태 실험</div>
+<p style="font-size:12px;color:var(--text-sub)">Midea 14개 수상(최다): "Fairy Boat"(2020) 전통 선박 모티프, "peak"(2024) 산봉우리 곡선. GIILLS 3(2관왕): 핸들과 바디 경계 해체 → 조각적 오브제. EDENUS "Forget"(2023): 전통 다기 문법을 전기포트에 이식.</p>
+<div style="background:rgba(124,92,252,.08);border-radius:8px;padding:10px;margin-top:8px;border-left:3px solid var(--purple)"><span style="font-size:11px;font-weight:700;color:var(--purple)">디자인 의미:</span><span style="font-size:11px;color:var(--text-sub)"> 유럽·일본 중심 디자인 문법에 대한 독자적 대안 제시. 문화적 내러티브가 형태 실험의 동력 — 글로벌 디자인 다극화의 신호</span></div>
+</div>
+<div style="background:var(--yellow-light);border-radius:14px;padding:18px;grid-column:1/-1">
+<div style="font-size:13px;font-weight:800;color:var(--yellow);margin-bottom:8px">🔮 시그널 5: 무소음·스마트·포터블</div>
+<p style="font-size:12px;color:var(--text-sub)">Midea 3D Surround Heating Silent(2026 iF): 전방위 가열로 소음 최소화 → 부드러운 곡면 형태 강조. Joyoung K06-Z2(2관왕): 접이식 구조가 새로운 형태 어휘 생성. Snow bear 항온 휴대용(2021 iF): 보온+급탕 일체형 → 기존 포트 형태 문법 해체.</p>
+<div style="background:rgba(245,166,35,.08);border-radius:8px;padding:10px;margin-top:8px;border-left:3px solid var(--yellow)"><span style="font-size:11px;font-weight:700;color:var(--yellow)">디자인 의미:</span><span style="font-size:11px;color:var(--text-sub)"> 기술 혁신(무소음/접이/스마트)이 새로운 형태 어휘를 생성. 기존 "주전자" 아키타입에서 탈피 — 카테고리 경계 자체를 재정의하는 디자인 진화</span></div>
+</div>
+</div>
+</div>
+
+<!-- 어워드×블루오션 교차검증 -->
+<div style="margin-top:20px" class="card card-pad">
+<div style="font-size:16px;font-weight:800;margin-bottom:16px">어워드 트렌드 × 블루오션 교차 검증</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+<div style="border:2px solid var(--blue);border-radius:16px;padding:20px">
+<div style="font-size:14px;font-weight:800;color:var(--blue);margin-bottom:10px">🔵 BLUE OCEAN A 검증</div>
+<p style="font-size:13px;color:var(--text-sub)">감성·라이프스타일 × ₩80K~150K</p>
+<div style="margin-top:12px;font-size:12px;display:flex;flex-direction:column;gap:6px">
+<div><strong style="color:var(--blue)">✅ 어워드:</strong> Fellow(2관왕), BALMUDA(2관왕), De'Longhi Eclettica(2024 iF), Kalita KEDP-X1(2관왕) — 소수이나 지속 수상</div>
+<div><strong style="color:var(--green)">✅ 시장:</strong> Fellow $200, BALMUDA $260 — 상한은 확인. ₩80K~150K 중간대 제품 부재</div>
+<div><strong style="color:var(--orange)">⚠️ 주의:</strong> BALMUDA MoonKettle이 2025년 공격적 진입 중</div>
+</div>
+</div>
+<div style="border:2px solid var(--green);border-radius:16px;padding:20px">
+<div style="font-size:14px;font-weight:800;color:var(--green);margin-bottom:10px">🟢 BLUE OCEAN B 검증</div>
+<p style="font-size:13px;color:var(--text-sub)">에코·웜 감성 × ₩30K~60K</p>
+<div style="margin-top:12px;font-size:12px;display:flex;flex-direction:column;gap:6px">
+<div><strong style="color:var(--blue)">✅ 어워드:</strong> Philips ECO(2022 Red Dot)가 에코 방향 선행 — 그러나 ₩97K대</div>
+<div><strong style="color:var(--green)">✅ 시장:</strong> 저가 기본형은 플라스틱+유광이 지배. 에코 감성 가성비 = 부재</div>
+<div><strong style="color:var(--purple)">★ 기회:</strong> 재생소재 텍스처 + 웜톤 + ₩40K~60K = <strong>완전 공백</strong></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ===== SYNTHESIS ===== -->
+<div style="margin-top:48px;background:linear-gradient(135deg,#1a56db,#3182f6);border-radius:24px;padding:36px 40px;color:#fff">
+<div style="font-size:18px;font-weight:800;margin-bottom:20px">4개 프레임워크 종합 시사점</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px">
+<div>
+<div style="font-size:11px;font-weight:700;opacity:.7;letter-spacing:.8px;margin-bottom:8px">④ 포지셔닝 맵</div>
+<p style="font-size:13px;opacity:.9;line-height:1.7">감성×₩80K~150K = 블루오션A. 에코×₩30K~60K = 블루오션B. Fellow·BALMUDA 사이 가격 공백이 진입 타깃.</p>
+</div>
+<div>
+<div style="font-size:11px;font-weight:700;opacity:.7;letter-spacing:.8px;margin-bottom:8px">⑤ DNA 해부도</div>
+<p style="font-size:13px;opacity:.9;line-height:1.7">구스넥=STS+무광+ㄱ핸들+디스플레이 표준화. 차별화는 핸들 포인트 소재(우드·코르크)와 기본형의 디스플레이 도입.</p>
+</div>
+<div>
+<div style="font-size:11px;font-weight:700;opacity:.7;letter-spacing:.8px;margin-bottom:8px">⑥ 상관 히트맵</div>
+<p style="font-size:13px;opacity:.9;line-height:1.7">STS×유광 11건만=희소 차별화. 기본형 디스플레이 8.5%=블루오션. 조그다이얼의 기본형 진출 미개척.</p>
+</div>
+<div>
+<div style="font-size:11px;font-weight:700;opacity:.7;letter-spacing:.8px;margin-bottom:8px">⑦ 어워드 트렌드</div>
+<p style="font-size:13px;opacity:.9;line-height:1.7">안전·가족, 에코·재생, 커피감성, 중국 형태실험, 무소음·포터블 — 5대 시그널이 디자인 방향성의 근거.</p>
+</div>
+</div>
+</div>
+
+<!-- Revision Log -->
+<div style="margin-top:32px;background:var(--white);border-radius:16px;padding:24px;border:1.5px solid var(--border)">
+<div style="font-size:14px;font-weight:800;margin-bottom:12px">📋 v4 변경 이력</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px">
+<div style="background:var(--bg);padding:12px;border-radius:10px"><strong style="color:var(--red)">🔴 삭제</strong> lens1_domestic 22개 — 백데이터에 근거 없는 임의 추가 데이터 전수 삭제</div>
+<div style="background:var(--bg);padding:12px;border-radius:10px"><strong style="color:var(--red)">🔴 삭제</strong> lens1_global_lineup 중 appendix 6개사 이외 제품 — 근거 없는 데이터 삭제</div>
+<div style="background:var(--bg);padding:12px;border-radius:10px"><strong style="color:var(--blue)">🔵 정정</strong> 총 제품 수: 190→218(중복제거 고유수). DNA·히트맵 모수: 124개(기본94+티15+구15, 분유제외)</div>
+<div style="background:var(--bg);padding:12px;border-radius:10px"><strong style="color:var(--blue)">🔵 정정</strong> BALMUDA DNA: 토스터 특성 혼입 제거 → The Pot·MoonKettle 실제 특성으로 교체</div>
+<div style="background:var(--bg);padding:12px;border-radius:10px"><strong style="color:var(--green)">🟢 추가</strong> Framework 7: Lens3 어워드 118개(고유 105개) 전수 분석 · 5대 시그널 · 2관왕 11건 · 블루오션 교차검증</div>
+<div style="background:var(--bg);padding:12px;border-radius:10px"><strong style="color:var(--green)">🟢 추가</strong> 중복 제거 내역표: 원래241→내부중복-16→타렌즈중복-7→고유218개 투명 공개</div>
+</div>
+</div>
+
+<div style="margin-top:16px;background:var(--white);border-radius:16px;padding:24px;border:1.5px solid var(--border)">
+<div style="font-size:14px;font-weight:800;margin-bottom:12px">📋 v5 수정 이력 (백데이터 검증 기반)</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px">
+<div style="background:var(--bg);padding:12px;border-radius:10px"><strong style="color:var(--red)">🔴 수정</strong> Lens3 어워드 카드수: iF 68→72, Red Dot 47→44, IDEA 3→2 (실제 HTML 카드 전수 재집계)</div>
+<div style="background:var(--bg);padding:12px;border-radius:10px"><strong style="color:var(--red)">🔴 수정</strong> Lens3 내부중복: -12→-13 (Midea warm love 2관왕 누락분 반영, 고유 106→105)</div>
+<div style="background:var(--bg);padding:12px;border-radius:10px"><strong style="color:var(--red)">🔴 수정</strong> 브랜드 Top 8: Midea 10→14, Philips 7→11, Kenwood 4 신규 반영</div>
+<div style="background:var(--bg);padding:12px;border-radius:10px"><strong style="color:var(--red)">🔴 수정</strong> 연도 분포: 2025(3→4), 2024(10→11), 2023(12→10), 2021(9→8)</div>
+<div style="background:var(--bg);padding:12px;border-radius:10px"><strong style="color:var(--red)">🔴 수정</strong> 2관왕 12→11건: Cocinare(2종=서로 다른 제품) 제거, Midea warm love 추가</div>
+<div style="background:var(--bg);padding:12px;border-radius:10px"><strong style="color:var(--blue)">🔵 정정</strong> DNA·히트맵 모수: n=113→124 (94+15+15=124 정합성 수정)</div>
+<div style="background:var(--bg);padding:12px;border-radius:10px"><strong style="color:var(--blue)">🔵 정정</strong> Toshiba 설명: "3개 세트 동시 수상"→"3종 5카드(중복2건)" 정정</div>
+<div style="background:var(--bg);padding:12px;border-radius:10px"><strong style="color:var(--blue)">🔵 정정</strong> 소스테이블: 내부중복 합계 -15→-16, 타렌즈 -8→-7 (총 218 동일)</div>
+</div>
+</div>
+</div>
+
+<script>
+const D=[
+// === Lens1 판매상위: 기본형 14개 (-1중복=13) ===
+{b:"필립스",n:"HD9318",c:"기본형",x:14.6,y:65.8,s:"m",a:0,e:0,p:23210},
+{b:"테팔",n:"세이프티",c:"기본형",x:20,y:61.3,s:"m",a:0,e:0,p:31820},
+{b:"테팔",n:"로프트",c:"기본형",x:60,y:59.4,s:"m",a:0,e:0,p:36300},
+{b:"코소리",n:"COSORI GK-172",c:"기본형",x:42,y:59.4,s:"m",a:0,e:1,p:36387},// Lens2 중복→전문가마커
+{b:"셰프맨",n:"데일리 컬렉션",c:"기본형",x:30,y:56.2,s:"m",a:0,e:1,p:45474},// Lens2 중복
+{b:"아마존베이직스",n:"Electric Kettle",c:"기본형",x:12,y:61.7,s:"m",a:0,e:0,p:30927},
+{b:"CHIGO",n:"전기포트",c:"기본형",x:15,y:52.7,s:"m",a:0,e:0,p:57759},
+{b:"미디어",n:"미디어 CN-1",c:"기본형",x:14.6,y:41.2,s:"m",a:0,e:0,p:128557},
+{b:"미디어",n:"미디어 CN-2",c:"기본형",x:14.6,y:43.6,s:"m",a:0,e:0,p:109070},
+{b:"HIRO",n:"KTK-300",c:"기본형",x:18.9,y:68.5,s:"m",a:0,e:0,p:16970},
+{b:"야마젠",n:"DKE-100",c:"기본형",x:14.6,y:63.4,s:"m",a:0,e:0,p:26800},
+{b:"Emerio",n:"WK-119988",c:"기본형",x:38,y:65.3,s:"m",a:0,e:0,p:24141},
+// 필립스 HD9350/90 독일2위 (HD9318과 다른 모델)
+{b:"필립스",n:"HD9350/90",c:"기본형",x:18.9,y:59.5,s:"m",a:0,e:0,p:35932},
+{b:"보쉬",n:"TWK2M163",c:"기본형",x:35,y:59.2,s:"m",a:0,e:1,p:36777},// Lens2 Which중복
+
+// === Lens1 판매상위: 티포트 15개 ===
+{b:"키친아트",n:"쏘렐 더글라스",c:"티포트",x:49,y:57.3,s:"m",a:0,e:0,p:42000},
+{b:"키친아트",n:"유리티포트",c:"티포트",x:44.7,y:59.6,s:"m",a:0,e:0,p:35900},
+{b:"신일",n:"무선 티 포트",c:"티포트",x:53.3,y:53.3,s:"m",a:0,e:0,p:55500},
+{b:"셰프맨",n:"Tea Kettle",c:"티포트",x:45,y:56.2,s:"m",a:0,e:0,p:45474},
+{b:"비안테",n:"Tea Maker",c:"티포트",x:48,y:42.6,s:"m",a:0,e:0,p:116987},
+{b:"구르미아",n:"GDK-380",c:"티포트",x:48,y:42.8,s:"m",a:0,e:0,p:116987},
+{b:"베어",n:"베어 CN",c:"티포트",x:57.6,y:44.5,s:"m",a:0,e:0,p:102700},
+{b:"베어",n:"베어 CN-2",c:"티포트",x:27.5,y:33.5,s:"m",a:0,e:0,p:219895},
+{b:"미지아",n:"미지아",c:"티포트",x:44.7,y:42.7,s:"m",a:0,e:0,p:115830},
+{b:"HIRO",n:"BJ8158JP",c:"티포트",x:49,y:43.4,s:"m",a:0,e:0,p:111610},
+{b:"피카",n:"피카 1.3L",c:"티포트",x:53.3,y:52.1,s:"m",a:0,e:0,p:59800},
+{b:"피카",n:"피카 1.3L-2",c:"티포트",x:54,y:52.9,s:"m",a:0,e:0,p:56990},
+{b:"포미",n:"ME Electric",c:"티포트",x:35,y:65.3,s:"m",a:0,e:0,p:24141},
+{b:"WMF",n:"KüchenMinis",c:"티포트",x:65,y:46.8,s:"m",a:0,e:0,p:87386},
+{b:"세버린",n:"WK-3480",c:"티포트",x:48,y:50.5,s:"m",a:0,e:0,p:67236},
+
+// === Lens1 판매상위: 구스넥 15개 (X축 분산) ===
+{b:"하트만",n:"드립포트",c:"구스넥",x:78,y:52.4,s:"m",a:0,e:0,p:59150},
+{b:"이즈홈",n:"EN-DRP-100",c:"구스넥",x:62,y:58.3,s:"m",a:0,e:0,p:39300},
+{b:"라쿠진",n:"드립포트",c:"구스넥",x:75,y:49,s:"m",a:0,e:0,p:74900},
+{b:"코소리",n:"Gooseneck",c:"구스넥",x:80,y:46.2,s:"m",a:0,e:0,p:90987},
+{b:"보덤",n:"Bistro GN",c:"구스넥",x:85,y:54.2,s:"m",a:0,e:0,p:51961},
+{b:"쿠진아트",n:"GK-1",c:"구스넥",x:82,y:44.3,s:"m",a:0,e:1,p:103974},// Lens2 중복
+{b:"SUPOR",n:"구스넥 CN",c:"구스넥",x:55,y:57.5,s:"m",a:0,e:0,p:41500},
+{b:"MIDEA",n:"구스넥 CN",c:"구스넥",x:58,y:41.1,s:"m",a:0,e:0,p:130000},
+{b:"틸리빙",n:"구스넥 CN",c:"구스넥",x:60,y:48.9,s:"m",a:0,e:0,p:75010},
+{b:"에페오스",n:"EPCP JP",c:"구스넥",x:90,y:48.6,s:"m",a:0,e:0,p:76310},
+{b:"야마젠",n:"EKG JP",c:"구스넥",x:82,y:51.5,s:"m",a:0,e:0,p:62300},
+{b:"INTASTING",n:"GN JP",c:"구스넥",x:78,y:48.6,s:"m",a:0,e:0,p:76330},
+{b:"RHD",n:"GN DE",c:"구스넥",x:58,y:51,s:"m",a:0,e:0,p:64987},
+{b:"vmotal",n:"GN DE",c:"구스넥",x:55,y:50.9,s:"m",a:0,e:0,p:65533},
+{b:"타임모어",n:"Fish Smart DE",c:"구스넥",x:95,y:37.8,s:"m",a:0,e:0,p:162773},
+
+// === Lens1 appendix 48개 (내부중복2건 제거, 대표 표시) ===
+{b:"쿠진아트",n:"JK-17P1",c:"기본형",x:45,y:35.7,s:"ap",a:0,e:0,p:188427},
+{b:"쿠진아트",n:"CK-10TR",c:"기본형",x:25,y:49.5,s:"ap",a:0,e:0,p:72427},
+{b:"Oster",n:"BVSTKT7098",c:"기본형",x:10,y:48.6,s:"ap",a:0,e:0,p:76850},
+{b:"Oster",n:"BVSTKT8970",c:"기본형",x:22,y:47.3,s:"ap",a:0,e:0,p:84071},
+{b:"Oster",n:"BVSTKT8970-017",c:"기본형",x:25,y:46.3,s:"ap",a:0,e:0,p:90026},
+{b:"Oster",n:"BVSTKT8970 Color",c:"기본형",x:30,y:49.5,s:"ap",a:0,e:0,p:72311},
+{b:"Oster",n:"OCEL920",c:"기본형",x:38,y:39.8,s:"ap",a:0,e:0,p:141828},
+{b:"Oster",n:"OCEL840",c:"기본형",x:20,y:58.4,s:"ap",a:0,e:0,p:38913},
+{b:"Philips",n:"HD9339/80",c:"기본형",x:22,y:56.9,s:"ap",a:0,e:0,p:43180},
+{b:"Philips",n:"HD9355/92",c:"기본형",x:35,y:52.2,s:"ap",a:0,e:0,p:60000},
+{b:"Philips",n:"HD9359/90",c:"기본형",x:55,y:44.7,s:"ap",a:0,e:0,p:100662},
+{b:"Philips",n:"HD9365/10",c:"기본형",x:40,y:45.3,s:"ap",a:0,e:0,p:97020},
+{b:"Philips",n:"HD9395/90",c:"기본형",x:42,y:47.2,s:"ap",a:0,e:0,p:85000},
+{b:"Philips",n:"HD941100",c:"기본형",x:22,y:58.9,s:"ap",a:0,e:0,p:37500},
+{b:"R.Hobbs",n:"20461",c:"기본형",x:35,y:45.8,s:"ap",a:0,e:0,p:93482},
+{b:"R.Hobbs",n:"21274",c:"기본형",x:28,y:54.5,s:"ap",a:0,e:0,p:50986},
+{b:"R.Hobbs",n:"21603",c:"기본형",x:12,y:45.8,s:"ap",a:0,e:0,p:93461},
+{b:"R.Hobbs",n:"22851",c:"기본형",x:15,y:47.8,s:"ap",a:0,e:0,p:81564},
+{b:"R.Hobbs",n:"24191",c:"기본형",x:25,y:47.2,s:"ap",a:0,e:0,p:85004},
+{b:"R.Hobbs",n:"24360",c:"기본형",x:32,y:47.2,s:"ap",a:0,e:0,p:84982},
+{b:"R.Hobbs",n:"25840",c:"기본형",x:55,y:44.6,s:"ap",a:0,e:0,p:101982},
+{b:"R.Hobbs",n:"26050",c:"기본형",x:22,y:52.5,s:"ap",a:0,e:0,p:58547},
+{b:"R.Hobbs",n:"25861",c:"기본형",x:40,y:43.4,s:"ap",a:0,e:0,p:110457},
+{b:"R.Hobbs",n:"27450",c:"기본형",x:20,y:39.8,s:"ap",a:0,e:0,p:142367},
+{b:"R.Hobbs",n:"20460",c:"기본형",x:28,y:47.2,s:"ap",a:0,e:0,p:85004},
+{b:"R.Hobbs",n:"21888",c:"기본형",x:35,y:44.6,s:"ap",a:0,e:0,p:102008},
+{b:"R.Hobbs",n:"23910",c:"기본형",x:50,y:43.2,s:"ap",a:0,e:0,p:112194},
+{b:"R.Hobbs",n:"23763",c:"기본형",x:30,y:50.4,s:"ap",a:0,e:0,p:68000},
+{b:"R.Hobbs",n:"23925",c:"기본형",x:35,y:48.7,s:"ap",a:0,e:0,p:76502},
+{b:"R.Hobbs",n:"25502",c:"기본형",x:35,y:48.7,s:"ap",a:0,e:0,p:76502},
+{b:"R.Hobbs",n:"25111",c:"기본형",x:42,y:42.3,s:"ap",a:0,e:0,p:119013},
+{b:"Tiger",n:"PCH-G080",c:"기본형",x:35,y:51,s:"ap",a:0,e:0,p:65000},
+{b:"Tiger",n:"PCM-N080",c:"기본형",x:25,y:53.7,s:"ap",a:0,e:0,p:54000},
+{b:"Tiger",n:"PTV-A080",c:"기본형",x:30,y:46.7,s:"ap",a:0,e:0,p:87700},
+{b:"Tiger",n:"PTV-A120",c:"기본형",x:30,y:43.5,s:"ap",a:0,e:0,p:109900},
+{b:"Tiger",n:"PCL-N100",c:"기본형",x:22,y:55.3,s:"ap",a:0,e:0,p:48400},
+{b:"Tiger",n:"PCL-N120",c:"기본형",x:22,y:53.7,s:"ap",a:0,e:0,p:54000},
+{b:"Tiger",n:"PCF-G060",c:"기본형",x:20,y:55.9,s:"ap",a:0,e:0,p:46400},
+{b:"Tiger",n:"PCF-G080",c:"기본형",x:20,y:54.5,s:"ap",a:0,e:0,p:51000},
+{b:"Tiger",n:"PCI-G100",c:"기본형",x:18,y:56.4,s:"ap",a:0,e:0,p:44700},
+{b:"Tiger",n:"PCI-G120",c:"기본형",x:18,y:55,s:"ap",a:0,e:0,p:49400},
+{b:"Midea",n:"MK-SH53-Q",c:"기본형",x:28,y:58.1,s:"ap",a:0,e:0,p:39640},
+{b:"Midea",n:"MK-SH20M121",c:"기본형",x:28,y:58.1,s:"ap",a:0,e:0,p:39626},
+{b:"Midea",n:"MK-SHE1750",c:"기본형",x:30,y:57.4,s:"ap",a:0,e:0,p:41722},
+{b:"Midea",n:"MK-SH63-Q",c:"기본형",x:35,y:50.2,s:"ap",a:0,e:0,p:68768},
+{b:"Midea",n:"MK-SHE2002-PRO",c:"기본형",x:25,y:63.6,s:"ap",a:0,e:0,p:27046},
+// RH 21270, 26080 → Lens2 중복, 이미 appendix에서 카운트
+{b:"R.Hobbs",n:"21270",c:"기본형",x:28,y:54.5,s:"ap",a:0,e:1,p:50995},
+{b:"R.Hobbs",n:"26080",c:"기본형",x:15,y:48.7,s:"ap",a:0,e:1,p:76482},
+
+// === Lens2 전문가 추천 (Lens1과 중복 7건 제거 후 19개 신규) ===
+{b:"Breville",n:"IQ Kettle",c:"기본형",x:55,y:29.7,s:"ex",a:0,e:1,p:286000},
+{b:"Hamilton Beach",n:"40880",c:"기본형",x:15,y:58.4,s:"ex",a:0,e:1,p:39000},
+{b:"Zwilling",n:"Enfinigy",c:"기본형",x:55,y:37.3,s:"ex",a:0,e:1,p:169000},
+{b:"펠로우",n:"EKG-1171",c:"기본형",x:92,y:32.7,s:"ex",a:0,e:1,p:233200},
+{b:"Amazon",n:"Basics SS",c:"기본형",x:10,y:60.1,s:"ex",a:0,e:1,p:34500},
+{b:"OXO",n:"Cordless Glass",c:"기본형",x:42,y:44.3,s:"ex",a:0,e:1,p:104000},
+{b:"Secura",n:"SWK-1701DB",c:"기본형",x:22,y:56.3,s:"ex",a:0,e:1,p:45000},
+{b:"KENWOOD",n:"ZJP09",c:"기본형",x:25,y:56.3,s:"ex",a:0,e:1,p:45000},
+{b:"BOSCH",n:"TWK1M123GB",c:"기본형",x:30,y:52.2,s:"ex",a:0,e:1,p:60000},
+{b:"KitchenAid",n:"Artisan DW",c:"기본형",x:65,y:39,s:"ex",a:0,e:1,p:150000},
+{b:"Ninja",n:"Perfect Temp",c:"기본형",x:38,y:42.2,s:"ex",a:0,e:1,p:120000},
+{b:"Asda",n:"GDK101B-22",c:"기본형",x:15,y:62.1,s:"ex",a:0,e:1,p:30000},
+{b:"Cuisinart",n:"CPK17BPU",c:"기본형",x:40,y:42.2,s:"ex",a:0,e:1,p:120000},
+{b:"Bosch",n:"TWK8633GB",c:"기본형",x:38,y:46.4,s:"ex",a:0,e:1,p:90000},
+{b:"OXO",n:"Brew Pour-Over",c:"구스넥",x:75,y:41.1,s:"ex",a:0,e:1,p:130000},
+{b:"Fellow",n:"Stagg EKG",c:"구스넥",x:97,y:30.5,s:"ex",a:0,e:1,p:254000},// Lens3 중복→마커 통합
+{b:"Breville",n:"BTM800XL",c:"티포트",x:50,y:30,s:"ex",a:0,e:1,p:330000},
+
+];
+
+const CC={기본형:'#3182f6',티포트:'#ff6b35',구스넥:'#05c072'};
+
+function render(f){
+var box=document.getElementById('dots');box.innerHTML='';
+D.forEach(function(d){
+if(f!=='all'&&d.c!==f)return;
+var isAp=d.s==='ap';
+var isEx=d.e===1;
+var isAw=d.a===1;
+var sz=isAp?7:(isAw?15:(isEx?22:16));
+var col=CC[d.c]||'#888';
+var op=isAp?.35:1;
+var bc=isEx?'#f5a623':(isAw?'#f5a623':'#fff');
+var bw=isEx?'2.5px':'2px';
+var el=document.createElement('div');el.className='bdot';el.style.left=d.x+'%';el.style.top=d.y+'%';
+var ci=document.createElement('div');ci.className='bdot-circle';
+ci.style.cssText='width:'+sz+'px;height:'+sz+'px;background:'+col+';opacity:'+op+';border:'+bw+' solid '+bc;
+if(isAw)ci.style.borderRadius='3px';
+if(sz>=12&&!isAp)ci.textContent=(d.b||'').substring(0,2);
+var tip=document.createElement('div');tip.className='bdot-tip';
+var pr=d.p>0?'₩'+d.p.toLocaleString():'—';
+var src=d.s==='m'?'시장':d.s==='ap'?'라인업':d.s==='ex'?'전문가':'어워드';
+tip.innerHTML='<strong>'+d.b+'</strong><br>'+d.n+'<br>'+d.c+' · '+pr+'<br>출처: '+src;
+el.appendChild(ci);el.appendChild(tip);box.appendChild(el);
+});
+}
+function fMap(btn){
+document.querySelectorAll('.mf-btn').forEach(function(b){b.classList.remove('active')});
+btn.classList.add('active');render(btn.dataset.f);
+}
+render('all');
+
+document.querySelectorAll('.nav-link').forEach(function(l){
+l.addEventListener('click',function(e){e.preventDefault();
+var t=document.querySelector(l.getAttribute('href'));
+if(t)t.scrollIntoView({behavior:'smooth'});
+});
+});
+window.addEventListener('scroll',function(){
+var cur='';document.querySelectorAll('section[id]').forEach(function(s){if(scrollY>=s.offsetTop-80)cur=s.id});
+document.querySelectorAll('.nav-link').forEach(function(l){l.classList.toggle('active',l.getAttribute('href')==='#'+cur)});
+},{passive:true});
+
+function swHm(id,btn){
+document.querySelectorAll('.hm-table-wrap').forEach(function(t){t.style.display='none'});
+document.getElementById(id).style.display='block';
+document.querySelectorAll('.hm-tab').forEach(function(b){b.classList.remove('active')});
+btn.classList.add('active');
+}
+
+function swDna(id,btn){
+var tabs=['dna-all','dna-basic','dna-tea','dna-goose'];
+tabs.forEach(function(t){document.getElementById(t).style.display='none'});
+document.getElementById('dna-'+id).style.display='block';
+btn.parentElement.querySelectorAll('button').forEach(function(b){
+b.style.background='var(--white)';b.style.color='var(--text-sub)';b.style.borderColor='var(--border)';
+});
+btn.style.background='var(--blue-light)';btn.style.color='var(--blue)';btn.style.borderColor='var(--blue)';
+}
+</script>
+</body>
+</html>
