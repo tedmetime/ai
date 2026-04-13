@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>경쟁사 디자인 분석 프레임워크 — 가열포트 v6 (포지셔닝맵 이미지 검증)</title>
+<style>
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+:root{
+--blue:#3182f6;--blue-light:#e8f3ff;--green:#05c072;--green-light:#e6faf2;
+--orange:#ff6b35;--orange-light:#fff0e8;--purple:#7c5cfc;--purple-light:#ede9ff;
+--yellow:#f5a623;--yellow-light:#fff8e6;--red:#ff4545;--red-light:#fff0f0;
+--teal:#00b8d4;--teal-light:#e0f7fa;--bg:#f2f4f6;--white:#fff;
+--text:#191f28;--text-sub:#4e5968;--text-light:#8b95a1;--border:#e8ebed;
+--shadow:0 4px 24px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+.nav{position:sticky;top:0;z-index:200;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;gap:6px;height:56px;overflow-x:auto}
+.nav-brand{font-size:15px;font-weight:800;margin-right:8px;white-space:nowrap}
+.nav-sep{width:1px;height:16px;background:var(--border);flex-shrink:0}
+.nav-link{font-size:13px;font-weight:500;color:var(--text-sub);padding:6px 12px;border-radius:8px;cursor:pointer;transition:.15s;text-decoration:none;white-space:nowrap}
+.nav-link:hover{background:var(--bg);color:var(--text)}
+.nav-link.active{background:var(--blue-light);color:var(--blue)}
+.page{max-width:1280px;margin:0 auto;padding:0 24px 100px}
+.hero{padding:60px 0 44px;display:flex;flex-direction:column;gap:10px}
+.hero h1{font-size:36px;font-weight:800;letter-spacing:-1px;line-height:1.2}
+.hero h1 em{color:var(--blue);font-style:normal}
+.section{margin-top:64px}
+.section-label{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 12px;border-radius:8px;margin-bottom:10px}
+.section-title{font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:6px}
+.section-sub{font-size:14px;color:var(--text-sub);margin-bottom:24px}
+.card{background:var(--white);border-radius:20px;box-shadow:var(--shadow)}
+.card-pad{padding:28px}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px}
+/* MAP */
+.map-wrap{position:relative;width:100%;background:var(--white);border-radius:24px;box-shadow:var(--shadow);padding:40px;overflow:hidden}
+.map-canvas{position:relative;width:100%;padding-top:70%;background:var(--bg);border-radius:16px;overflow:hidden}
+.map-inner{position:absolute;inset:0}
+.map-grid-h,.map-grid-v{position:absolute;pointer-events:none}
+.map-grid-h{left:0;right:0;height:1px;background:var(--border)}
+.map-grid-v{top:0;bottom:0;width:1px;background:var(--border)}
+.bdot{position:absolute;transform:translate(-50%,-50%);cursor:pointer;z-index:10}
+.bdot-circle{border-radius:50%;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;color:#fff;transition:transform .2s}
+.bdot:hover .bdot-circle{transform:scale(1.6)}
+.bdot:hover .bdot-tip{display:block}
+.bdot-tip{display:none;position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--text);color:#fff;font-size:11px;font-weight:600;white-space:nowrap;padding:6px 10px;border-radius:8px;z-index:200;pointer-events:none;line-height:1.5}
+.bdot-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:var(--text)}
+.bo-label{position:absolute;font-size:10px;font-weight:800;letter-spacing:.6px;opacity:.8;pointer-events:none}
+.mf-btn{padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-size:12px;font-weight:600;cursor:pointer;color:var(--text-sub);transition:.15s;font-family:inherit}
+.mf-btn.active{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.mf-btn[data-f="티포트"].active{border-color:var(--orange);color:var(--orange);background:var(--orange-light)}
+.mf-btn[data-f="구스넥"].active{border-color:var(--green);color:var(--green);background:var(--green-light)}
+.mf-btn[data-f="어워드"].active{border-color:var(--yellow);color:var(--yellow);background:var(--yellow-light)}
+.leg-item{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--text-sub)}
+.leg-dot{width:12px;height:12px;border-radius:50%}
+/* DNA */
+.exp-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:20px}
+.exp-col{background:var(--bg);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.exp-col-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--text-light);padding-bottom:6px;border-bottom:1px solid var(--border)}
+.ev{background:var(--white);border-radius:8px;padding:8px 10px}
+.ev-n{font-size:11px;font-weight:700;margin-bottom:3px}
+.ev-c{display:flex;gap:6px}
+.ct{font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px}
+.ct.b{background:var(--blue-light);color:var(--blue)}
+.ct.t{background:var(--orange-light);color:var(--orange)}
+.ct.g{background:var(--green-light);color:var(--green)}
+.ct.dim{opacity:.3}
+.id-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px}
+.id-card{border-radius:16px;padding:18px;border-left:4px solid}
+.id-brand{font-size:13px;font-weight:800;margin-bottom:10px}
+.id-row{display:flex;gap:6px;margin-bottom:5px}
+.id-k{font-size:10px;font-weight:700;color:var(--text-light);width:52px;flex-shrink:0;padding-top:1px}
+.id-v{font-size:11px;color:var(--text-sub);line-height:1.5}
+/* HEATMAP */
+.hm-wrap{background:var(--white);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+.hm-table-wrap{padding:20px 28px 28px;overflow-x:auto}
+.hm-table{border-collapse:collapse;width:100%;min-width:700px}
+.hm-table th,.hm-table td{padding:0;border:2px solid #fff}
+.hm-th-row th,.hm-th-col{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text-sub);background:var(--bg)}
+.hm-th-row th{padding:10px 12px;text-align:center}
+.hm-th-col{padding:10px 14px;text-align:right;white-space:nowrap;font-size:11px;min-width:120px}
+.hm-cell{width:70px;height:52px;text-align:center;vertical-align:middle;border-radius:4px;transition:transform .1s}
+.hm-cell:hover{transform:scale(1.08);z-index:10;position:relative}
+.hm-v{font-size:16px;font-weight:800;display:block}
+.hm-s{font-size:9px;font-weight:600;opacity:.75;display:block;margin-top:1px}
+.hm-tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:10px;width:fit-content}
+.hm-tab{padding:7px 16px;border-radius:7px;border:none;font-size:12px;font-weight:600;cursor:pointer;background:0;color:var(--text-sub);transition:.15s;font-family:inherit}
+.hm-tab.active{background:var(--white);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.ichip{background:var(--bg);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text-sub);line-height:1.5}
+.ichip strong{color:var(--text)}
+.ic{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:800;color:#fff;margin-right:5px}
+.award-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.award-bar-label{font-size:11px;font-weight:600;color:var(--text-sub);width:80px;flex-shrink:0;text-align:right}
+.award-bar{height:18px;border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:10px;font-weight:700;color:#fff;min-width:2px}
+/* SIGNAL */
+.signal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.signal-card{background:var(--white);border-radius:16px;padding:20px;box-shadow:var(--shadow);text-align:center}
+.signal-icon{font-size:28px;margin-bottom:10px}
+.signal-title{font-size:13px;font-weight:800;margin-bottom:6px}
+.signal-desc{font-size:11px;color:var(--text-sub);line-height:1.6}
+.signal-bars{display:flex;gap:3px;margin-top:12px;justify-content:center}
+.signal-bar{height:4px;border-radius:2px;background:var(--border)}
+.signal-bar.fill-blue{background:var(--blue)}
+.signal-bar.fill-green{background:var(--green)}
+.signal-bar.fill-orange{background:var(--orange)}
+@media(max-width:900px){.exp-grid{grid-template-columns:repeat(3,1fr)}.id-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.exp-grid{grid-template-columns:1fr 1fr}.id-grid{grid-template-columns:1fr}.signal-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<nav class="nav">
+<span class="nav-brand">Design Analysis</span>
+<span class="nav-sep"></span>
+<a class="nav-link active" href="#map">디자인 포지셔닝 맵</a>
+<a class="nav-link" href="#dna">DNA 해부도</a>
+<a class="nav-link" href="#award">어워드 디자인 분석</a>
+<a class="nav-link" href="#signal">디자인 시그널</a>
+</nav>
+
+<div class="page">
+<section class="hero">
+<h1>형태와 속성으로 해체하는<br><em>전기포트 디자인 경쟁 구도</em></h1>
+<p style="font-size:16px;color:var(--text-sub);max-width:680px;">Lens1(시장) · Lens2(전문가) · Lens3(어워드) 가열포트 디자인 분석</p>
+
+<div style="margin-top:16px;background:var(--white);border-radius:14px;padding:18px 22px;border:1.5px solid var(--border);">
+<div style="font-size:13px;font-weight:800;margin-bottom:10px;">📊 데이터 개요 (내부 중복 제외 기준)</div>
+<table style="width:100%;font-size:12px;border-collapse:collapse;">
+<thead><tr style="background:var(--bg);"><th style="padding:8px;text-align:left;border-radius:8px 0 0 0;">소스</th><th style="padding:8px;text-align:center;">원래 수</th><th style="padding:8px;text-align:center;">타 렌즈 중복</th><th style="padding:8px;text-align:center;border-radius:0 8px 0 0;font-weight:800;">고유 수</th></tr></thead>
+<tbody>
+<tr><td style="padding:6px 8px;"><span style="color:var(--blue);font-weight:700;">Lens1</span> 판매상위 (기본14+티15+구15+분유3)</td><td style="text-align:center;">45</td><td style="text-align:center;">—</td><td style="text-align:center;font-weight:700;">45</td></tr>
+<tr style="background:var(--bg);"><td style="padding:6px 8px;"><span style="color:var(--blue);font-weight:700;">Lens1</span> appendix 기본형 (6개사)</td><td style="text-align:center;">49</td><td style="text-align:center;color:var(--red);">-2</td><td style="text-align:center;font-weight:700;">47</td></tr>
+<tr><td style="padding:6px 8px;"><span style="color:var(--blue);font-weight:700;">Lens1</span> appendix 구스넥 (글로벌 경쟁사)</td><td style="text-align:center;">15</td><td style="text-align:center;color:var(--red);">-5</td><td style="text-align:center;font-weight:700;">10</td></tr>
+<tr style="background:var(--bg);"><td style="padding:6px 8px;"><span style="color:var(--blue);font-weight:700;">Lens1</span> appendix 티포트 (글로벌 경쟁사)</td><td style="text-align:center;">25</td><td style="text-align:center;color:var(--red);">-8</td><td style="text-align:center;font-weight:700;">17</td></tr>
+<tr><td style="padding:6px 8px;"><span style="color:var(--green);font-weight:700;">Lens2</span> 전문가 매거진 추천</td><td style="text-align:center;">25</td><td style="text-align:center;color:var(--red);">-10</td><td style="text-align:center;font-weight:700;">15</td></tr>
+<tr style="background:var(--bg);"><td style="padding:6px 8px;"><span style="color:var(--yellow);font-weight:700;">Lens3</span> 디자인 어워드 (iF·Red Dot·IDEA)</td><td style="text-align:center;">118</td><td style="text-align:center;color:var(--red);">-13</td><td style="text-align:center;font-weight:700;">105</td></tr>
+<tr style="border-top:2px solid var(--text);"><td style="padding:8px;font-weight:800;">합계</td><td style="text-align:center;font-weight:800;">277</td><td style="text-align:center;color:var(--red);font-weight:700;">-38</td><td style="text-align:center;font-weight:800;color:var(--blue);font-size:16px;">239</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ===== FRAMEWORK 4: MAP ===== -->
+<section class="section" id="map">
+<div class="section-title">디자인 포지셔닝 맵</div>
+<div class="section-sub">Y축: 가격대 · X축: 디자인 톤앤매너(기능주의↔감성) — Lens1+Lens2 <strong>134개 제품</strong>(어워드 제외)</div>
+<div class="map-wrap">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+<span style="font-size:13px;font-weight:800;color:var(--text-sub);">▲ 프리미엄</span>
+<div style="display:flex;gap:6px;flex-wrap:wrap;" id="filterBtns">
+<button class="mf-btn active" data-f="all" onclick="fMap(this)">전체</button>
+<button class="mf-btn" data-f="기본형" onclick="fMap(this)">기본형</button>
+<button class="mf-btn" data-f="티포트" onclick="fMap(this)">티포트</button>
+<button class="mf-btn" data-f="구스넥" onclick="fMap(this)">구스넥</button>
+</div>
+</div>
+<div style="display:flex;gap:10px;">
+<div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:11px;font-weight:700;color:var(--text-light);display:flex;align-items:center;justify-content:center;min-width:24px;">가격대</div>
+<div class="map-canvas" style="flex:1">
+<div class="map-inner">
+<!-- zones -->
+<div style="position:absolute;left:0;bottom:0;width:42%;height:60%;background:rgba(255,69,69,.07);border-radius:0 16px 0 0;border:1.5px dashed rgba(255,69,69,.25)"></div>
+<div class="bo-label" style="left:2%;bottom:32%;color:var(--red)">🔴 RED OCEAN<br><span style="font-size:9px">저가~중가 기능형 포화<br>플라스틱·유광·원버튼 밀집</span></div>
+<div style="position:absolute;right:2%;top:32%;width:35%;height:20%;background:rgba(49,130,246,.08);border-radius:16px;border:2px dashed rgba(49,130,246,.3)"></div>
+<div class="bo-label" style="right:4%;top:35%;color:var(--blue)">🔵 BLUE OCEAN A<br><span style="font-size:9px">차별화된 프리미엄 감성</span></div>
+<div style="position:absolute;right:3%;bottom:10%;width:40%;height:44%;background:rgba(5,192,114,.07);border-radius:16px;border:2px dashed rgba(5,192,114,.3)"></div>
+<div class="bo-label" style="right:5%;bottom:12%;color:var(--green)">🟢 BLUE OCEAN B<br><span style="font-size:9px">프리미엄 감성의 대중화</span></div>
+<!-- grid -->
+<div class="map-grid-h" style="top:25%;opacity:.5"></div>
+<div class="map-grid-h" style="top:50%"></div>
+<div class="map-grid-h" style="top:75%;opacity:.5"></div>
+<div class="map-grid-v" style="left:25%;opacity:.5"></div>
+<div class="map-grid-v" style="left:50%"></div>
+<div class="map-grid-v" style="left:75%;opacity:.5"></div>
+<div style="position:absolute;bottom:2%;left:2%;font-size:10px;font-weight:700;color:var(--text-light)">◀ 기능주의</div>
+<div style="position:absolute;bottom:2%;right:2%;font-size:10px;font-weight:700;color:var(--text-light)">감성 ▶</div>
+<div id="dots"></div>
+</div>
+</div>
+</div>
+<div style="text-align:center;margin-top:8px"><span style="font-size:13px;font-weight:800;color:var(--text-sub)">▼ 저가</span></div>
+<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;">
+<div class="leg-item"><div class="leg-dot" style="background:#3182f6"></div>기본형</div>
+<div class="leg-item"><div class="leg-dot" style="background:#ff6b35"></div>티포트</div>
+<div class="leg-item"><div class="leg-dot" style="background:#05c072"></div>구스넥</div>
+<div class="leg-item"><div style="width:12px;height:12px;border-radius:50%;border:2.5px solid #f5a623"></div>전문가 추천</div>
+<div class="leg-item"><div style="width:8px;height:8px;border-radius:50%;background:rgba(150,150,150,.4)"></div>라인업(반투명)</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px;">
+<div style="background:rgba(49,130,246,.08);border:1.5px solid rgba(49,130,246,.25);border-radius:12px;padding:14px;">
+<div style="font-size:12px;font-weight:800;color:var(--blue)">🔵 BLUE OCEAN A — 차별화된 프리미엄 감성(8~15만원대)</div>
+<p style="font-size:12px;color:var(--text-sub);margin-top:6px">초고가 하이엔드와 저렴한 대중성 제품 사이, 비어있는 중고가 지점을 공략. 고급스러운 무광 스테인리스 소재에 '홈카페' 분위기를 연출하는 매력적인 디자인을 결합하여 가치 소비를 지향하는 고객층 선점.</p>
+</div>
+<div style="background:rgba(5,192,114,.07);border:1.5px solid rgba(5,192,114,.25);border-radius:12px;padding:14px;">
+<div style="font-size:12px;font-weight:800;color:var(--green)">🟢 BLUE OCEAN B — 저렴한 가격대에서 느끼는 프리미엄 감성(3~8만원대)</div>
+<p style="font-size:12px;color:var(--text-sub);margin-top:6px">기존 고가 제품에서만 경험할 수 있었던 고급스러운 소재감과 핵심 기능을 가성비 라인업에 일부 적용. 대중적인 가격대에서도 소비자가 프리미엄 감성을 누릴 수 있도록 디자인의 기준을 높임.</strong></p>
+</div>
+</div>
+</div>
+</section>
+
+
+<section class="section" id="dna">
+<div class="section-title">디자인 DNA MATRIX</div>
+<div class="section-sub">Lens1+Lens2 백데이터 전수 검증 — 기본형 65 · 티포트 41 · 구스넥 41 = <strong>총 147개 제품</strong> (분유포트 제외)</div>
+
+<div style="background:var(--white);border-radius:20px;padding:28px;box-shadow:var(--shadow)">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:20px;">
+<div style="font-size:16px;font-weight:800">12대 구성 요소별 속성 분포</div>
+<div style="display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:10px" id="dnaTabs">
+<button onclick="swDna('basic',this)" style="padding:5px 14px;border-radius:20px;border:1.5px solid var(--blue);background:var(--blue-light);font-size:12px;font-weight:600;cursor:pointer;color:var(--blue);font-family:inherit">기본형 (65)</button>
+<button onclick="swDna('tea',this)" style="padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-size:12px;font-weight:600;cursor:pointer;color:var(--text-sub);font-family:inherit">티포트 (41)</button>
+<button onclick="swDna('goose',this)" style="padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-size:12px;font-weight:600;cursor:pointer;color:var(--text-sub);font-family:inherit">구스넥 (41)</button>
+</div>
+</div>
+
+<!-- ==================== 기본형 ==================== -->
+<div id="dna-basic" >
+<div style="display:grid;grid-template-columns:280px 1fr 280px;gap:16px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">① 뚜껑 타입 <span style="background:var(--blue);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">원터치 스프링 <strong>82%</strong> 압도적 표준. 버튼 자동개폐·팝업 포함. 분리형 18%는 STS 프리미엄 라인에 집중.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--blue-light);color:var(--blue);padding:2px 8px;border-radius:6px">원터치 82%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">분리형 18%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">② 바디 형상</div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">유선형·테이퍼형 각 <strong>38%</strong> 공동 최다. 직선형 22%</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--blue-light);color:var(--blue);padding:2px 8px;border-radius:6px">유선형 38%</span><span style="font-size:10px;font-weight:700;background:var(--blue-light);color:var(--blue);padding:2px 8px;border-radius:6px">테이퍼형 38%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">직선형 22%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">숄더형 2%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">③ 핸들 타입 <span style="background:var(--blue);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">Closed <strong>78.8%</strong> 압도적 표준(물 하중). Open 21.2%는 프리미엄 차별화 포인트(펠로우, 즈윌링 등)</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--blue-light);color:var(--blue);padding:2px 8px;border-radius:6px">Closed 78.8%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">Open 21.2%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">③ 핸들 디자인</div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">ㄷ형 <strong>55%</strong> 최다 → C형 23% → ㄱ형 22%. ㄷ형이 기본형의 핸들 표준.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--blue-light);color:var(--blue);padding:2px 8px;border-radius:6px">ㄷ형 51.8%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">C형 28.2%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">ㄱ형 18.8%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">Y형 1.2%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">④ 스파우트 <span style="background:var(--blue);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0"><strong>짧은 스파우트 주류</strong></p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--blue-light);color:var(--blue);padding:2px 8px;border-radius:6px">짧은 스파우트 100%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">구스넥 0%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑤ 디스플레이 <span style="background:var(--blue);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">디스플레이 없음 <strong>91%</strong> 압도적. 기본형은 단순 ON/OFF 중심.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--blue-light);color:var(--blue);padding:2px 8px;border-radius:6px">X 91%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">O 9%</span></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;position:relative">
+<img src="https://tedmetime.github.io/ai/A.png" alt="기본형 실루엣" style="width:100%;max-width:650px;display:block">
+<svg viewBox="0 0 320 440" style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:320px;height:100%;pointer-events:none">
+<text x="160" y="18" text-anchor="middle" font-size="10" font-weight="700" fill="var(--blue)" opacity=".6">CAP</text>
+<text x="42" y="170" text-anchor="middle" font-size="10" font-weight="700" fill="var(--blue)" opacity=".6">SPOUT</text>
+<text x="160" y="260" text-anchor="middle" font-size="10" font-weight="700" fill="var(--blue)" opacity=".6">BODY</text>
+<text x="280" y="200" text-anchor="middle" font-size="10" font-weight="700" fill="var(--blue)" opacity=".6">HANDLE</text>
+<text x="160" y="420" text-anchor="middle" font-size="10" font-weight="700" fill="var(--blue)" opacity=".6">BASE</text>
+</svg>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑤ 수위창</div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">전면 수위창 <strong>38%</strong> 최다 → 측면·없음 각 23% · 통유리 15%. <strong>수위 확인 방식이 다양하게 분화.</strong></p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--blue-light);color:var(--blue);padding:2px 8px;border-radius:6px">전면 38%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">측면 23%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">없음 23%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">통유리 15%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑥ 외부소재</div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">플라스틱·STS 각 <strong>43%</strong> 양분. 유리 14%. <strong>소재 선택이 가격대 분화의 핵심.</strong></p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--blue-light);color:var(--blue);padding:2px 8px;border-radius:6px">플라스틱 43%</span><span style="font-size:10px;font-weight:700;background:var(--blue-light);color:var(--blue);padding:2px 8px;border-radius:6px">STS 43%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">유리 14%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑥ 표면마감 <span style="background:var(--blue);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">무광 <strong>72%</strong> 우세. 유광 28%. <strong>무광이 기본형 CMF의 표준.</strong></p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--blue-light);color:var(--blue);padding:2px 8px;border-radius:6px">무광 72%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">유광 28%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑦ 조작부 <span style="background:var(--blue);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">원버튼 <strong>78%</strong> 압도적. 터치 14% · 택타일 5% · 다이얼 3%. <strong>심플 조작이 기본형 DNA.</strong></p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--blue-light);color:var(--blue);padding:2px 8px;border-radius:6px">원버튼 78%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">터치 14%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">택타일 5%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">다이얼 3%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑧ 베이스 타입 <span style="background:var(--blue);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">일체감 <strong>71%</strong> 우세. 분리감 29%.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--blue-light);color:var(--blue);padding:2px 8px;border-radius:6px">일체감 71%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">분리감 29%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑨ 컬러 계열 <span style="background:var(--blue);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">뉴트럴(블랙·화이트·실버) <strong>85%</strong> 압도적. 웜톤(우드·아이보리) 14%. 유채색 2%.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--blue-light);color:var(--blue);padding:2px 8px;border-radius:6px">뉴트럴 85%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">웜톤 14%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">유채색 2%</span></div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ==================== 티포트 ==================== -->
+<div id="dna-tea" style="display:none">
+<div style="display:grid;grid-template-columns:280px 1fr 280px;gap:16px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">① 뚜껑 타입</div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">분리형 뚜껑 <strong>60%</strong> · 원터치 38%. 인퓨저 탈착용이성 때문에 <strong>분리형 비율이 기본형 대비 3.2배.</strong></p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--orange-light);color:var(--orange);padding:2px 8px;border-radius:6px">원터치 51%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">분리형 49%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">② 바디 형상</div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">유선형 44% + 직선형 41% 양분.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--orange-light);color:var(--orange);padding:2px 8px;border-radius:6px">유선형 44%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">직선형 41%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">테이퍼형 12%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">숄더형 2%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">③ 핸들 타입 <span style="background:var(--orange);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">Closed <strong>81%</strong> 우세. Open 14.3%. 유리 바디 무게 때문에 그립감 중심 설계.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--orange-light);color:var(--orange);padding:2px 8px;border-radius:6px">Closed 81%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">Open 14.3%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">핸들없음 4.8%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">③ 핸들 디자인</div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">C형 <strong>44%</strong> 최다 → ㄷ형 39% → ㄱ형 15%. <strong>C형이 티포트 핸들 DNA.</strong></p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--orange-light);color:var(--orange);padding:2px 8px;border-radius:6px">C형 42.9%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">ㄷ형 40.5%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">ㄱ형 14.3%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">없음 2.4%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">④ 스파우트 <span style="background:var(--orange);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0"><strong>짧은 스파우트 100%</strong>. 기본형과 동일한 완전 표준.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--orange-light);color:var(--orange);padding:2px 8px;border-radius:6px">짧은 스파우트 100%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">구스넥 0%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑤ 디스플레이 <span style="background:var(--orange);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">디스플레이 있음 60% 없음 40%. 기본형(9%) 대비 6.7배 높은 탑재율.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--orange-light);color:var(--orange);padding:2px 8px;border-radius:6px">O 60%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">X 40%</span></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;position:relative">
+<img src="https://tedmetime.github.io/ai/C.png" alt="티포트 실루엣" style="width:100%;max-width:600px;display:block">
+<svg viewBox="0 0 320 480" style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:320px;height:100%;pointer-events:none">
+<text x="160" y="24" text-anchor="middle" font-size="10" font-weight="700" fill="var(--orange)" opacity=".6">CAP</text>
+<text x="56" y="120" text-anchor="middle" font-size="10" font-weight="700" fill="var(--orange)" opacity=".6">SPOUT</text>
+<text x="200" y="200" text-anchor="middle" font-size="10" font-weight="700" fill="var(--orange)" opacity=".6">INFUSER</text>
+<text x="160" y="300" text-anchor="middle" font-size="10" font-weight="700" fill="var(--orange)" opacity=".6">BODY</text>
+<text x="280" y="180" text-anchor="middle" font-size="10" font-weight="700" fill="var(--orange)" opacity=".6">HANDLE</text>
+<text x="160" y="460" text-anchor="middle" font-size="10" font-weight="700" fill="var(--orange)" opacity=".6">BASE</text>
+</svg>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑤ 수위창 <span style="background:var(--orange);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0"><strong>수위창(통유리+측면) 93%</strong> 압도적. "차 우리는 과정 시각화"가 핵심 가치</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--orange-light);color:var(--orange);padding:2px 8px;border-radius:6px">통유리 76%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">없음 7%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">측면 17%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑥ 외부소재 <span style="background:var(--orange);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0"><strong>유리 76%</strong> 압도적. 소재 자체가 프리미엄·시각화 역할. 플라스틱 15% · STS 10%.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--orange-light);color:var(--orange);padding:2px 8px;border-radius:6px">유리 76%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">플라스틱 15%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">STS 10%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑥ 표면마감</div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">무광 51% · 유광 49% <strong>거의 균형</strong>. 유리 자체 광택 + 플라스틱 유광이 비율 견인.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--orange-light);color:var(--orange);padding:2px 8px;border-radius:6px">무광 51%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">유광 49%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑦ 조작부</div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">터치 <strong>46%</strong> 최다 → 택타일 24% → 원버튼 22% → 다이얼 7%. 기본형 대비 <strong>다중버튼 비율 3배.</strong></p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--orange-light);color:var(--orange);padding:2px 8px;border-radius:6px">터치 46%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">택타일 24%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">원버튼 22%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">다이얼 7%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑧ 베이스 타입 <span style="background:var(--orange);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">분리감 <strong>60%</strong> · 일체감 28% · 베이스 없음(출수형) 12% — <strong>베이스=UI 허브</strong> 역할.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--orange-light);color:var(--orange);padding:2px 8px;border-radius:6px">분리감 60%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">일체감 28%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">베이스없음(출수형) 12%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑨ 컬러 계열 <span style="background:var(--orange);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">뉴트럴(블랙·화이트·실버) <strong>90%</strong> 압도적. 웜톤(우드·아이보리) 10%. 유리 투명 바디가 색상 역할 대체.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--orange-light);color:var(--orange);padding:2px 8px;border-radius:6px">뉴트럴 90%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">웜톤 10%</span></div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ==================== 구스넥 ==================== -->
+<div id="dna-goose" style="display:none">
+<div style="display:grid;grid-template-columns:280px 1fr 280px;gap:16px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">① 뚜껑 타입 <span style="background:var(--green);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">MOST</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">분리형 <strong>98%</strong> 사실상 표준. 좁은 개구부 특성상 프레스오픈(2%) 1건 외 전부 분리형.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--green-light);color:var(--green);padding:2px 8px;border-radius:6px">분리형 98%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">원터치 2%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">② 바디 형상</div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">유선형 46% + 테이퍼 44% 양분. <strong>하단으로 넓어지는 안정감</strong>이 구스넥의 전형. 직선형 10%.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--green-light);color:var(--green);padding:2px 8px;border-radius:6px">유선형 46%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">테이퍼형 44%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">직선형 10%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">③ 핸들 타입 <span style="background:var(--green);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">Open <strong>95%</strong> 사실상 완전 표준. Closed 5%는 극소수 예외.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--green-light);color:var(--green);padding:2px 8px;border-radius:6px">Open 95%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">Closed 5%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">③ 핸들 디자인 <span style="background:var(--green);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">ㄱ형 <strong>80%</strong> 완전 표준화. Y형(Fellow 12%)이 유일한 차별화. ㄷ형 5% · C형 2%.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--green-light);color:var(--green);padding:2px 8px;border-radius:6px">ㄱ형 80%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">Y형 12%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">ㄷ형 5%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">C형 2%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">④ 스파우트 <span style="background:var(--green);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0"><strong>구스넥 100%</strong>. 카테고리 정의 요소. S-커브 곡률과 끝단 직경이 정밀 수류의 핵심.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--green-light);color:var(--green);padding:2px 8px;border-radius:6px">구스넥 100%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">짧은 스파우트 0%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑤ 디스플레이 <span style="background:var(--green);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">디스플레이 <strong>73%</strong> 탑재. 정밀 온도제어가 표준 — 디스플레이가 구스넥의 핵심 인터페이스.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--green-light);color:var(--green);padding:2px 8px;border-radius:6px">O 73%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">X 27%</span></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;position:relative">
+<img src="https://tedmetime.github.io/ai/B.png" alt="구스넥 실루엣" style="width:100%;max-width:600px;display:block">
+<svg viewBox="0 0 320 400" style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:320px;height:100%;pointer-events:none">
+<text x="200" y="38" text-anchor="middle" font-size="10" font-weight="700" fill="var(--green)" opacity=".6">CAP</text>
+<text x="60" y="180" text-anchor="middle" font-size="10" font-weight="700" fill="var(--green)" opacity=".6">GOOSENECK</text>
+<text x="190" y="220" text-anchor="middle" font-size="10" font-weight="700" fill="var(--green)" opacity=".6">BODY</text>
+<text x="280" y="160" text-anchor="middle" font-size="10" font-weight="700" fill="var(--green)" opacity=".6">HANDLE</text>
+<text x="190" y="380" text-anchor="middle" font-size="10" font-weight="700" fill="var(--green)" opacity=".6">BASE + UI</text>
+</svg>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑤ 수위창 <span style="background:var(--green);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0"><strong>전 제품 없음 100%</strong>. STS 밀폐 바디 특성. 뚜껑 열어 확인 또는 내부 눈금 의존.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--green-light);color:var(--green);padding:2px 8px;border-radius:6px">없음 100%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑥ 외부소재 <span style="background:var(--green);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0"><strong>STS 100%</strong> 완전 표준. 플라스틱·유리 0%. 소재 자체가 카테고리 DNA.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--green-light);color:var(--green);padding:2px 8px;border-radius:6px">STS 100%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">플라스틱 0%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">유리 0%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑥ 표면마감 <span style="background:var(--green);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0"><strong>무광 88%</strong> 압도적. 유광 12%. 무광 STS가 구스넥 CMF의 완전 표준.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--green-light);color:var(--green);padding:2px 8px;border-radius:6px">무광 88%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">유광 12%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑦ 조작부</div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">터치 <strong>49%</strong> 최다 → 다이얼 24% → 원버튼 15% → 택타일 12%. 정밀 온도제어가 표준.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--green-light);color:var(--green);padding:2px 8px;border-radius:6px">터치 49%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">다이얼 24%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">원버튼 15%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">택타일 12%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑧ 베이스 타입 <span style="background:var(--green);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">분리감 <strong>90%</strong> 압도적. 베이스에 디스플레이+다이얼 집중. 베이스 형태가 브랜드 시그니처.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--green-light);color:var(--green);padding:2px 8px;border-radius:6px">분리감 90%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">일체감 10%</span></div>
+</div>
+<div style="background:var(--bg);border-radius:14px;padding:14px 16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">⑨ 컬러 계열 <span style="background:var(--green);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:4px">DNA</span></div>
+<p style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:6px 0">뉴트럴(매트블랙·실버) <strong>88%</strong>. 웜톤(우드포인트) 12%. <strong>매트블랙 단색이 구스넥 시그니처.</strong></p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--green-light);color:var(--green);padding:2px 8px;border-radius:6px">뉴트럴 88%</span><span style="font-size:10px;font-weight:700;background:var(--bg);color:var(--text-sub);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">웜톤 12%</span></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</section>
+
+
+<!-- ===== FRAMEWORK 7: AWARD TREND ===== -->
+<section class="section" id="award">
+<div class="section-title">디자인 어워드 제품 분석</div>
+<div class="section-sub">iF · Red Dot · IDEA 수상작 118개</div>
+
+<div class="card card-pad">
+<div style="font-size:16px;font-weight:800;margin-bottom:16px">어워드·브랜드·연도 분포</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+<!-- 어워드별 -->
+<div style="background:var(--bg);border-radius:14px;padding:16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:12px">어워드별</div>
+<div class="award-bar-row"><span class="award-bar-label">iF Design</span><div class="award-bar" style="width:62%;background:var(--blue)">72건</div></div>
+<div class="award-bar-row"><span class="award-bar-label">Red Dot</span><div class="award-bar" style="width:38%;background:var(--red)">44건</div></div>
+<div class="award-bar-row"><span class="award-bar-label">IDEA</span><div class="award-bar" style="width:2%;background:var(--purple)">2건</div></div>
+<p style="font-size:10px;color:var(--text-light);margin-top:8px">※ 복수 수상 포함한 연 카드 수 기준</p>
+</div>
+<!-- 브랜드별 -->
+<div style="background:var(--bg);border-radius:14px;padding:16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:12px">브랜드 Top 8 (고유 제품 수)</div>
+<div class="award-bar-row"><span class="award-bar-label">Midea</span><div class="award-bar" style="width:100%;background:var(--blue)">14</div></div>
+<div class="award-bar-row"><span class="award-bar-label">Philips</span><div class="award-bar" style="width:79%;background:var(--blue)">11</div></div>
+<div class="award-bar-row"><span class="award-bar-label">Kenwood</span><div class="award-bar" style="width:29%;background:var(--teal)">4</div></div>
+<div class="award-bar-row"><span class="award-bar-label">BUYDEEM</span><div class="award-bar" style="width:29%;background:var(--orange)">4</div></div>
+<div class="award-bar-row"><span class="award-bar-label">SIEMENS</span><div class="award-bar" style="width:21%;background:var(--text-light)">3</div></div>
+<div class="award-bar-row"><span class="award-bar-label">Toshiba</span><div class="award-bar" style="width:21%;background:var(--teal)">3</div></div>
+<div class="award-bar-row"><span class="award-bar-label">WMF</span><div class="award-bar" style="width:21%;background:var(--text-light)">3</div></div>
+<div class="award-bar-row"><span class="award-bar-label">Breville</span><div class="award-bar" style="width:21%;background:var(--green)">3</div></div>
+</div>
+<!-- 연도별 -->
+<div style="background:var(--bg);border-radius:14px;padding:16px">
+<div style="font-size:13px;font-weight:800;margin-bottom:12px">최근 5년 추이 (고유 제품)</div>
+<div class="award-bar-row"><span class="award-bar-label">2026</span><div class="award-bar" style="width:14%;background:var(--blue)">2</div></div>
+<div class="award-bar-row"><span class="award-bar-label">2025</span><div class="award-bar" style="width:29%;background:var(--blue)">4</div></div>
+<div class="award-bar-row"><span class="award-bar-label">2024</span><div class="award-bar" style="width:79%;background:var(--blue)">11</div></div>
+<div class="award-bar-row"><span class="award-bar-label">2023</span><div class="award-bar" style="width:71%;background:var(--green)">10</div></div>
+<div class="award-bar-row"><span class="award-bar-label">2022</span><div class="award-bar" style="width:57%;background:var(--orange)">8</div></div>
+<div class="award-bar-row"><span class="award-bar-label">2021</span><div class="award-bar" style="width:57%;background:var(--text-light)">8</div></div>
+<p style="font-size:10px;color:var(--text-light);margin-top:8px">2024년 피크(11개) → 2025~26 프리미엄·감성 강세</p>
+</div>
+</div>
+</div>
+
+<!-- 12개 2관왕 -->
+<div style="margin-top:20px" class="card card-pad">
+<div style="font-size:16px;font-weight:800;margin-bottom:12px">🏆 복수 어워드 수상 제품 (2관왕) — 11건</div>
+<p style="font-size:12px;color:var(--text-sub);margin-bottom:16px">동일 제품이 iF+Red Dot 또는 Red Dot+IDEA를 동시/연속 수상한 경우. 디자인 완성도가 교차 검증된 제품들.<br>※ Toshiba 동일 카드 중복(2건), Midea warm love 포함 총 13건 내부 중복 제거.</p>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>BALMUDA The Pot</strong><br>2017 iF + 2017 Red Dot</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>Fellow Stagg EKG</strong><br>2018 Red Dot + 2019 IDEA</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>Philips Atom Kettle</strong><br>2016 iF + 2016 Red Dot</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>Philips DW 5000/7000</strong><br>2024 iF + 2024 Red Dot</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>SIEMENS TW86103</strong><br>2011 iF + 2011 Red Dot</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>Kalita KEDP-X1</strong><br>2022 iF + 2022 Red Dot</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>Joyoung K06-Z2</strong><br>2020 iF + 2020 Red Dot</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>Teawith Kettle</strong><br>2018 iF + 2019 Red Dot</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>GIILLS 3</strong><br>2023 IDEA + 2024 iF</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>Tbox mini</strong><br>2023 iF + 2024 Red Dot</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>Midea warm love</strong><br>2017 iF + 2017 Red Dot</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:11px;"><strong>BORK K780→K781</strong><br>2016 iF + 2017 iF (후속모델)</div>
+</div>
+</div>
+
+<!-- 5대 시그널 -->
+<div style="margin-top:20px" class="card card-pad">
+<div style="font-size:16px;font-weight:800;margin-bottom:16px">DESIGN SIGNAL</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div style="background:var(--blue-light);border-radius:14px;padding:18px">
+<div style="font-size:13px;font-weight:800;color:var(--blue);margin-bottom:8px">🔬 시그널 1: 안전을 고려한 디자인</div>
+<p style="font-size:12px;color:var(--text-sub)">Toshiba safety kettle(2023 iF 3종): 이중벽 구조로 어린이 화상 방지, 넘김 방지 메커니즘을 외형에 통합. Tiger PTQ(2023 iF): 매끄러운 표면 처리로 돌출부 최소화.</p>
+<div style="background:rgba(49,130,246,.08);border-radius:8px;padding:10px;margin-top:8px;border-left:3px solid var(--blue)"><span style="font-size:11px;font-weight:700;color:var(--blue)">디자인 의미:</span><span style="font-size:11px;color:var(--text-sub)"> '안전 기능'을 보이지 않는 스펙이 아닌, 시각적 디자인 요소로 표현. 안전 자체가 제품의 중요한 디자인 테마가 되는 추세.</span></div>
+</div>
+<div style="background:var(--green-light);border-radius:14px;padding:18px">
+<div style="font-size:13px;font-weight:800;color:var(--green);margin-bottom:8px">🌿 시그널 2: 숨기지 않는 친환경 소재</div>
+<p style="font-size:12px;color:var(--text-sub)">Philips 5000 ECO(2022 RD): 재생 플라스틱 마블 텍스처를 의도적 노출 → "불완전한 소재미". Philips DW 5000/7000(2024 2관왕): 이중벽 보온으로 에너지 절감을 구조로 시각화.</p>
+<div style="background:rgba(5,192,114,.08);border-radius:8px;padding:10px;margin-top:8px;border-left:3px solid var(--green)"><span style="font-size:11px;font-weight:700;color:var(--green)">디자인 의미:</span><span style="font-size:11px;color:var(--text-sub)">친환경 소재를 있는 그대로 드러내는 트렌드. 재생 소재가 가진 특유의 흔적이나 질감이 오히려 고급스러운 프리미엄 가치로 인정받고 있음.</span></div>
+</div>
+<div style="background:var(--orange-light);border-radius:14px;padding:18px">
+<div style="font-size:13px;font-weight:800;color:var(--orange);margin-bottom:8px">☕ 시그널 3: 감성을 더한 프리미엄 커피라이프</div>
+<p style="font-size:12px;color:var(--text-sub)">Fellow Stagg EKG(2관왕): 원통+직선+원 기본도형의 모놀리식 형태, Y형 오픈핸들이 아이코닉 실루엣 형성. Kalita KEDP-X1(2관왕): 일본 장인 문화의 현대적 미니멀 재해석. BALMUDA MoonKettle(2025 RD): 앰비언트 라이트+사운드 → 추출을 "의식(ritual)"으로 승격.</p>
+<div style="background:rgba(255,107,53,.08);border-radius:8px;padding:10px;margin-top:8px;border-left:3px solid var(--orange)"><span style="font-size:11px;font-weight:700;color:var(--orange)">디자인 의미:</span><span style="font-size:11px;color:var(--text-sub)"> 전기포트가 단순 '물 끓이는 도구'를 넘어 라이프스타일을 보여주는 인테리어 오브제로 전환. 형태뿐만 아니라 빛, 소리 등 오감을 자극하는 경험 디자인을 중시하고 있음.</span></div>
+</div>
+<div style="background:var(--purple-light);border-radius:14px;padding:18px">
+<div style="font-size:13px;font-weight:800;color:var(--purple);margin-bottom:8px">🎨 시그널 4: 형태의 틀을 꺠는 독창적 시도(중국 브랜드 다수)</div>
+<p style="font-size:12px;color:var(--text-sub)">Midea 14개 수상(최다): "Fairy Boat"(2020) 전통 선박 모티프, "peak"(2024) 산봉우리 곡선. GIILLS 3(2관왕): 핸들과 바디 경계 해체 → 조각적 오브제. EDENUS "Forget"(2023): 전통 다기 문법을 전기포트에 이식.</p>
+<div style="background:rgba(124,92,252,.08);border-radius:8px;padding:10px;margin-top:8px;border-left:3px solid var(--purple)"><span style="font-size:11px;font-weight:700;color:var(--purple)">디자인 의미:</span><span style="font-size:11px;color:var(--text-sub)"> 기존 유럽·일본 중심의 익숙한 스타일에서 벗어나, 고유의 문화적 요소를 접목한 독창적이고 과감한 형태 실험이 증가하는 추세.</span></div>
+</div>
+<div style="background:var(--yellow-light);border-radius:14px;padding:18px;grid-column:1/-1">
+<div style="font-size:13px;font-weight:800;color:var(--yellow);margin-bottom:8px">🔮 시그널 5: 무소음·스마트·포터블</div>
+<p style="font-size:12px;color:var(--text-sub)">Midea 3D Surround Heating Silent(2026 iF): 전방위 가열로 소음 최소화 → 부드러운 곡면 형태 강조. Joyoung K06-Z2(2관왕): 접이식 구조가 새로운 형태 어휘 생성. Snow bear 항온 휴대용(2021 iF): 보온+급탕 일체형 → 기존 포트 형태 문법 해체.</p>
+<div style="background:rgba(245,166,35,.08);border-radius:8px;padding:10px;margin-top:8px;border-left:3px solid var(--yellow)"><span style="font-size:11px;font-weight:700;color:var(--yellow)">디자인 의미:</span><span style="font-size:11px;color:var(--text-sub)"> 무소음, 접이식, 스마트 기능 등 신기술 도입으로 기존 '주전자'의 고정관념 타파. 용도와 카테고리의 한계를 뛰어넘는 디자인 진화 추세.</span></div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ===== 디자인 시그널 — 8가지 키워드 ===== -->
+<section class="section" id="signal">
+<div class="section-title">디자인 시그널 — 8가지 키워드</div>
+<div class="section-sub">3렌즈에서 공통적으로 나타나는 디자인 언어</div>
+
+<div style="display:flex; gap:16px; margin-top:12px; margin-bottom: 20px; font-size:13px; font-weight:600; color:var(--text-sub);">
+  <div style="display:flex; align-items:center; gap:6px;">
+    <span style="display:inline-block; width:14px; height:14px; background:var(--blue); border-radius:3px;"></span> 시장 렌즈
+  </div>
+  <div style="display:flex; align-items:center; gap:6px;">
+    <span style="display:inline-block; width:14px; height:14px; background:var(--green); border-radius:3px;"></span> 전문가 렌즈
+  </div>
+  <div style="display:flex; align-items:center; gap:6px;">
+    <span style="display:inline-block; width:14px; height:14px; background:var(--orange); border-radius:3px;"></span> 어워드 렌즈
+  </div>
+</div>
+<div class="signal-grid">
+<div class="signal-card"><div class="signal-icon">⬛</div><div class="signal-title">고급스러운 무광 마감의 표준화</div><div class="signal-desc">프리미엄 제품일수록 번들거리는 유광 소재를 피하고, 차분하고 세련된 무광(Matte) 마감을 기본 사양으로 채택</div><div class="signal-bars"><div class="signal-bar fill-blue" style="width:32px;"></div><div class="signal-bar fill-green" style="width:26px;"></div><div class="signal-bar fill-orange" style="width:32px;"></div></div></div>
+<div class="signal-card"><div class="signal-icon">🥄</div><div class="signal-title">외부 풀 스테인리스(STS)의 프리미엄 표준화</div><div class="signal-desc">내부 스테인리스 적용은 이제 너무나 당연한 기본. 이제는 제품의 외부 마감까지 스테인리스로 적용하는 것이 고급형의 핵심 요소로 자리 잡음</div><div class="signal-bars"><div class="signal-bar fill-blue" style="width:22px;"></div><div class="signal-bar fill-green" style="width:32px;"></div><div class="signal-bar fill-orange" style="width:30px;"></div></div></div>
+<div class="signal-card"><div class="signal-icon">🌊</div><div class="signal-title">전문적인 구스넥 포트의 대중화</div><div class="signal-desc">홈카페 문화가 일상으로 스며들면서, 바리스타들이 쓰던 전문적인 구스넥포트가 일반 가정으로 대중화되고 있음. 이에 따라 형태, 컬러, 손잡이 소재 등이 소비자 취향에 맞춰 폭넓고 다양해지 중.</div><div class="signal-bars"><div class="signal-bar fill-blue" style="width:30px;"></div><div class="signal-bar fill-green" style="width:36px;"></div><div class="signal-bar fill-orange" style="width:28px;"></div></div></div>
+<div class="signal-card"><div class="signal-icon">🌙</div><div class="signal-title">주방에 스며드는 미니멀 오브제</div><div class="signal-desc">복잡한 기계적 요소를 겉으로 드러내지 않고, 주방 인테리어와 하나의 장식품처럼 자연스럽게 어울리는 단순하고 아름다운 조형(오브제) 경쟁이 치열해 지는 중.</div><div class="signal-bars"><div class="signal-bar" style="width:14px;"></div><div class="signal-bar fill-green" style="width:22px;"></div><div class="signal-bar fill-orange" style="width:36px;"></div></div></div>
+<div class="signal-card"><div class="signal-icon">🎛️</div><div class="signal-title">직관적인 디지털 조작부의 확산</div><div class="signal-desc">딸깍거리는 단순 버튼을 넘어, 매끄러운 터치 패널이나 세밀한 다이얼, 온도를 직관적으로 보여주는 디스플레이를 장착한 스마트 포트가 늘고 있음.</div><div class="signal-bars"><div class="signal-bar fill-blue" style="width:28px;"></div><div class="signal-bar fill-green" style="width:30px;"></div><div class="signal-bar fill-orange" style="width:34px;"></div></div></div>
+<div class="signal-card"><div class="signal-icon">🌿</div><div class="signal-title">친환경 디자인</div><div class="signal-desc">재생 플라스틱 특유의 질감을 그대로 노출하는 등 친환경 소재를 디자인 요소로 적극 활용하는 브랜드가 글로벌 어워드에서 눈에 띄게 급증하고 있음.</div><div class="signal-bars"><div class="signal-bar" style="width:10px;"></div><div class="signal-bar fill-green" style="width:18px;"></div><div class="signal-bar fill-orange" style="width:36px;"></div></div></div>
+<div class="signal-card"><div class="signal-icon">🔇</div><div class="signal-title">소음저감 기술</div><div class="signal-desc">Midea 3D Silent 모델(2026 iF 수상)처럼, 단순히 형태를 예쁘게 만드는 것을 넘어 가열할 때 나는 시끄러운 소음을 구조적으로 줄여주는 기술적 디자인이 새로운 가치로 떠오르고 있음.</div><div class="signal-bars"><div class="signal-bar" style="width:6px;"></div><div class="signal-bar" style="width:8px;"></div><div class="signal-bar fill-orange" style="width:36px;"></div></div></div>
+<div class="signal-card"><div class="signal-icon">🧸</div><div class="signal-title">우드 등 자연 소재로 따뜻한 감성 전달</div><div class="signal-desc">스테인리스나 플라스틱이 주는 차갑고 딱딱한 느낌을 중화하기 위해, 손잡이나 뚜껑 등에 우드(나무) 무늬나 코르크 같은 자연 소재를 포인트로 적용하여 따뜻한 감성을 더함.</div><div class="signal-bars"><div class="signal-bar fill-blue" style="width:24px;"></div><div class="signal-bar" style="width:12px;"></div><div class="signal-bar fill-orange" style="width:20px;"></div></div></div>
+</div>
+</section>
+
+</div>
+
+<script>
+const D=[
+{b:"필립스",n:"HD9318",c:"기본형",x:10,y:72,s:"m",a:0,e:0,p:23210},
+{b:"테팔",n:"세이프티",c:"기본형",x:12,y:67,s:"m",a:0,e:0,p:31820},
+{b:"테팔",n:"로프트",c:"기본형",x:42,y:64,s:"m",a:0,e:0,p:36300},
+{b:"코소리",n:"COSORI GK-172",c:"기본형",x:35,y:63,s:"m",a:0,e:1,p:36387},
+{b:"셰프맨",n:"데일리 컬렉션",c:"기본형",x:28,y:58,s:"m",a:0,e:1,p:45474},
+{b:"아마존베이직스",n:"Electric Kettle",c:"기본형",x:8,y:68,s:"m",a:0,e:0,p:30927},
+{b:"CHIGO",n:"전기포트",c:"기본형",x:18,y:57,s:"m",a:0,e:0,p:57759},
+{b:"미디어",n:"미디어 CN-1",c:"기본형",x:8,y:46,s:"m",a:0,e:0,p:128557},
+{b:"미디어",n:"미디어 CN-2",c:"기본형",x:10,y:48,s:"m",a:0,e:0,p:109070},
+{b:"HIRO",n:"KTK-300",c:"기본형",x:15,y:74,s:"m",a:0,e:0,p:16970},
+{b:"야마젠",n:"DKE-100",c:"기본형",x:12,y:70,s:"m",a:0,e:0,p:26800},
+{b:"Emerio",n:"WK-119988",c:"기본형",x:30,y:74,s:"m",a:0,e:0,p:24141},
+{b:"필립스",n:"HD9350/90",c:"기본형",x:14,y:64,s:"m",a:0,e:0,p:35932},
+{b:"보쉬",n:"TWK2M163",c:"기본형",x:28,y:63,s:"m",a:0,e:1,p:36777},
+{b:"키친아트",n:"쏘렐 더글라스",c:"티포트",x:40,y:58,s:"m",a:0,e:0,p:42000},
+{b:"키친아트",n:"유리티포트",c:"티포트",x:35,y:64,s:"m",a:0,e:0,p:35900},
+{b:"신일",n:"무선 티 포트",c:"티포트",x:45,y:55,s:"m",a:0,e:0,p:55500},
+{b:"셰프맨",n:"Tea Kettle",c:"티포트",x:30,y:58,s:"m",a:0,e:0,p:45474},
+{b:"비안테",n:"Tea Maker",c:"티포트",x:25,y:46,s:"m",a:0,e:0,p:116987},
+{b:"구르미아",n:"GDK-380",c:"티포트",x:32,y:46,s:"m",a:0,e:0,p:116987},
+{b:"베어",n:"베어 CN",c:"티포트",x:42,y:48,s:"m",a:0,e:0,p:102700},
+{b:"베어",n:"베어 CN-2",c:"티포트",x:22,y:32,s:"m",a:0,e:0,p:219895},
+{b:"미지아",n:"미지아",c:"티포트",x:34,y:47,s:"m",a:0,e:0,p:115830},
+{b:"HIRO",n:"BJ8158JP",c:"티포트",x:36,y:48,s:"m",a:0,e:0,p:111610},
+{b:"피카",n:"피카 1.3L",c:"티포트",x:38,y:55,s:"m",a:0,e:0,p:59800},
+{b:"피카",n:"피카 1.3L-2",c:"티포트",x:44,y:56,s:"m",a:0,e:0,p:56990},
+{b:"포미",n:"ME Electric",c:"티포트",x:22,y:74,s:"m",a:0,e:0,p:24141},
+{b:"WMF",n:"KüchenMinis",c:"티포트",x:52,y:44,s:"m",a:0,e:0,p:87386},
+{b:"세버린",n:"WK-3480",c:"티포트",x:40,y:52,s:"m",a:0,e:0,p:67236},
+{b:"하트만",n:"드립포트",c:"구스넥",x:72,y:55,s:"m",a:0,e:0,p:59150},
+{b:"이즈홈",n:"EN-DRP-100",c:"구스넥",x:55,y:62,s:"m",a:0,e:0,p:39300},
+{b:"라쿠진",n:"드립포트",c:"구스넥",x:70,y:50,s:"m",a:0,e:0,p:74900},
+{b:"코소리",n:"Gooseneck",c:"구스넥",x:55,y:46,s:"m",a:0,e:0,p:90987},
+{b:"보덤",n:"Bistro GN",c:"구스넥",x:75,y:57,s:"m",a:0,e:0,p:51961},
+{b:"쿠진아트",n:"GK-1",c:"구스넥",x:62,y:44,s:"m",a:0,e:1,p:103974},
+{b:"SUPOR",n:"구스넥 CN",c:"구스넥",x:42,y:62,s:"m",a:0,e:0,p:41500},
+{b:"MIDEA",n:"구스넥 CN",c:"구스넥",x:48,y:42,s:"m",a:0,e:0,p:130000},
+{b:"틸리빙",n:"구스넥 CN",c:"구스넥",x:65,y:50,s:"m",a:0,e:0,p:75010},
+{b:"에페오스",n:"EPCP JP",c:"구스넥",x:78,y:50,s:"m",a:0,e:0,p:76310},
+{b:"야마젠",n:"EKG JP",c:"구스넥",x:65,y:54,s:"m",a:0,e:0,p:62300},
+{b:"INTASTING",n:"GN JP",c:"구스넥",x:68,y:50,s:"m",a:0,e:0,p:76330},
+{b:"RHD",n:"GN DE",c:"구스넥",x:66,y:54,s:"m",a:0,e:0,p:64987},
+{b:"vmotal",n:"GN DE",c:"구스넥",x:64,y:54,s:"m",a:0,e:0,p:65533},
+{b:"타임모어",n:"Fish Smart DE",c:"구스넥",x:88,y:36,s:"m",a:0,e:0,p:162773},
+{b:"쿠진아트",n:"JK-17P1",c:"기본형",x:32,y:34,s:"ap",a:0,e:0,p:188427},
+{b:"쿠진아트",n:"CK-10TR",c:"기본형",x:18,y:51,s:"ap",a:0,e:0,p:72427},
+{b:"Oster",n:"BVSTKT7098",c:"기본형",x:8,y:50,s:"ap",a:0,e:0,p:76850},
+{b:"Oster",n:"BVSTKT8970",c:"기본형",x:15,y:48,s:"ap",a:0,e:0,p:84071},
+{b:"Oster",n:"BVSTKT8970-017",c:"기본형",x:14,y:46,s:"ap",a:0,e:0,p:90026},
+{b:"Oster",n:"BVSTKT8970 Color",c:"기본형",x:22,y:51,s:"ap",a:0,e:0,p:72311},
+{b:"Oster",n:"OCEL920",c:"기본형",x:20,y:40,s:"ap",a:0,e:0,p:141828},
+{b:"Oster",n:"OCEL840",c:"기본형",x:12,y:62,s:"ap",a:0,e:0,p:38913},
+{b:"Philips",n:"HD9339/80",c:"기본형",x:16,y:58,s:"ap",a:0,e:0,p:43180},
+{b:"Philips",n:"HD9355/92",c:"기본형",x:22,y:55,s:"ap",a:0,e:0,p:60000},
+{b:"Philips",n:"HD9359/90",c:"기본형",x:38,y:44,s:"ap",a:0,e:0,p:100662},
+{b:"Philips",n:"HD9365/10",c:"기본형",x:30,y:46,s:"ap",a:0,e:0,p:97020},
+{b:"Philips",n:"HD9395/90",c:"기본형",x:28,y:48,s:"ap",a:0,e:0,p:85000},
+{b:"Philips",n:"HD941100",c:"기본형",x:16,y:64,s:"ap",a:0,e:0,p:37500},
+{b:"R.Hobbs",n:"20461",c:"기본형",x:22,y:46,s:"ap",a:0,e:0,p:93482},
+{b:"R.Hobbs",n:"21274",c:"기본형",x:16,y:56,s:"ap",a:0,e:0,p:50986},
+{b:"R.Hobbs",n:"21603",c:"기본형",x:12,y:46,s:"ap",a:0,e:0,p:93461},
+{b:"R.Hobbs",n:"22851",c:"기본형",x:10,y:49,s:"ap",a:0,e:0,p:81564},
+{b:"R.Hobbs",n:"24191",c:"기본형",x:14,y:48,s:"ap",a:0,e:0,p:85004},
+{b:"R.Hobbs",n:"24360",c:"기본형",x:26,y:48,s:"ap",a:0,e:0,p:84982},
+{b:"R.Hobbs",n:"25840",c:"기본형",x:38,y:44,s:"ap",a:0,e:0,p:101982},
+{b:"R.Hobbs",n:"26050",c:"기본형",x:20,y:56,s:"ap",a:0,e:0,p:58547},
+{b:"R.Hobbs",n:"25861",c:"기본형",x:34,y:44,s:"ap",a:0,e:0,p:110457},
+{b:"R.Hobbs",n:"27450",c:"기본형",x:24,y:40,s:"ap",a:0,e:0,p:142367},
+{b:"R.Hobbs",n:"20460",c:"기본형",x:18,y:48,s:"ap",a:0,e:0,p:85004},
+{b:"R.Hobbs",n:"21888",c:"기본형",x:24,y:44,s:"ap",a:0,e:0,p:102008},
+{b:"R.Hobbs",n:"23910",c:"기본형",x:32,y:43,s:"ap",a:0,e:0,p:112194},
+{b:"R.Hobbs",n:"23763",c:"기본형",x:22,y:52,s:"ap",a:0,e:0,p:68000},
+{b:"R.Hobbs",n:"23925",c:"기본형",x:26,y:50,s:"ap",a:0,e:0,p:76502},
+{b:"R.Hobbs",n:"25502",c:"기본형",x:24,y:50,s:"ap",a:0,e:0,p:76502},
+{b:"R.Hobbs",n:"25111",c:"기본형",x:28,y:42,s:"ap",a:0,e:0,p:119013},
+{b:"Tiger",n:"PCH-G080",c:"기본형",x:26,y:54,s:"ap",a:0,e:0,p:65000},
+{b:"Tiger",n:"PCM-N080",c:"기본형",x:20,y:56,s:"ap",a:0,e:0,p:54000},
+{b:"Tiger",n:"PTV-A080",c:"기본형",x:22,y:47,s:"ap",a:0,e:0,p:87700},
+{b:"Tiger",n:"PTV-A120",c:"기본형",x:24,y:44,s:"ap",a:0,e:0,p:109900},
+{b:"Tiger",n:"PCL-N100",c:"기본형",x:18,y:57,s:"ap",a:0,e:0,p:48400},
+{b:"Tiger",n:"PCL-N120",c:"기본형",x:18,y:56,s:"ap",a:0,e:0,p:54000},
+{b:"Tiger",n:"PCF-G060",c:"기본형",x:16,y:58,s:"ap",a:0,e:0,p:46400},
+{b:"Tiger",n:"PCF-G080",c:"기본형",x:16,y:56,s:"ap",a:0,e:0,p:51000},
+{b:"Tiger",n:"PCI-G100",c:"기본형",x:14,y:58,s:"ap",a:0,e:0,p:44700},
+{b:"Tiger",n:"PCI-G120",c:"기본형",x:14,y:57,s:"ap",a:0,e:0,p:49400},
+{b:"Midea",n:"MK-SH53-Q",c:"기본형",x:20,y:62,s:"ap",a:0,e:0,p:39640},
+{b:"Midea",n:"MK-SH20M121",c:"기본형",x:18,y:62,s:"ap",a:0,e:0,p:39626},
+{b:"Midea",n:"MK-SHE1750",c:"기본형",x:22,y:60,s:"ap",a:0,e:0,p:41722},
+{b:"Midea",n:"MK-SH63-Q",c:"기본형",x:26,y:52,s:"ap",a:0,e:0,p:68768},
+{b:"Midea",n:"MK-SHE2002-PRO",c:"기본형",x:16,y:70,s:"ap",a:0,e:0,p:27046},
+{b:"R.Hobbs",n:"21270",c:"기본형",x:14,y:56,s:"ap",a:0,e:1,p:50995},
+{b:"R.Hobbs",n:"26080",c:"기본형",x:12,y:50,s:"ap",a:0,e:1,p:76482},
+{b:"Breville",n:"IQ Kettle",c:"기본형",x:40,y:26,s:"ex",a:0,e:1,p:286000},
+{b:"Hamilton Beach",n:"40880",c:"기본형",x:10,y:62,s:"ex",a:0,e:1,p:39000},
+{b:"Zwilling",n:"Enfinigy",c:"기본형",x:38,y:36,s:"ex",a:0,e:1,p:169000},
+{b:"펠로우",n:"EKG-1171",c:"기본형",x:92,y:30,s:"ex",a:0,e:1,p:233200},
+{b:"Amazon",n:"Basics SS",c:"기본형",x:8,y:66,s:"ex",a:0,e:1,p:34500},
+{b:"OXO",n:"Cordless Glass",c:"기본형",x:30,y:44,s:"ex",a:0,e:1,p:104000},
+{b:"Secura",n:"SWK-1701DB",c:"기본형",x:8,y:58,s:"ex",a:0,e:1,p:45000},
+{b:"KENWOOD",n:"ZJP09",c:"기본형",x:10,y:58,s:"ex",a:0,e:1,p:45000},
+{b:"BOSCH",n:"TWK1M123GB",c:"기본형",x:14,y:55,s:"ex",a:0,e:1,p:60000},
+{b:"KitchenAid",n:"Artisan DW",c:"기본형",x:55,y:38,s:"ex",a:0,e:1,p:150000},
+{b:"Ninja",n:"Perfect Temp",c:"기본형",x:32,y:42,s:"ex",a:0,e:1,p:120000},
+{b:"Asda",n:"GDK101B-22",c:"기본형",x:16,y:68,s:"ex",a:0,e:1,p:30000},
+{b:"Cuisinart",n:"CPK17BPU",c:"기본형",x:28,y:42,s:"ex",a:0,e:1,p:120000},
+{b:"Bosch",n:"TWK8633GB",c:"기본형",x:34,y:46,s:"ex",a:0,e:1,p:90000},
+{b:"OXO",n:"Brew Pour-Over",c:"구스넥",x:62,y:40,s:"ex",a:0,e:1,p:130000},
+{b:"Fellow",n:"Stagg EKG",c:"구스넥",x:95,y:22,s:"ex",a:0,e:1,p:354000},
+{b:"Breville",n:"BTM800XL",c:"티포트",x:35,y:24,s:"ex",a:0,e:1,p:330000},
+{b:"Cuisinart",n:"CPK-17P1",c:"기본형",x:30,y:40,s:"ex",a:0,e:1,p:117000},
+{b:"Bosch",n:"TWK2M161GB",c:"기본형",x:22,y:52,s:"ex",a:0,e:1,p:75000},
+
+// ═══ 구스넥 Appendix (중복 제거 후 순수 고유 제품만) ═══
+// Fellow Stagg EKG Pro — 판매상위 Fellow Stagg EKG(전문가)와 별개 모델(Pro 버전)
+{b:"Fellow",n:"Stagg EKG Pro",c:"구스넥",x:96,y:20,s:"ap",a:0,e:0,p:354000},
+// Brewista Artisan — 신규 브랜드
+{b:"Brewista",n:"Artisan GN 1L",c:"구스넥",x:72,y:24,s:"ap",a:0,e:0,p:215000},
+// Hario V60 Buono Electric — 신규
+{b:"Hario",n:"V60 Buono EVKB",c:"구스넥",x:56,y:50,s:"ap",a:0,e:0,p:84500},
+// De'Longhi Ikona Cafe — 신규
+{b:"De'Longhi",n:"Ikona Cafe KBOE",c:"구스넥",x:60,y:38,s:"ap",a:0,e:0,p:130000},
+// Willow & Everett Stovetop — 신규 (스토브탑 겸용, 최저가)
+{b:"Willow&Everett",n:"Stovetop GN 1.2L",c:"구스넥",x:45,y:66,s:"ap",a:0,e:0,p:42250},
+// Bonavita Digital — 신규
+{b:"Bonavita",n:"Digital Temp GN 1L",c:"구스넥",x:58,y:48,s:"ap",a:0,e:0,p:91000},
+// Brewista X Series — 신규
+{b:"Brewista",n:"X Series GN 0.8L",c:"구스넥",x:68,y:44,s:"ap",a:0,e:0,p:97500},
+// Govee Smart GN — 신규 (WiFi/Alexa)
+{b:"Govee",n:"Smart GN 0.8L",c:"구스넥",x:55,y:52,s:"ap",a:0,e:0,p:78000},
+// Hario V60 Power Kettle — Buono와 별개 모델
+{b:"Hario",n:"V60 Power EVKT",c:"구스넥",x:52,y:56,s:"ap",a:0,e:0,p:65000},
+// Yamazen EKG-C801 — 판매상위 야마젠과 별개 모델
+{b:"Yamazen",n:"EKG-C801 JP",c:"구스넥",x:60,y:56,s:"ap",a:0,e:0,p:64870},
+
+// ═══ 티포트 Appendix (중복 제거 후 순수 고유 제품만) ═══
+// 미국
+{b:"Chefman",n:"Tea Infuser 1.8L",c:"티포트",x:24,y:58,s:"ap",a:0,e:0,p:54600},
+{b:"Mecity",n:"9Preset Tea 1.7L",c:"티포트",x:30,y:54,s:"ap",a:0,e:0,p:74750},
+{b:"Gourmia",n:"GDK290 Tea 1.7L",c:"티포트",x:28,y:52,s:"ap",a:0,e:0,p:81250},
+{b:"Viante",n:"Italian Tea 1.5L",c:"티포트",x:35,y:48,s:"ap",a:0,e:0,p:91000},
+// COSORI GK172 Tea → 판매상위 COSORI와 중복 제외
+{b:"GoveeLife",n:"Smart Tea WiFi",c:"티포트",x:26,y:50,s:"ap",a:0,e:0,p:84500},
+// 유럽
+// Ninja KT201 → 전문가 추천과 중복 제외
+{b:"R.Hobbs",n:"21600 Glass Tea",c:"티포트",x:22,y:58,s:"ap",a:0,e:0,p:58500},
+{b:"Tefal",n:"KI605827 Glass",c:"티포트",x:30,y:56,s:"ap",a:0,e:0,p:61750},
+// COSORI Glass Tea EU → 미국 판매상위 COSORI와 중복 제외
+{b:"Bosch",n:"TWK8613 DLine",c:"티포트",x:34,y:42,s:"ap",a:0,e:0,p:104000},
+// 중국
+{b:"Joyoung",n:"DJ10U-K650 양생호",c:"티포트",x:30,y:66,s:"ap",a:0,e:0,p:32370},
+// Bear YSH-C18S2 → 판매상위 베어와 중복 제외
+{b:"Buydeem",n:"K2973 양생호",c:"티포트",x:40,y:60,s:"ap",a:0,e:0,p:51870},
+{b:"Midea",n:"MK-SP15E 양생호",c:"티포트",x:24,y:70,s:"ap",a:0,e:0,p:19370},
+{b:"SUPOR",n:"SW-15YJ 양생호",c:"티포트",x:26,y:68,s:"ap",a:0,e:0,p:23270},
+// 일본 (디스펜서형 = 티포트 겸용)
+{b:"Zojirushi",n:"CV-WB30 3L",c:"티포트",x:18,y:28,s:"ap",a:0,e:0,p:227500},
+{b:"Tiger",n:"PIG-A300 3L",c:"티포트",x:16,y:30,s:"ap",a:0,e:0,p:195000},
+{b:"Panasonic",n:"NC-BU354 3.5L",c:"티포트",x:16,y:28,s:"ap",a:0,e:0,p:208000},
+{b:"Iris",n:"IAHD-022 1.5L",c:"티포트",x:20,y:50,s:"ap",a:0,e:0,p:91000},
+// Hario V60 Tea → 구스넥 카테고리로 이미 배치, 제외
+// 한국
+{b:"Hurom",n:"Tea Master 1.2L",c:"티포트",x:45,y:40,s:"ap",a:0,e:0,p:129350},
+{b:"Cuckoo",n:"CWR-PT1009F",c:"티포트",x:20,y:24,s:"ap",a:0,e:0,p:325000},
+// Philips HD9350 → 기본형 판매상위와 중복 제외
+{b:"맘록",n:"DMK-1818G 1.8L",c:"티포트",x:20,y:70,s:"ap",a:0,e:0,p:27738},
+{b:"키친아트",n:"KK-6018T 1.8L",c:"티포트",x:28,y:58,s:"ap",a:0,e:0,p:55770},
+];
+
+
+
+
+const CC={기본형:'#3182f6',티포트:'#ff6b35',구스넥:'#05c072'};
+
+function render(f){
+var box=document.getElementById('dots');box.innerHTML='';
+D.forEach(function(d){
+if(f!=='all'&&d.c!==f)return;
+var isAp=d.s==='ap';
+var isEx=d.e===1;
+var isAw=d.a===1;
+var sz=isAp?7:(isAw?15:(isEx?22:16));
+var col=CC[d.c]||'#888';
+var op=isAp?.35:1;
+var bc=isEx?'#f5a623':(isAw?'#f5a623':'#fff');
+var bw=isEx?'2.5px':'2px';
+var el=document.createElement('div');el.className='bdot';el.style.left=d.x+'%';el.style.top=d.y+'%';
+var ci=document.createElement('div');ci.className='bdot-circle';
+ci.style.cssText='width:'+sz+'px;height:'+sz+'px;background:'+col+';opacity:'+op+';border:'+bw+' solid '+bc;
+if(isAw)ci.style.borderRadius='3px';
+if(sz>=12&&!isAp)ci.textContent=(d.b||'').substring(0,2);
+var tip=document.createElement('div');tip.className='bdot-tip';
+var pr=d.p>0?'₩'+d.p.toLocaleString():'—';
+var src=d.s==='m'?'시장':d.s==='ap'?'라인업':d.s==='ex'?'전문가':'어워드';
+tip.innerHTML='<strong>'+d.b+'</strong><br>'+d.n+'<br>'+d.c+' · '+pr+'<br>출처: '+src;
+el.appendChild(ci);el.appendChild(tip);box.appendChild(el);
+});
+}
+function fMap(btn){
+document.querySelectorAll('.mf-btn').forEach(function(b){b.classList.remove('active')});
+btn.classList.add('active');render(btn.dataset.f);
+}
+render('all');
+
+document.querySelectorAll('.nav-link').forEach(function(l){
+l.addEventListener('click',function(e){e.preventDefault();
+var t=document.querySelector(l.getAttribute('href'));
+if(t)t.scrollIntoView({behavior:'smooth'});
+});
+});
+window.addEventListener('scroll',function(){
+var cur='';document.querySelectorAll('section[id]').forEach(function(s){if(scrollY>=s.offsetTop-80)cur=s.id});
+document.querySelectorAll('.nav-link').forEach(function(l){l.classList.toggle('active',l.getAttribute('href')==='#'+cur)});
+},{passive:true});
+
+function swHm(id,btn){
+document.querySelectorAll('.hm-table-wrap').forEach(function(t){t.style.display='none'});
+document.getElementById(id).style.display='block';
+document.querySelectorAll('.hm-tab').forEach(function(b){b.classList.remove('active')});
+btn.classList.add('active');
+}
+
+function swDna(id,btn){
+var tabs=['dna-basic','dna-tea','dna-goose'];
+tabs.forEach(function(t){document.getElementById(t).style.display='none'});
+document.getElementById('dna-'+id).style.display='block';
+var c={basic:['var(--blue-light)','var(--blue)'],tea:['var(--orange-light)','var(--orange)'],goose:['var(--green-light)','var(--green)']};
+document.getElementById('dnaTabs').querySelectorAll('button').forEach(function(b){
+b.style.background='var(--white)';b.style.color='var(--text-sub)';b.style.borderColor='var(--border)';
+});
+btn.style.background=c[id][0];btn.style.color=c[id][1];btn.style.borderColor=c[id][1];
+}
+</script>
+</body>
+</html>
