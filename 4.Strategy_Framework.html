@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>전략 프레임워크 — WHY Matrix & ERRC 캔버스 템플릿</title>
+<style>
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+:root{
+  --blue:#3182f6;--blue-light:#e8f3ff;--blue-mid:#b8d4fb;
+  --green:#05c072;--green-light:#e6faf2;
+  --orange:#ff6b35;--orange-light:#fff0e8;
+  --purple:#7c5cfc;--purple-light:#ede9ff;
+  --yellow:#f5a623;--yellow-light:#fff8e6;
+  --red:#ff4545;--red-light:#fff0f0;
+  --teal:#00c9b1;--teal-light:#e0faf7;
+  --bg:#f2f4f6;--white:#fff;
+  --text:#191f28;--text-sub:#4e5968;--text-light:#8b95a1;
+  --border:#e8ebed;
+  --shadow:0 4px 24px rgba(0,0,0,0.06);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
+
+.nav{position:sticky;top:0;z-index:200;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;gap:6px;height:56px;}
+.nav-brand{font-size:15px;font-weight:800;margin-right:8px;}
+.nav-sep{width:1px;height:16px;background:var(--border);}
+.nav-link{font-size:13px;font-weight:500;color:var(--text-sub);padding:6px 12px;border-radius:8px;cursor:pointer;transition:all .15s;text-decoration:none;}
+.nav-link:hover{background:var(--bg);}
+.nav-link.active{background:var(--blue-light);color:var(--blue);}
+
+.page{max-width:1280px;margin:0 auto;padding:0 24px 100px;}
+
+.hero{padding:56px 0 40px;display:flex;flex-direction:column;gap:10px;}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--blue-light),var(--purple-light));color:var(--blue);font-size:12px;font-weight:700;padding:4px 14px;border-radius:20px;width:fit-content;}
+.hero h1{font-size:36px;font-weight:800;letter-spacing:-1px;line-height:1.2;}
+.hero h1 em{color:var(--blue);font-style:normal;}
+.hero-sub{font-size:15px;color:var(--text-sub);max-width:680px;}
+
+.section{margin-top:64px;}
+.section-label{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 12px;border-radius:8px;margin-bottom:10px;}
+.section-title{font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:6px;}
+.section-sub{font-size:14px;color:var(--text-sub);margin-bottom:24px;}
+.card{background:var(--white);border-radius:20px;box-shadow:var(--shadow);}
+.card-pad{padding:32px;}
+
+.insight-bar{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+.ins-chip{background:var(--bg);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text-sub);line-height:1.6;}
+.ins-chip strong{color:var(--text);}
+.ins-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;}
+
+/* WHY MATRIX */
+.why-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
+.c3-grid{display:grid;grid-template-columns:1fr;gap:14px;}
+.c3-card{border-radius:16px;padding:20px;}
+.c3-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.c3-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.c3-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.7;}
+.c3-title{font-size:14px;font-weight:800;}
+.c3-items{display:flex;flex-direction:column;gap:6px;}
+.c3-item{display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.5;}
+.c3-dot{width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+
+.why-cross{margin-top:24px;border-radius:20px;padding:28px;background:linear-gradient(135deg,#1a56db,#3182f6);color:white;}
+.why-cross-head{font-size:11px;font-weight:700;opacity:.7;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px;}
+.why-cross-title{font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:14px;}
+.why-cross-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.why-cross-item{background:rgba(255,255,255,.12);border-radius:12px;padding:14px;}
+.why-cross-item-label{font-size:10px;opacity:.7;margin-bottom:4px;font-weight:600;}
+.why-cross-item-text{font-size:12px;font-weight:700;line-height:1.5;}
+
+.evidence-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px;}
+.ev-card{border-radius:14px;padding:18px;}
+.ev-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
+.ev-items{display:flex;flex-direction:column;gap:5px;}
+.ev-item{font-size:11px;padding:6px 10px;border-radius:8px;line-height:1.5;}
+
+/* ERRC CANVAS */
+.errc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);}
+.errc-col{display:flex;flex-direction:column;}
+.errc-header{padding:20px 20px 14px;display:flex;flex-direction:column;align-items:center;text-align:center;}
+.errc-header-icon{font-size:28px;margin-bottom:6px;}
+.errc-header-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:.8;margin-bottom:2px;}
+.errc-header-title{font-size:18px;font-weight:800;}
+.errc-header-sub{font-size:10px;opacity:.75;margin-top:3px;line-height:1.5;}
+.errc-body{flex:1;background:var(--white);padding:14px 16px 20px;display:flex;flex-direction:column;gap:8px;}
+.errc-item{border-radius:10px;padding:12px 14px;}
+.errc-item-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;opacity:.7;}
+.errc-item-title{font-size:12px;font-weight:800;margin-bottom:3px;}
+.errc-item-desc{font-size:11px;color:var(--text-sub);line-height:1.5;}
+
+.errc-impact{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px;}
+.errc-impact-card{border-radius:14px;padding:14px;text-align:center;}
+.errc-impact-num{font-size:22px;font-weight:800;margin-bottom:2px;}
+.errc-impact-label{font-size:11px;color:var(--text-sub);}
+
+.strat-strip{margin-top:48px;background:linear-gradient(135deg,#191f28,#2d3748);border-radius:24px;padding:36px 40px;color:white;}
+.strat-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:20px;}
+.strat-h{font-size:11px;font-weight:700;opacity:.6;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;}
+.strat-p{font-size:13px;opacity:.88;line-height:1.7;}
+.strat-title{font-size:20px;font-weight:800;opacity:.95;letter-spacing:-.3px;}
+.strat-sub{font-size:13px;opacity:.7;margin-top:6px;}
+
+@media(max-width:900px){
+  .why-layout{grid-template-columns:1fr;}
+  .why-cross-grid{grid-template-columns:1fr;}
+  .evidence-grid{grid-template-columns:1fr;}
+  .errc-grid{grid-template-columns:1fr 1fr;}
+  .errc-impact{grid-template-columns:1fr 1fr;}
+  .strat-grid{grid-template-columns:1fr;}
+  .hero h1{font-size:26px;}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav-brand">Strategy Framework</span>
+  <span class="nav-sep"></span>
+  <a class="nav-link active" href="#why">⑩ WHY Matrix</a>
+  <a class="nav-link" href="#errc">⑪ ERRC 캔버스</a>
+</nav>
+
+<div class="page">
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge"></div>
+  <h1><br><em></em></h1>
+  <p class="hero-sub"></p>
+</section>
+
+<!-- ══════════════════════════════════════
+     10. WHY MATRIX (3C)
+══════════════════════════════════════ -->
+<section class="section" id="why">
+  <div class="section-label" style="background:var(--blue-light);color:var(--blue);">Framework 10 — WHY Matrix</div>
+  <div class="section-title"></div>
+  <div class="section-sub"></div>
+
+  <div class="why-layout">
+
+    <div class="c3-grid">
+
+      <!-- Market -->
+      <div class="c3-card" style="background:var(--blue-light);">
+        <div class="c3-head">
+          <div class="c3-icon" style="background:var(--blue);color:white;">M</div>
+          <div>
+            <div class="c3-label" style="color:var(--blue);"></div>
+            <div class="c3-title"></div>
+          </div>
+        </div>
+        <div class="c3-items">
+          <div class="c3-item"><div class="c3-dot" style="background:var(--blue);"></div><span><strong></strong></span></div>
+          <div class="c3-item"><div class="c3-dot" style="background:var(--blue);"></div><span><strong></strong></span></div>
+          <div class="c3-item"><div class="c3-dot" style="background:var(--blue);"></div><span><strong></strong></span></div>
+          <div class="c3-item"><div class="c3-dot" style="background:var(--blue);"></div><span><strong></strong></span></div>
+        </div>
+      </div>
+
+      <!-- Customer -->
+      <div class="c3-card" style="background:var(--purple-light);">
+        <div class="c3-head">
+          <div class="c3-icon" style="background:var(--purple);color:white;">C</div>
+          <div>
+            <div class="c3-label" style="color:var(--purple);"></div>
+            <div class="c3-title"></div>
+          </div>
+        </div>
+        <div class="c3-items">
+          <div class="c3-item"><div class="c3-dot" style="background:var(--purple);"></div><span><strong></strong></span></div>
+          <div class="c3-item"><div class="c3-dot" style="background:var(--purple);"></div><span><strong></strong></span></div>
+          <div class="c3-item"><div class="c3-dot" style="background:var(--purple);"></div><span><strong></strong></span></div>
+          <div class="c3-item"><div class="c3-dot" style="background:var(--purple);"></div><span><strong></strong></span></div>
+        </div>
+      </div>
+
+      <!-- Competitor -->
+      <div class="c3-card" style="background:var(--green-light);">
+        <div class="c3-head">
+          <div class="c3-icon" style="background:var(--green);color:white;">C</div>
+          <div>
+            <div class="c3-label" style="color:var(--green);"></div>
+            <div class="c3-title"></div>
+          </div>
+        </div>
+        <div class="c3-items">
+          <div class="c3-item"><div class="c3-dot" style="background:var(--green);"></div><span><strong></strong></span></div>
+          <div class="c3-item"><div class="c3-dot" style="background:var(--green);"></div><span><strong></strong></span></div>
+          <div class="c3-item"><div class="c3-dot" style="background:var(--green);"></div><span><strong></strong></span></div>
+          <div class="c3-item"><div class="c3-dot" style="background:var(--green);"></div><span><strong></strong></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Venn SVG -->
+    <div>
+      <div class="card card-pad" style="text-align:center;">
+        <div style="font-size:14px;font-weight:800;margin-bottom:4px;"></div>
+        <div style="font-size:11px;color:var(--text-sub);margin-bottom:16px;"></div>
+        <svg viewBox="0 0 400 380" width="100%" style="display:block;max-height:340px;">
+          <defs>
+            <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <circle cx="200" cy="120" r="110" fill="#3182f6" opacity=".13" stroke="#3182f6" stroke-width="2"/>
+          <circle cx="130" cy="250" r="110" fill="#7c5cfc" opacity=".13" stroke="#7c5cfc" stroke-width="2"/>
+          <circle cx="270" cy="250" r="110" fill="#05c072" opacity=".13" stroke="#05c072" stroke-width="2"/>
+          <circle cx="200" cy="210" r="44" fill="white" opacity=".9"/>
+          <circle cx="200" cy="210" r="44" fill="#3182f6" opacity=".12" filter="url(#glow)"/>
+          <text x="200" y="48" text-anchor="middle" font-size="13" font-weight="800" fill="#3182f6">Market</text>
+          <text x="200" y="62" text-anchor="middle" font-size="10" fill="#3182f6" opacity=".8"></text>
+          <text x="70" y="320" text-anchor="middle" font-size="13" font-weight="800" fill="#7c5cfc">Customer</text>
+          <text x="70" y="334" text-anchor="middle" font-size="10" fill="#7c5cfc" opacity=".8"></text>
+          <text x="330" y="320" text-anchor="middle" font-size="13" font-weight="800" fill="#05c072">Competitor</text>
+          <text x="330" y="334" text-anchor="middle" font-size="10" fill="#05c072" opacity=".8"></text>
+          <text x="200" y="198" text-anchor="middle" font-size="10" font-weight="800" fill="#1a56db">WHY</text>
+          <text x="200" y="212" text-anchor="middle" font-size="9" font-weight="700" fill="#3182f6"></text>
+          <text x="200" y="226" text-anchor="middle" font-size="8" fill="#4e5968"></text>
+          <text x="155" y="168" text-anchor="middle" font-size="8.5" fill="#4e5968" font-weight="600"></text>
+          <text x="155" y="179" text-anchor="middle" font-size="8.5" fill="#4e5968" font-weight="600"></text>
+          <text x="245" y="168" text-anchor="middle" font-size="8.5" fill="#4e5968" font-weight="600"></text>
+          <text x="245" y="179" text-anchor="middle" font-size="8.5" fill="#4e5968" font-weight="600"></text>
+          <text x="200" y="274" text-anchor="middle" font-size="8.5" fill="#4e5968" font-weight="600"></text>
+          <text x="200" y="285" text-anchor="middle" font-size="8.5" fill="#4e5968" font-weight="600"></text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Evidence Grid -->
+  <div class="evidence-grid" style="margin-top:24px;">
+    <div class="ev-card" style="background:var(--blue-light);">
+      <div class="ev-label" style="color:var(--blue);"></div>
+      <div class="ev-items">
+        <div class="ev-item" style="background:rgba(49,130,246,.07);"></div>
+        <div class="ev-item" style="background:rgba(49,130,246,.07);"></div>
+        <div class="ev-item" style="background:rgba(49,130,246,.07);"></div>
+      </div>
+    </div>
+    <div class="ev-card" style="background:var(--purple-light);">
+      <div class="ev-label" style="color:var(--purple);"></div>
+      <div class="ev-items">
+        <div class="ev-item" style="background:rgba(124,92,252,.07);"></div>
+        <div class="ev-item" style="background:rgba(124,92,252,.07);"></div>
+        <div class="ev-item" style="background:rgba(124,92,252,.07);"></div>
+      </div>
+    </div>
+    <div class="ev-card" style="background:var(--green-light);">
+      <div class="ev-label" style="color:var(--green);"></div>
+      <div class="ev-items">
+        <div class="ev-item" style="background:rgba(5,192,114,.07);"></div>
+        <div class="ev-item" style="background:rgba(5,192,114,.07);"></div>
+        <div class="ev-item" style="background:rgba(5,192,114,.07);"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHY Conclusion -->
+  <div class="why-cross" style="margin-top:24px;">
+    <div class="why-cross-head"></div>
+    <div class="why-cross-title"></div>
+    <div class="why-cross-grid">
+      <div class="why-cross-item">
+        <div class="why-cross-item-label"></div>
+        <div class="why-cross-item-text"></div>
+      </div>
+      <div class="why-cross-item">
+        <div class="why-cross-item-label"></div>
+        <div class="why-cross-item-text"></div>
+      </div>
+      <div class="why-cross-item">
+        <div class="why-cross-item-label"></div>
+        <div class="why-cross-item-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight-bar" style="margin-top:16px;">
+    <div class="ins-chip"><span class="ins-dot" style="background:var(--blue);"></span></div>
+    <div class="ins-chip"><span class="ins-dot" style="background:var(--purple);"></span></div>
+    <div class="ins-chip"><span class="ins-dot" style="background:var(--red);"></span></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     11. ERRC CANVAS
+══════════════════════════════════════ -->
+<section class="section" id="errc">
+  <div class="section-label" style="background:var(--orange-light);color:var(--orange);">Framework 11 — ERRC Blue Ocean Strategy</div>
+  <div class="section-title"></div>
+  <div class="section-sub"></div>
+
+  <div class="errc-grid">
+
+    <!-- ELIMINATE -->
+    <div class="errc-col">
+      <div class="errc-header" style="background:var(--red);">
+        <div class="errc-header-icon">✕</div>
+        <div class="errc-header-label" style="color:rgba(255,255,255,.75);">Eliminate</div>
+        <div class="errc-header-title" style="color:white;">제거</div>
+        <div class="errc-header-sub" style="color:rgba(255,255,255,.8);"></div>
+      </div>
+      <div class="errc-body">
+        <div class="errc-item" style="background:var(--red-light);">
+          <div class="errc-item-tag" style="color:var(--red);"></div>
+          <div class="errc-item-title"></div>
+          <div class="errc-item-desc"></div>
+        </div>
+        <div class="errc-item" style="background:var(--red-light);">
+          <div class="errc-item-tag" style="color:var(--red);"></div>
+          <div class="errc-item-title"></div>
+          <div class="errc-item-desc"></div>
+        </div>
+        <div class="errc-item" style="background:var(--red-light);">
+          <div class="errc-item-tag" style="color:var(--red);"></div>
+          <div class="errc-item-title"></div>
+          <div class="errc-item-desc"></div>
+        </div>
+        <div class="errc-item" style="background:var(--red-light);">
+          <div class="errc-item-tag" style="color:var(--red);"></div>
+          <div class="errc-item-title"></div>
+          <div class="errc-item-desc"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REDUCE -->
+    <div class="errc-col">
+      <div class="errc-header" style="background:var(--orange);">
+        <div class="errc-header-icon">↓</div>
+        <div class="errc-header-label" style="color:rgba(255,255,255,.75);">Reduce</div>
+        <div class="errc-header-title" style="color:white;">축소</div>
+        <div class="errc-header-sub" style="color:rgba(255,255,255,.8);"></div>
+      </div>
+      <div class="errc-body">
+        <div class="errc-item" style="background:var(--orange-light);">
+          <div class="errc-item-tag" style="color:var(--orange);"></div>
+          <div class="errc-item-title"></div>
+          <div class="errc-item-desc"></div>
+        </div>
+        <div class="errc-item" style="background:var(--orange-light);">
+          <div class="errc-item-tag" style="color:var(--orange);"></div>
+          <div class="errc-item-title"></div>
+          <div class="errc-item-desc"></div>
+        </div>
+        <div class="errc-item" style="background:var(--orange-light);">
+          <div class="errc-item-tag" style="color:var(--orange);"></div>
+          <div class="errc-item-title"></div>
+          <div class="errc-item-desc"></div>
+        </div>
+        <div class="errc-item" style="background:var(--orange-light);">
+          <div class="errc-item-tag" style="color:var(--orange);"></div>
+          <div class="errc-item-title"></div>
+          <div class="errc-item-desc"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RAISE -->
+    <div class="errc-col">
+      <div class="errc-header" style="background:var(--blue);">
+        <div class="errc-header-icon">↑</div>
+        <div class="errc-header-label" style="color:rgba(255,255,255,.75);">Raise</div>
+        <div class="errc-header-title" style="color:white;">강화</div>
+        <div class="errc-header-sub" style="color:rgba(255,255,255,.8);"></div>
+      </div>
+      <div class="errc-body">
+        <div class="errc-item" style="background:var(--blue-light);">
+          <div class="errc-item-tag" style="color:var(--blue);"></div>
+          <div class="errc-item-title"></div>
+          <div class="errc-item-desc"></div>
+        </div>
+        <div class="errc-item" style="background:var(--blue-light);">
+          <div class="errc-item-tag" style="color:var(--blue);"></div>
+          <div class="errc-item-title"></div>
+          <div class="errc-item-desc"></div>
+        </div>
+        <div class="errc-item" style="background:var(--blue-light);">
+          <div class="errc-item-tag" style="color:var(--blue);"></div>
+          <div class="errc-item-title"></div>
+          <div class="errc-item-desc"></div>
+        </div>
+        <div class="errc-item" style="background:var(--blue-light);">
+          <div class="errc-item-tag" style="color:var(--blue);"></div>
+          <div class="errc-item-title"></div>
+          <div class="errc-item-desc"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CREATE -->
+    <div class="errc-col">
+      <div class="errc-header" style="background:var(--green);">
+        <div class="errc-header-icon">★</div>
+        <div class="errc-header-label" style="color:rgba(255,255,255,.75);">Create</div>
+        <div class="errc-header-title" style="color:white;">창조</div>
+        <div class="errc-header-sub" style="color:rgba(255,255,255,.8);"></div>
+      </div>
+      <div class="errc-body">
+        <div class="errc-item" style="background:var(--green-light);">
+          <div class="errc-item-tag" style="color:var(--green);"></div>
+          <div class="errc-item-title"></div>
+          <div class="errc-item-desc"></div>
+        </div>
+        <div class="errc-item" style="background:var(--green-light);">
+          <div class="errc-item-tag" style="color:var(--green);"></div>
+          <div class="errc-item-title"></div>
+          <div class="errc-item-desc"></div>
+        </div>
+        <div class="errc-item" style="background:var(--green-light);">
+          <div class="errc-item-tag" style="color:var(--green);"></div>
+          <div class="errc-item-title"></div>
+          <div class="errc-item-desc"></div>
+        </div>
+        <div class="errc-item" style="background:var(--green-light);">
+          <div class="errc-item-tag" style="color:var(--green);"></div>
+          <div class="errc-item-title"></div>
+          <div class="errc-item-desc"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ERRC Impact -->
+  <div class="errc-impact">
+    <div class="errc-impact-card" style="background:var(--red-light);">
+      <div class="errc-impact-num" style="color:var(--red);"></div>
+      <div class="errc-impact-label"></div>
+    </div>
+    <div class="errc-impact-card" style="background:var(--orange-light);">
+      <div class="errc-impact-num" style="color:var(--orange);"></div>
+      <div class="errc-impact-label"></div>
+    </div>
+    <div class="errc-impact-card" style="background:var(--blue-light);">
+      <div class="errc-impact-num" style="color:var(--blue);"></div>
+      <div class="errc-impact-label"></div>
+    </div>
+    <div class="errc-impact-card" style="background:var(--green-light);">
+      <div class="errc-impact-num" style="color:var(--green);"></div>
+      <div class="errc-impact-label"></div>
+    </div>
+  </div>
+
+  <!-- Strategy Canvas Table -->
+  <div class="card card-pad" style="margin-top:20px;">
+    <div style="font-size:14px;font-weight:800;margin-bottom:4px;"></div>
+    <div style="font-size:11px;color:var(--text-sub);margin-bottom:20px;"></div>
+    <div style="position:relative;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;min-width:700px;">
+        <thead>
+          <tr style="background:var(--bg);">
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text-sub);border-radius:8px 0 0 8px;">경쟁 요소</th>
+            <th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:700;color:var(--text-sub);">현재 시장 평균</th>
+            <th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:700;color:var(--blue);">ERRC 목표 포지션</th>
+            <th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:700;color:var(--text-sub);border-radius:0 8px 8px 0;">전략 액션</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 행 템플릿 — 필요한 만큼 복제 -->
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px 14px;font-size:12px;font-weight:700;"></td>
+            <td style="padding:10px 14px;text-align:center;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="flex:1;background:var(--border);height:6px;border-radius:3px;overflow:hidden;">
+                  <div style="width:0%;background:#8b95a1;height:100%;border-radius:3px;"></div>
+                </div>
+                <span style="font-size:11px;font-weight:700;color:var(--text-light);width:32px;text-align:right;"></span>
+              </div>
+            </td>
+            <td style="padding:10px 14px;text-align:center;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="flex:1;background:var(--border);height:6px;border-radius:3px;overflow:hidden;">
+                  <div style="width:0%;background:var(--green);height:100%;border-radius:3px;"></div>
+                </div>
+                <span style="font-size:11px;font-weight:700;color:var(--green);width:32px;text-align:right;"></span>
+              </div>
+            </td>
+            <td style="padding:10px 14px;text-align:center;">
+              <span style="font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;background:rgba(0,0,0,.06);color:var(--blue);"></span>
+              <div style="font-size:10px;color:var(--text-light);margin-top:3px;"></div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="insight-bar" style="margin-top:16px;">
+    <div class="ins-chip"><span class="ins-dot" style="background:var(--green);"></span></div>
+    <div class="ins-chip"><span class="ins-dot" style="background:var(--blue);"></span></div>
+    <div class="ins-chip"><span class="ins-dot" style="background:var(--orange);"></span></div>
+    <div class="ins-chip"><span class="ins-dot" style="background:var(--purple);"></span></div>
+  </div>
+</section>
+
+<!-- STRATEGY SUMMARY -->
+<div class="strat-strip">
+  <div class="strat-title"></div>
+  <div class="strat-sub"></div>
+  <div class="strat-grid">
+    <div>
+      <div class="strat-h"></div>
+      <p class="strat-p"></p>
+    </div>
+    <div>
+      <div class="strat-h"></div>
+      <p class="strat-p"></p>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const secs = document.querySelectorAll('section[id]');
+const links = document.querySelectorAll('.nav-link');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  secs.forEach(s => { if (window.scrollY >= s.offsetTop - 80) cur = s.id; });
+  links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + cur));
+}, {passive:true});
+links.forEach(l => l.addEventListener('click', e => {
+  e.preventDefault();
+  document.querySelector(l.getAttribute('href'))?.scrollIntoView({behavior:'smooth'});
+}));
+</script>
+</body>
+</html>
