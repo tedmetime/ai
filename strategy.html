@@ -3,527 +3,432 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>전략 프레임워크 — WHY Matrix & ERRC 캔버스 템플릿</title>
+<title>3 Lens Market Scan Framework — 가열포트 시장 분석 (수정판)</title>
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-:root{
-  --blue:#3182f6;--blue-light:#e8f3ff;--blue-mid:#b8d4fb;
-  --green:#05c072;--green-light:#e6faf2;
-  --orange:#ff6b35;--orange-light:#fff0e8;
-  --purple:#7c5cfc;--purple-light:#ede9ff;
-  --yellow:#f5a623;--yellow-light:#fff8e6;
-  --red:#ff4545;--red-light:#fff0f0;
-  --teal:#00c9b1;--teal-light:#e0faf7;
-  --bg:#f2f4f6;--white:#fff;
-  --text:#191f28;--text-sub:#4e5968;--text-light:#8b95a1;
-  --border:#e8ebed;
-  --shadow:0 4px 24px rgba(0,0,0,0.06);
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body {font-family:'Pretendard',-apple-system, BlinkMacSystemFont, sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
+:root{--blue:#3182f6;--blue-light:#e8f3ff;--green:#05c072;--green-light:#e6faf2;--orange:#ff6b35;--orange-light:#fff0e8;--purple:#7c5cfc;--purple-light:#ede9ff;--yellow:#f5a623;--yellow-light:#fff8e6;--red:#ff4545;--red-light:#fff0f0;--bg:#f2f4f6;--white:#fff;--text:#191f28;--text-sub:#4e5968;--text-light:#8b95a1;--border:#e8ebed;--card-shadow:0 4px 24px rgba(0,0,0,.06);--card-shadow-hover:0 12px 40px rgba(49,130,246,.14)}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;gap:8px;height:56px}.nav-brand{font-size:15px;font-weight:700;color:var(--text);margin-right:12px}.nav-dot{width:4px;height:4px;border-radius:50%;background:var(--border)}.nav-link{font-size:13px;font-weight:500;color:var(--text-sub);padding:6px 12px;border-radius:8px;cursor:pointer;transition:all .15s;text-decoration:none}.nav-link:hover{background:var(--bg);color:var(--text)}.nav-link.active{background:var(--blue-light);color:var(--blue)}
+.page{max-width:1200px;margin:0 auto;padding:0 24px 80px}
+.hero{padding:64px 0 48px;display:flex;flex-direction:column;gap:12px}.hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--blue-light);color:var(--blue);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;width:fit-content}.hero-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--blue)}.hero h1{font-size:40px;font-weight:800;letter-spacing:-1px;line-height:1.2}.hero h1 em{color:var(--blue);font-style:normal}.hero-sub{font-size:17px;color:var(--text-sub);max-width:560px}.hero-meta{display:flex;gap:24px;margin-top:8px;flex-wrap:wrap}.hero-meta-item{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-light)}.hero-meta-item strong{color:var(--text-sub)}
+.section{margin-top:56px}.section-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px}.section-title{font-size:22px;font-weight:800;letter-spacing:-.5px}.section-sub{font-size:14px;color:var(--text-light)}
+.card{background:var(--white);border-radius:20px;padding:28px;box-shadow:var(--card-shadow);transition:box-shadow .2s,transform .2s}.card:hover{box-shadow:var(--card-shadow-hover);transform:translateY(-2px)}
+.lens-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.lens-card{background:var(--white);border-radius:20px;padding:28px;box-shadow:var(--card-shadow);border-top:4px solid transparent;position:relative;overflow:hidden}.lens-card.l1{border-top-color:var(--blue)}.lens-card.l2{border-top-color:var(--green)}.lens-card.l3{border-top-color:var(--orange)}.lens-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px}.l1 .lens-icon{background:var(--blue-light)}.l2 .lens-icon{background:var(--green-light)}.l3 .lens-icon{background:var(--orange-light)}.lens-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}.l1 .lens-name{color:var(--blue)}.l2 .lens-name{color:var(--green)}.l3 .lens-name{color:var(--orange)}.lens-title{font-size:18px;font-weight:800;margin-bottom:8px}.lens-desc{font-size:13px;color:var(--text-sub);line-height:1.6;margin-bottom:20px}.stat-row{display:flex;gap:16px;flex-wrap:wrap}.stat-item{text-align:left}.stat-num{font-size:26px;font-weight:800;line-height:1}.l1 .stat-num{color:var(--blue)}.l2 .stat-num{color:var(--green)}.l3 .stat-num{color:var(--orange)}.stat-label{font-size:11px;color:var(--text-light);margin-top:3px}.lens-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}.lens-tag{font-size:11px;font-weight:600;padding:4px 10px;border-radius:8px;background:var(--bg);color:var(--text-sub)}
+.findings-wrap{overflow-x:auto}table.findings{width:100%;border-collapse:collapse;font-size:13px}table.findings th,table.findings td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--border)}table.findings thead th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-light);background:var(--bg);border-bottom:2px solid var(--border)}table.findings thead th:first-child{border-radius:12px 0 0 0}table.findings thead th:last-child{border-radius:0 12px 0 0}table.findings tbody tr:hover td{background:#fafafa}table.findings .attr{font-weight:700;color:var(--text)}.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:600}.badge.b-blue{background:var(--blue-light);color:var(--blue)}.badge.b-green{background:var(--green-light);color:var(--green)}.badge.b-orange{background:var(--orange-light);color:var(--orange)}.badge.b-gray{background:var(--bg);color:var(--text-sub)}.badge.b-red{background:var(--red-light);color:var(--red)}.badge.b-purple{background:var(--purple-light);color:var(--purple)}
+.venn-wrap{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}.venn-section{background:var(--white);border-radius:20px;padding:24px;box-shadow:var(--card-shadow)}.venn-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}.venn-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}.venn-title{font-size:14px;font-weight:800}.venn-sub{font-size:11px;color:var(--text-light)}.insight-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}.insight-item:last-child{border-bottom:none}.insight-bullet{width:6px;height:6px;border-radius:50%;margin-top:7px;flex-shrink:0}.insight-text{font-size:12px;color:var(--text-sub);line-height:1.6}.insight-text strong{color:var(--text);font-weight:700}
+.opp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}.opp-card{background:var(--white);border-radius:20px;padding:28px;box-shadow:var(--card-shadow);position:relative;overflow:hidden}.opp-num{position:absolute;right:24px;top:24px;font-size:48px;font-weight:800;opacity:.06;line-height:1}.opp-badge{margin-bottom:12px}.opp-title{font-size:17px;font-weight:800;margin-bottom:8px;letter-spacing:-.3px}.opp-desc{font-size:13px;color:var(--text-sub);line-height:1.7;margin-bottom:16px}.opp-evidence{display:flex;flex-direction:column;gap:6px}.opp-ev-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-sub)}.ev-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.brand-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.brand-pill{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:100px;font-size:12px;font-weight:700;background:var(--white);border:1.5px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.04)}.brand-pill .dot{width:6px;height:6px;border-radius:50%}
+.signal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.signal-card{background:var(--white);border-radius:16px;padding:20px;box-shadow:var(--card-shadow);text-align:center}.signal-icon{font-size:28px;margin-bottom:10px}.signal-title{font-size:13px;font-weight:800;margin-bottom:6px}.signal-desc{font-size:11px;color:var(--text-sub);line-height:1.6}.signal-bars{display:flex;gap:3px;margin-top:12px;justify-content:center}.signal-bar{height:4px;border-radius:2px;background:var(--border)}.signal-bar.fill-blue{background:var(--blue)}.signal-bar.fill-green{background:var(--green)}.signal-bar.fill-orange{background:var(--orange)}
+.summary-box{background:linear-gradient(135deg,#1a56db 0%,#3182f6 50%,#4e9af1 100%);border-radius:24px;padding:40px;color:#fff;display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px;margin-top:56px}.summary-item h3{font-size:13px;font-weight:700;opacity:.7;margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px}.summary-item p{font-size:14px;line-height:1.7;opacity:.9}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+@media(max-width:900px){.lens-grid{grid-template-columns:1fr}.opp-grid{grid-template-columns:1fr}.venn-wrap{grid-template-columns:1fr}.signal-grid{grid-template-columns:repeat(2,1fr)}.summary-box{grid-template-columns:1fr}.hero h1{font-size:28px}}
+.highlight-box{flex:1;min-width:200px;background:var(--bg);border-radius:14px;padding:16px 20px}.highlight-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-light);margin-bottom:6px}.highlight-value{font-size:15px;font-weight:800;color:var(--text);line-height:1.4}
+.progress-wrap{display:flex;flex-direction:column;gap:10px}.progress-item{display:flex;align-items:center;gap:12px}.progress-label{font-size:12px;font-weight:600;color:var(--text-sub);width:130px;flex-shrink:0}.progress-bar-bg{flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}.progress-bar-fill{height:100%;border-radius:3px;transition:width 1s}.progress-value{font-size:12px;font-weight:700;width:40px;text-align:right}
+.award-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700}.award-if{background:#fff7e6;color:#c97d00}.award-reddot{background:#fff0f0;color:#cc2222}
+.tab-bar{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:12px;margin-bottom:20px;width:fit-content}.tab-btn{padding:8px 18px;border-radius:9px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text-sub);transition:all .15s;font-family:inherit}.tab-btn.active{background:var(--white);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.07)}.tab-content{display:none}.tab-content.active{display:block}
+.cross-tab-content{}.cross-tab-btn-active-std{background:var(--blue-light)!important;color:var(--blue)!important;border-color:var(--blue)!important}.cross-tab-btn-active-neck{background:var(--green-light)!important;color:var(--green)!important;border-color:var(--green)!important}.cross-tab-btn-active-tea{background:var(--yellow-light)!important;color:#c97d00!important;border-color:var(--yellow)!important}.cross-tab-btn-active-baby{background:var(--purple-light)!important;color:var(--purple)!important;border-color:var(--purple)!important}
 
-.nav{position:sticky;top:0;z-index:200;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;gap:6px;height:56px;}
-.nav-brand{font-size:15px;font-weight:800;margin-right:8px;}
-.nav-sep{width:1px;height:16px;background:var(--border);}
-.nav-link{font-size:13px;font-weight:500;color:var(--text-sub);padding:6px 12px;border-radius:8px;cursor:pointer;transition:all .15s;text-decoration:none;}
-.nav-link:hover{background:var(--bg);}
-.nav-link.active{background:var(--blue-light);color:var(--blue);}
-
-.page{max-width:1280px;margin:0 auto;padding:0 24px 100px;}
-
-.hero{padding:56px 0 40px;display:flex;flex-direction:column;gap:10px;}
-.hero-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--blue-light),var(--purple-light));color:var(--blue);font-size:12px;font-weight:700;padding:4px 14px;border-radius:20px;width:fit-content;}
-.hero h1{font-size:36px;font-weight:800;letter-spacing:-1px;line-height:1.2;}
-.hero h1 em{color:var(--blue);font-style:normal;}
-.hero-sub{font-size:15px;color:var(--text-sub);max-width:680px;}
-
-.section{margin-top:64px;}
-.section-label{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 12px;border-radius:8px;margin-bottom:10px;}
-.section-title{font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:6px;}
-.section-sub{font-size:14px;color:var(--text-sub);margin-bottom:24px;}
-.card{background:var(--white);border-radius:20px;box-shadow:var(--shadow);}
-.card-pad{padding:32px;}
-
-.insight-bar{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
-.ins-chip{background:var(--bg);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text-sub);line-height:1.6;}
-.ins-chip strong{color:var(--text);}
-.ins-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;}
-
-/* WHY MATRIX */
-.why-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
-.c3-grid{display:grid;grid-template-columns:1fr;gap:14px;}
-.c3-card{border-radius:16px;padding:20px;}
-.c3-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
-.c3-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
-.c3-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.7;}
-.c3-title{font-size:14px;font-weight:800;}
-.c3-items{display:flex;flex-direction:column;gap:6px;}
-.c3-item{display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.5;}
-.c3-dot{width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0;}
-
-.why-cross{margin-top:24px;border-radius:20px;padding:28px;background:linear-gradient(135deg,#1a56db,#3182f6);color:white;}
-.why-cross-head{font-size:11px;font-weight:700;opacity:.7;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px;}
-.why-cross-title{font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:14px;}
-.why-cross-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
-.why-cross-item{background:rgba(255,255,255,.12);border-radius:12px;padding:14px;}
-.why-cross-item-label{font-size:10px;opacity:.7;margin-bottom:4px;font-weight:600;}
-.why-cross-item-text{font-size:12px;font-weight:700;line-height:1.5;}
-
-.evidence-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px;}
-.ev-card{border-radius:14px;padding:18px;}
-.ev-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
-.ev-items{display:flex;flex-direction:column;gap:5px;}
-.ev-item{font-size:11px;padding:6px 10px;border-radius:8px;line-height:1.5;}
-
-/* ERRC CANVAS */
-.errc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);}
-.errc-col{display:flex;flex-direction:column;}
-.errc-header{padding:20px 20px 14px;display:flex;flex-direction:column;align-items:center;text-align:center;}
-.errc-header-icon{font-size:28px;margin-bottom:6px;}
-.errc-header-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:.8;margin-bottom:2px;}
-.errc-header-title{font-size:18px;font-weight:800;}
-.errc-header-sub{font-size:10px;opacity:.75;margin-top:3px;line-height:1.5;}
-.errc-body{flex:1;background:var(--white);padding:14px 16px 20px;display:flex;flex-direction:column;gap:8px;}
-.errc-item{border-radius:10px;padding:12px 14px;}
-.errc-item-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;opacity:.7;}
-.errc-item-title{font-size:12px;font-weight:800;margin-bottom:3px;}
-.errc-item-desc{font-size:11px;color:var(--text-sub);line-height:1.5;}
-
-.errc-impact{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px;}
-.errc-impact-card{border-radius:14px;padding:14px;text-align:center;}
-.errc-impact-num{font-size:22px;font-weight:800;margin-bottom:2px;}
-.errc-impact-label{font-size:11px;color:var(--text-sub);}
-
-.strat-strip{margin-top:48px;background:linear-gradient(135deg,#191f28,#2d3748);border-radius:24px;padding:36px 40px;color:white;}
-.strat-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:20px;}
-.strat-h{font-size:11px;font-weight:700;opacity:.6;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;}
-.strat-p{font-size:13px;opacity:.88;line-height:1.7;}
-.strat-title{font-size:20px;font-weight:800;opacity:.95;letter-spacing:-.3px;}
-.strat-sub{font-size:13px;opacity:.7;margin-top:6px;}
-
-@media(max-width:900px){
-  .why-layout{grid-template-columns:1fr;}
-  .why-cross-grid{grid-template-columns:1fr;}
-  .evidence-grid{grid-template-columns:1fr;}
-  .errc-grid{grid-template-columns:1fr 1fr;}
-  .errc-impact{grid-template-columns:1fr 1fr;}
-  .strat-grid{grid-template-columns:1fr;}
-  .hero h1{font-size:26px;}
-}
+/* ═══ 교차 매트릭스 상세 분석 섹션 추가 스타일 ═══ */
+.deep-section-label{display:flex;align-items:center;gap:12px;margin-bottom:16px;margin-top:40px}.deep-section-label:first-child{margin-top:0}.deep-section-label-text{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-light)}.deep-section-label-line{flex:1;height:1px;background:var(--border)}
+.deep-cat-tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
+.deep-cat-tab{display:flex;align-items:center;gap:7px;padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:var(--white);font-size:13px;font-weight:600;color:var(--text-sub);cursor:pointer;transition:all .15s;font-family:inherit;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.deep-cat-tab:hover{border-color:var(--text-light);color:var(--text)}
+.deep-cat-tab.dactive-std{background:var(--blue-light);border-color:var(--blue);color:var(--blue)}
+.deep-cat-tab.dactive-neck{background:var(--green-light);border-color:var(--green);color:var(--green)}
+.deep-cat-tab.dactive-tea{background:var(--yellow-light);border-color:var(--yellow);color:#c97d00}
+.deep-cat-tab.dactive-baby{background:var(--purple-light);border-color:var(--purple);color:var(--purple)}
+.deep-cat-dot{width:7px;height:7px;border-radius:50%}
+.deep-cat-section{display:none}.deep-cat-section.dactive{display:block}
+.deep-matrix-wrap{overflow-x:auto;border-radius:16px;border:1px solid var(--border);background:var(--white);box-shadow:var(--card-shadow)}
+table.deep-matrix{width:100%;border-collapse:collapse;font-size:12.5px}
+table.deep-matrix thead th{padding:12px 16px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-light);background:var(--bg);border-bottom:2px solid var(--border);white-space:nowrap}
+table.deep-matrix tbody tr:not(:last-child) td{border-bottom:1px solid var(--border)}
+table.deep-matrix tbody tr:hover td{background:rgba(49,130,246,.02)}
+table.deep-matrix td{padding:13px 16px;vertical-align:top;line-height:1.55;background:var(--white)}
+.dm-attr{font-weight:700;color:var(--text);white-space:nowrap;min-width:110px;font-size:13px}
+.dm-l1{color:var(--blue);font-weight:600}.dm-l2{color:var(--green);font-weight:600}.dm-l3{color:var(--orange);font-weight:600}
+.dm-sub{font-size:11px;color:var(--text-light);margin-top:3px;line-height:1.5}
+.dm-verdict{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;margin-bottom:6px}
+.dm-v-gap{background:var(--red-light);color:var(--red);border:1px solid rgba(255,69,69,.2)}
+.dm-v-conv{background:var(--purple-light);color:var(--purple);border:1px solid rgba(124,92,252,.2)}
+.dm-v-opp{background:var(--yellow-light);color:#c97d00;border:1px solid rgba(245,166,35,.2)}
+.dm-v-ok{background:var(--green-light);color:var(--green);border:1px solid rgba(5,192,114,.2)}
+.dm-v-future{background:var(--purple-light);color:var(--purple);border:1px solid rgba(124,92,252,.2)}
+.dm-verdict-detail{font-size:11.5px;color:var(--text-sub);line-height:1.6}
+.deep-insight-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+.deep-insight-box{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.03)}
+.deep-insight-box.di-l1{border-left:3px solid var(--blue)}.deep-insight-box.di-l2{border-left:3px solid var(--green)}.deep-insight-box.di-l3{border-left:3px solid var(--orange)}
+.dib-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-light);margin-bottom:8px}
+.dib-content{font-size:12px;color:var(--text-sub);line-height:1.65}.dib-content strong{color:var(--text);font-weight:700}
+.deep-sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:40px}
+.deep-sum-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:var(--card-shadow)}
+.deep-sum-cat{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.deep-sum-title{font-size:15px;font-weight:700;margin-bottom:10px;line-height:1.3}
+.deep-sum-points{list-style:none;display:flex;flex-direction:column;gap:6px}
+.deep-sum-points li{font-size:11.5px;color:var(--text-sub);line-height:1.5;padding-left:12px;position:relative}
+.deep-sum-points li::before{content:'—';position:absolute;left:0;color:var(--text-light)}
+.deep-factcheck{background:rgba(255,69,69,.04);border:1px solid rgba(255,69,69,.15);border-radius:14px;padding:16px 20px;margin-bottom:16px;font-size:12px;color:var(--text-sub);line-height:1.6}
+@media(max-width:900px){.deep-sum-grid{grid-template-columns:1fr 1fr}.deep-insight-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-
-<nav class="nav">
-  <span class="nav-brand">Strategy Framework</span>
-  <span class="nav-sep"></span>
-  <a class="nav-link active" href="#why">⑩ WHY Matrix</a>
-  <a class="nav-link" href="#errc">⑪ ERRC 캔버스</a>
-</nav>
-
+<nav class="nav"><span class="nav-brand">3 Lens Market Scan</span><span class="nav-dot"></span><a class="nav-link active" href="#overview">개요</a><a class="nav-link" href="#lens-data">3렌즈 데이터</a><a class="nav-link" href="#deep-cross">상세 교차분석</a><a class="nav-link" href="#opportunity">기회 영역</a></nav>
 <div class="page">
+<section class="hero" id="overview">
+  <h1>3가지 렌즈로 읽는<br><em>전기포트 시장</em></h1>
+  
+  <p>시장 판매 데이터 · 전문가 추천 · 디자인 어워드 수상작을 교차 분석하여 경쟁 구도와 기회 영역 도출</p>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-badge"></div>
-  <h1><br><em></em></h1>
-  <p class="hero-sub"></p>
-</section>
-
-<!-- ══════════════════════════════════════
-     10. WHY MATRIX (3C)
-══════════════════════════════════════ -->
-<section class="section" id="why">
-  <div class="section-label" style="background:var(--blue-light);color:var(--blue);">Framework 10 — WHY Matrix</div>
-  <div class="section-title"></div>
-  <div class="section-sub"></div>
-
-  <div class="why-layout">
-
-    <div class="c3-grid">
-
-      <!-- Market -->
-      <div class="c3-card" style="background:var(--blue-light);">
-        <div class="c3-head">
-          <div class="c3-icon" style="background:var(--blue);color:white;">M</div>
-          <div>
-            <div class="c3-label" style="color:var(--blue);"></div>
-            <div class="c3-title"></div>
-          </div>
-        </div>
-        <div class="c3-items">
-          <div class="c3-item"><div class="c3-dot" style="background:var(--blue);"></div><span><strong></strong></span></div>
-          <div class="c3-item"><div class="c3-dot" style="background:var(--blue);"></div><span><strong></strong></span></div>
-          <div class="c3-item"><div class="c3-dot" style="background:var(--blue);"></div><span><strong></strong></span></div>
-          <div class="c3-item"><div class="c3-dot" style="background:var(--blue);"></div><span><strong></strong></span></div>
-        </div>
-      </div>
-
-      <!-- Customer -->
-      <div class="c3-card" style="background:var(--purple-light);">
-        <div class="c3-head">
-          <div class="c3-icon" style="background:var(--purple);color:white;">C</div>
-          <div>
-            <div class="c3-label" style="color:var(--purple);"></div>
-            <div class="c3-title"></div>
-          </div>
-        </div>
-        <div class="c3-items">
-          <div class="c3-item"><div class="c3-dot" style="background:var(--purple);"></div><span><strong></strong></span></div>
-          <div class="c3-item"><div class="c3-dot" style="background:var(--purple);"></div><span><strong></strong></span></div>
-          <div class="c3-item"><div class="c3-dot" style="background:var(--purple);"></div><span><strong></strong></span></div>
-          <div class="c3-item"><div class="c3-dot" style="background:var(--purple);"></div><span><strong></strong></span></div>
-        </div>
-      </div>
-
-      <!-- Competitor -->
-      <div class="c3-card" style="background:var(--green-light);">
-        <div class="c3-head">
-          <div class="c3-icon" style="background:var(--green);color:white;">C</div>
-          <div>
-            <div class="c3-label" style="color:var(--green);"></div>
-            <div class="c3-title"></div>
-          </div>
-        </div>
-        <div class="c3-items">
-          <div class="c3-item"><div class="c3-dot" style="background:var(--green);"></div><span><strong></strong></span></div>
-          <div class="c3-item"><div class="c3-dot" style="background:var(--green);"></div><span><strong></strong></span></div>
-          <div class="c3-item"><div class="c3-dot" style="background:var(--green);"></div><span><strong></strong></span></div>
-          <div class="c3-item"><div class="c3-dot" style="background:var(--green);"></div><span><strong></strong></span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Venn SVG -->
-    <div>
-      <div class="card card-pad" style="text-align:center;">
-        <div style="font-size:14px;font-weight:800;margin-bottom:4px;"></div>
-        <div style="font-size:11px;color:var(--text-sub);margin-bottom:16px;"></div>
-        <svg viewBox="0 0 400 380" width="100%" style="display:block;max-height:340px;">
-          <defs>
-            <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-          </defs>
-          <circle cx="200" cy="120" r="110" fill="#3182f6" opacity=".13" stroke="#3182f6" stroke-width="2"/>
-          <circle cx="130" cy="250" r="110" fill="#7c5cfc" opacity=".13" stroke="#7c5cfc" stroke-width="2"/>
-          <circle cx="270" cy="250" r="110" fill="#05c072" opacity=".13" stroke="#05c072" stroke-width="2"/>
-          <circle cx="200" cy="210" r="44" fill="white" opacity=".9"/>
-          <circle cx="200" cy="210" r="44" fill="#3182f6" opacity=".12" filter="url(#glow)"/>
-          <text x="200" y="48" text-anchor="middle" font-size="13" font-weight="800" fill="#3182f6">Market</text>
-          <text x="200" y="62" text-anchor="middle" font-size="10" fill="#3182f6" opacity=".8"></text>
-          <text x="70" y="320" text-anchor="middle" font-size="13" font-weight="800" fill="#7c5cfc">Customer</text>
-          <text x="70" y="334" text-anchor="middle" font-size="10" fill="#7c5cfc" opacity=".8"></text>
-          <text x="330" y="320" text-anchor="middle" font-size="13" font-weight="800" fill="#05c072">Competitor</text>
-          <text x="330" y="334" text-anchor="middle" font-size="10" fill="#05c072" opacity=".8"></text>
-          <text x="200" y="198" text-anchor="middle" font-size="10" font-weight="800" fill="#1a56db">WHY</text>
-          <text x="200" y="212" text-anchor="middle" font-size="9" font-weight="700" fill="#3182f6"></text>
-          <text x="200" y="226" text-anchor="middle" font-size="8" fill="#4e5968"></text>
-          <text x="155" y="168" text-anchor="middle" font-size="8.5" fill="#4e5968" font-weight="600"></text>
-          <text x="155" y="179" text-anchor="middle" font-size="8.5" fill="#4e5968" font-weight="600"></text>
-          <text x="245" y="168" text-anchor="middle" font-size="8.5" fill="#4e5968" font-weight="600"></text>
-          <text x="245" y="179" text-anchor="middle" font-size="8.5" fill="#4e5968" font-weight="600"></text>
-          <text x="200" y="274" text-anchor="middle" font-size="8.5" fill="#4e5968" font-weight="600"></text>
-          <text x="200" y="285" text-anchor="middle" font-size="8.5" fill="#4e5968" font-weight="600"></text>
-        </svg>
-      </div>
-    </div>
-  </div>
-
-  <!-- Evidence Grid -->
-  <div class="evidence-grid" style="margin-top:24px;">
-    <div class="ev-card" style="background:var(--blue-light);">
-      <div class="ev-label" style="color:var(--blue);"></div>
-      <div class="ev-items">
-        <div class="ev-item" style="background:rgba(49,130,246,.07);"></div>
-        <div class="ev-item" style="background:rgba(49,130,246,.07);"></div>
-        <div class="ev-item" style="background:rgba(49,130,246,.07);"></div>
-      </div>
-    </div>
-    <div class="ev-card" style="background:var(--purple-light);">
-      <div class="ev-label" style="color:var(--purple);"></div>
-      <div class="ev-items">
-        <div class="ev-item" style="background:rgba(124,92,252,.07);"></div>
-        <div class="ev-item" style="background:rgba(124,92,252,.07);"></div>
-        <div class="ev-item" style="background:rgba(124,92,252,.07);"></div>
-      </div>
-    </div>
-    <div class="ev-card" style="background:var(--green-light);">
-      <div class="ev-label" style="color:var(--green);"></div>
-      <div class="ev-items">
-        <div class="ev-item" style="background:rgba(5,192,114,.07);"></div>
-        <div class="ev-item" style="background:rgba(5,192,114,.07);"></div>
-        <div class="ev-item" style="background:rgba(5,192,114,.07);"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- WHY Conclusion -->
-  <div class="why-cross" style="margin-top:24px;">
-    <div class="why-cross-head"></div>
-    <div class="why-cross-title"></div>
-    <div class="why-cross-grid">
-      <div class="why-cross-item">
-        <div class="why-cross-item-label"></div>
-        <div class="why-cross-item-text"></div>
-      </div>
-      <div class="why-cross-item">
-        <div class="why-cross-item-label"></div>
-        <div class="why-cross-item-text"></div>
-      </div>
-      <div class="why-cross-item">
-        <div class="why-cross-item-label"></div>
-        <div class="why-cross-item-text"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="insight-bar" style="margin-top:16px;">
-    <div class="ins-chip"><span class="ins-dot" style="background:var(--blue);"></span></div>
-    <div class="ins-chip"><span class="ins-dot" style="background:var(--purple);"></span></div>
-    <div class="ins-chip"><span class="ins-dot" style="background:var(--red);"></span></div>
+  <div class="hero-meta">
+    <div class="hero-meta-item">📊 <strong>5개국</strong> 판매 데이터</div>
+    <div class="hero-meta-item">📰 <strong>5개 매거진</strong> 전문가 추천</div>
+    <div class="hero-meta-item">🏆 <strong>118개</strong> 디자인 어워드 수상작</div>
+    <div class="hero-meta-item">🔍 <strong>4개 카테고리</strong> 분석</div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════
-     11. ERRC CANVAS
-══════════════════════════════════════ -->
-<section class="section" id="errc">
-  <div class="section-label" style="background:var(--orange-light);color:var(--orange);">Framework 11 — ERRC Blue Ocean Strategy</div>
-  <div class="section-title"></div>
-  <div class="section-sub"></div>
+<section class="section" id="lens-data"><div class="section-header"><div><div class="section-title">3가지 렌즈 개요</div><div class="section-sub">각 렌즈가 포착하는 시장의 다른 단면</div></div></div>
+<div class="lens-grid">
+<div class="lens-card l1"><div class="lens-icon">📊</div><div class="lens-name">Lens 1</div><div class="lens-title">시장 렌즈</div><div class="lens-desc">5개국(한·미·중·일·독) 주요 이커머스 판매 순위 기준 상위 제품을 분석. <strong>실제 소비자가 선택한</strong> 제품의 디자인·소재·가격 패턴을 파악합니다.</div><div class="stat-row"><div class="stat-item"><div class="stat-num">5</div><div class="stat-label">분석 국가</div></div><div class="stat-item"><div class="stat-num">4</div><div class="stat-label">카테고리</div></div><div class="stat-item"><div class="stat-num">45+</div><div class="stat-label">제품 분석</div></div></div><div class="lens-tags"><span class="lens-tag">쿠팡 · 아마존 · JD</span><span class="lens-tag">판매량 기준</span><span class="lens-tag">실구매 데이터</span></div></div>
+<div class="lens-card l2"><div class="lens-icon">📰</div><div class="lens-name">Lens 2</div><div class="lens-title">전문가 렌즈</div><div class="lens-desc">Wirecutter · Forbes Vetted · Consumer Reports · Which?(UK) · CHOICE(AU) 등 신뢰도 높은 소비자 매거진의 <strong>전문가 추천 기준</strong>을 분석합니다.</div><div class="stat-row"><div class="stat-item"><div class="stat-num">5</div><div class="stat-label">전문 매거진</div></div><div class="stat-item"><div class="stat-num">25+</div><div class="stat-label">추천 제품</div></div><div class="stat-item"><div class="stat-num">3</div><div class="stat-label">평가 카테고리</div></div></div><div class="lens-tags"><span class="lens-tag">Wirecutter #1</span><span class="lens-tag">Forbes Vetted</span><span class="lens-tag">Consumer Reports</span></div></div>
+<div class="lens-card l3"><div class="lens-icon">🏆</div><div class="lens-name">Lens 3</div><div class="lens-title">디자인 어워드 렌즈</div><div class="lens-desc">iF Design Award · Red Dot · IDEA Award 수상작 118점을 분석. <strong>디자인 혁신의 방향성</strong>과 미래 트렌드 선행 지표를 확인합니다.</div><div class="stat-row"><div class="stat-item"><div class="stat-num">118</div><div class="stat-label">수상 제품</div></div><div class="stat-item"><div class="stat-num">3</div><div class="stat-label">어워드</div></div><div class="stat-item"><div class="stat-num">1962~2026Y</div><div class="stat-label">수상 기간</div></div></div><div class="lens-tags"><span class="lens-tag">iF Design Award</span><span class="lens-tag">Red Dot</span><span class="lens-tag">IDEA Award</span></div></div>
+</div></section>
 
-  <div class="errc-grid">
+<section class="section"><div class="section-header"><div><div class="section-title">렌즈별 핵심 데이터</div><div class="section-sub">카테고리·소재·디자인·기능 4개 축 분석</div></div></div>
+<div class="tab-bar"><button class="tab-btn active" onclick="switchTab('tab-market',this)">시장 렌즈</button><button class="tab-btn" onclick="switchTab('tab-expert',this)">전문가 렌즈</button><button class="tab-btn" onclick="switchTab('tab-award',this)">어워드 렌즈</button></div>
 
-    <!-- ELIMINATE -->
-    <div class="errc-col">
-      <div class="errc-header" style="background:var(--red);">
-        <div class="errc-header-icon">✕</div>
-        <div class="errc-header-label" style="color:rgba(255,255,255,.75);">Eliminate</div>
-        <div class="errc-header-title" style="color:white;">제거</div>
-        <div class="errc-header-sub" style="color:rgba(255,255,255,.8);"></div>
+<div id="tab-market" class="tab-content active"><div class="card">
+  <div style="font-size:14px;font-weight:800;margin-bottom:4px;">카테고리별 국가별 상위 3제품 분석</div>
+  <div style="font-size:11px;color:var(--text-sub);margin-bottom:14px;">5개국 이커머스 판매 상위 3위권 전수 분석 + 글로벌 경쟁사 라인업 Appendix 포함</div>
+  <div style="display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:10px;width:fit-content;margin-bottom:16px;">
+    <button class="cat-btn" onclick="switchCat('cat-std',this)" style="padding:6px 14px;border-radius:7px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:var(--white);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.07);">기본형</button>
+    <button class="cat-btn" onclick="switchCat('cat-neck',this)" style="padding:6px 14px;border-radius:7px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:var(--text-sub);">구스넥</button>
+    <button class="cat-btn" onclick="switchCat('cat-tea',this)" style="padding:6px 14px;border-radius:7px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:var(--text-sub);">티포트</button>
+    <button class="cat-btn" onclick="switchCat('cat-baby',this)" style="padding:6px 14px;border-radius:7px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:var(--text-sub);">분유포트</button>
+  </div>
+
+  <div id="cat-std" class="cat-content" style="display:block;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="background:var(--bg);border-radius:12px;padding:12px;"><div style="font-size:10px;font-weight:800;color:var(--blue);margin-bottom:8px;">🇰🇷 KOREA — 쿠팡 TOP 3</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;"><div style="background:var(--white);border-radius:8px;padding:8px;"><div style="font-size:9px;color:var(--text-light);font-weight:700;">1위</div><div style="font-size:11px;font-weight:800;">Philips HD9318</div><div style="font-size:10px;color:var(--text-sub);">₩23,210<br>테이퍼형·플라스틱·유광</div></div><div style="background:var(--white);border-radius:8px;padding:8px;"><div style="font-size:9px;color:var(--text-light);font-weight:700;">2위</div><div style="font-size:11px;font-weight:800;">테팔 세이프티</div><div style="font-size:10px;color:var(--text-sub);">₩31,820<br>직선형·플라스틱·유광</div></div><div style="background:var(--white);border-radius:8px;padding:8px;"><div style="font-size:9px;color:var(--text-light);font-weight:700;">3위</div><div style="font-size:11px;font-weight:800;">테팔 로프트</div><div style="font-size:10px;color:var(--text-sub);">₩36,300<br>유선형·플라스틱·무광</div></div></div><div style="font-size:10px;color:var(--text-sub);margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">→ 플라스틱 소재 주류 · 원버튼 조작 100%</div></div>
+          <div style="background:var(--bg);border-radius:12px;padding:12px;"><div style="font-size:10px;font-weight:800;color:var(--blue);margin-bottom:8px;">🇺🇸 USA — 아마존 TOP 3</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;"><div style="background:var(--white);border-radius:8px;padding:8px;"><div style="font-size:9px;color:var(--text-light);font-weight:700;">1위</div><div style="font-size:11px;font-weight:800;">COSORI Glass</div><div style="font-size:10px;color:var(--text-sub);">$27.99<br>유리+LED무드등</div></div><div style="background:var(--white);border-radius:8px;padding:8px;"><div style="font-size:9px;color:var(--text-light);font-weight:700;">2위</div><div style="font-size:11px;font-weight:800;">셰프맨 데일리</div><div style="font-size:10px;color:var(--text-sub);">$34.98<br>유리·핸들버튼식</div></div><div style="background:var(--white);border-radius:8px;padding:8px;"><div style="font-size:9px;color:var(--text-light);font-weight:700;">3위</div><div style="font-size:11px;font-weight:800;">Amazon Basics</div><div style="font-size:10px;color:var(--text-sub);">$23.79<br>유리·단순 원버튼</div></div></div><div style="font-size:10px;color:var(--text-sub);margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">→ 투명 유리 본체 100% · LED 무드등 차별화 · $20~35 밀집</div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;"><div style="background:var(--bg);border-radius:12px;padding:10px;"><div style="font-size:10px;font-weight:800;color:var(--blue);margin-bottom:6px;">🇨🇳 CHINA (JD)</div><div style="font-size:10px;color:var(--text);font-weight:700;">CHIGO · 미디어 × 2</div><div style="font-size:10px;color:var(--text-sub);margin-top:4px;">플라스틱·단순 가열<br>내수 보급형 강세</div></div><div style="background:var(--bg);border-radius:12px;padding:10px;"><div style="font-size:10px;font-weight:800;color:var(--blue);margin-bottom:6px;">🇯🇵 JAPAN</div><div style="font-size:10px;color:var(--text);font-weight:700;">HIRO · 야마젠</div><div style="font-size:10px;color:var(--text-sub);margin-top:4px;">소형·콤팩트 설계<br>안전 기능 강조</div></div><div style="background:var(--bg);border-radius:12px;padding:10px;"><div style="font-size:10px;font-weight:800;color:var(--blue);margin-bottom:6px;">🇪🇺 EUROPE</div><div style="font-size:10px;color:var(--text);font-weight:700;">Emerio · Philips · 보쉬</div><div style="font-size:10px;color:var(--text-sub);margin-top:4px;">유럽 인증·품질 중심<br>€18~50 가격대</div></div></div>
+        </div>
       </div>
-      <div class="errc-body">
-        <div class="errc-item" style="background:var(--red-light);">
-          <div class="errc-item-tag" style="color:var(--red);"></div>
-          <div class="errc-item-title"></div>
-          <div class="errc-item-desc"></div>
-        </div>
-        <div class="errc-item" style="background:var(--red-light);">
-          <div class="errc-item-tag" style="color:var(--red);"></div>
-          <div class="errc-item-title"></div>
-          <div class="errc-item-desc"></div>
-        </div>
-        <div class="errc-item" style="background:var(--red-light);">
-          <div class="errc-item-tag" style="color:var(--red);"></div>
-          <div class="errc-item-title"></div>
-          <div class="errc-item-desc"></div>
-        </div>
-        <div class="errc-item" style="background:var(--red-light);">
-          <div class="errc-item-tag" style="color:var(--red);"></div>
-          <div class="errc-item-title"></div>
-          <div class="errc-item-desc"></div>
+      <div>
+        <div style="font-size:12px;font-weight:800;margin-bottom:10px;">기본형 글로벌 경쟁사 라인업 (Appendix)</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"><div style="background:var(--bg);border-radius:10px;padding:10px;"><div style="font-size:10px;font-weight:800;color:var(--text-sub);margin-bottom:4px;">Cuisinart 3개 모델</div><div style="font-size:11px;">CPK-17P1 / JK-17P1 / CK-10TR — <span style="color:var(--text-sub);">테이퍼형, 온도제어 세분화, ₩2~19만</span></div></div><div style="background:var(--bg);border-radius:10px;padding:10px;"><div style="font-size:10px;font-weight:800;color:var(--text-sub);margin-bottom:4px;">Oster 6개 모델</div><div style="font-size:11px;">BVSTKT 시리즈 — <span style="color:var(--text-sub);">다양한 형상, ₩4~14만</span></div></div><div style="background:var(--bg);border-radius:10px;padding:10px;"><div style="font-size:10px;font-weight:800;color:var(--text-sub);margin-bottom:4px;">Tiger PTV-A080/A120 주목</div><div style="font-size:11px;">— <span style="color:var(--orange);font-weight:700;">조그 다이얼 탑재</span> <span style="color:var(--text-sub);">기본형 희귀 정밀 조작, ₩8~11만</span></div></div></div>
+        <div style="font-size:12px;font-weight:800;margin-bottom:10px;">총 65개 모델 기준</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+          <div class="highlight-box"><div class="highlight-label">형상 분포</div><div class="highlight-value" style="font-size:11px;line-height:1.4;">테이퍼 38% | 유선형 38%<br>직선형 22% | 숄더형 2%</div></div>
+          <div class="highlight-box"><div class="highlight-label">소재 특성</div><div class="highlight-value" style="font-size:11px;line-height:1.4;">외부: 플라43% | STS43% | 유리14%<br>내부: STS 91%</div></div>
+          <div class="highlight-box"><div class="highlight-label">컨트롤</div><div class="highlight-value" style="font-size:11px;line-height:1.4;">77% 원버튼/라커형<br>디스플레이 91% 미적용</div></div>
+          <div class="highlight-box"><div class="highlight-label">가격 범위</div><div class="highlight-value" style="font-size:10px;line-height:1.3;">[국가별] 미:3.1~4.6만 | 유:2.7~4.1만<br>중:0.8~1.9만 | 일:1.5~2.4만</div></div>
         </div>
       </div>
     </div>
-
-    <!-- REDUCE -->
-    <div class="errc-col">
-      <div class="errc-header" style="background:var(--orange);">
-        <div class="errc-header-icon">↓</div>
-        <div class="errc-header-label" style="color:rgba(255,255,255,.75);">Reduce</div>
-        <div class="errc-header-title" style="color:white;">축소</div>
-        <div class="errc-header-sub" style="color:rgba(255,255,255,.8);"></div>
+    <div style="background:var(--blue-light); border-radius:16px; padding:24px; margin-top:20px;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+        <span style="font-size:16px;">📊</span>
+        <div style="font-size:14px; font-weight:800; color:var(--blue);">기본형 가열포트 시장 분석 결론</div>
       </div>
-      <div class="errc-body">
-        <div class="errc-item" style="background:var(--orange-light);">
-          <div class="errc-item-tag" style="color:var(--orange);"></div>
-          <div class="errc-item-title"></div>
-          <div class="errc-item-desc"></div>
-        </div>
-        <div class="errc-item" style="background:var(--orange-light);">
-          <div class="errc-item-tag" style="color:var(--orange);"></div>
-          <div class="errc-item-title"></div>
-          <div class="errc-item-desc"></div>
-        </div>
-        <div class="errc-item" style="background:var(--orange-light);">
-          <div class="errc-item-tag" style="color:var(--orange);"></div>
-          <div class="errc-item-title"></div>
-          <div class="errc-item-desc"></div>
-        </div>
-        <div class="errc-item" style="background:var(--orange-light);">
-          <div class="errc-item-tag" style="color:var(--orange);"></div>
-          <div class="errc-item-title"></div>
-          <div class="errc-item-desc"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- RAISE -->
-    <div class="errc-col">
-      <div class="errc-header" style="background:var(--blue);">
-        <div class="errc-header-icon">↑</div>
-        <div class="errc-header-label" style="color:rgba(255,255,255,.75);">Raise</div>
-        <div class="errc-header-title" style="color:white;">강화</div>
-        <div class="errc-header-sub" style="color:rgba(255,255,255,.8);"></div>
-      </div>
-      <div class="errc-body">
-        <div class="errc-item" style="background:var(--blue-light);">
-          <div class="errc-item-tag" style="color:var(--blue);"></div>
-          <div class="errc-item-title"></div>
-          <div class="errc-item-desc"></div>
-        </div>
-        <div class="errc-item" style="background:var(--blue-light);">
-          <div class="errc-item-tag" style="color:var(--blue);"></div>
-          <div class="errc-item-title"></div>
-          <div class="errc-item-desc"></div>
-        </div>
-        <div class="errc-item" style="background:var(--blue-light);">
-          <div class="errc-item-tag" style="color:var(--blue);"></div>
-          <div class="errc-item-title"></div>
-          <div class="errc-item-desc"></div>
-        </div>
-        <div class="errc-item" style="background:var(--blue-light);">
-          <div class="errc-item-tag" style="color:var(--blue);"></div>
-          <div class="errc-item-title"></div>
-          <div class="errc-item-desc"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CREATE -->
-    <div class="errc-col">
-      <div class="errc-header" style="background:var(--green);">
-        <div class="errc-header-icon">★</div>
-        <div class="errc-header-label" style="color:rgba(255,255,255,.75);">Create</div>
-        <div class="errc-header-title" style="color:white;">창조</div>
-        <div class="errc-header-sub" style="color:rgba(255,255,255,.8);"></div>
-      </div>
-      <div class="errc-body">
-        <div class="errc-item" style="background:var(--green-light);">
-          <div class="errc-item-tag" style="color:var(--green);"></div>
-          <div class="errc-item-title"></div>
-          <div class="errc-item-desc"></div>
-        </div>
-        <div class="errc-item" style="background:var(--green-light);">
-          <div class="errc-item-tag" style="color:var(--green);"></div>
-          <div class="errc-item-title"></div>
-          <div class="errc-item-desc"></div>
-        </div>
-        <div class="errc-item" style="background:var(--green-light);">
-          <div class="errc-item-tag" style="color:var(--green);"></div>
-          <div class="errc-item-title"></div>
-          <div class="errc-item-desc"></div>
-        </div>
-        <div class="errc-item" style="background:var(--green-light);">
-          <div class="errc-item-tag" style="color:var(--green);"></div>
-          <div class="errc-item-title"></div>
-          <div class="errc-item-desc"></div>
-        </div>
+      <div style="display:flex; flex-direction:column; gap:16px; font-size:13px; line-height:1.6; color:var(--text-sub);">
+        <div><div style="font-size:13px; font-weight:800; color:var(--text); margin-bottom:4px;">1. 국가별 선호 소재의 양극화</div><ul style="margin:0; padding-left:20px; list-style-type:disc;"><li><strong style="color:var(--text);">한국·중국:</strong> 대기업 브랜드(필립스, 테팔 등) 중심의 2~3만 원대 유광 플라스틱 저가 제품이 시장 주류.</li><li><strong style="color:var(--text);">미국:</strong> 비슷한 가격대지만 투명 유리 소재에 LED 무드등을 결합해 시각적 감성으로 차별화함.</li><li><strong style="color:var(--text);">일본·유럽:</strong> 1L 이하 소형 및 안전 기능 강조(일본), 안전인증 및 품질 중심(유럽)</li></ul></div>
+        <div><div style="font-size:13px; font-weight:800; color:var(--text); margin-bottom:4px;">2. 기능적 정체: '1.7L + 단순 원버튼' 획일화</div><div style="padding-left:20px;">전체 제품의 78%가 단순 원버튼형이며, 91%는 디스플레이가 없어 기능적 발전이 정체된 상태임.</div></div>
+        <div><div style="font-size:13px; font-weight:800; color:var(--text); margin-bottom:4px;">3. 새로운 기회: '정밀 조작이 가능한 제품' 등장</div><div style="padding-left:20px;">단순 끓임을 넘어 쿠진아트(다단계 온도 제어), 타이거(조그 다이얼) 등 정밀 조작 기능을 갖춘 모델 → 새로운 프리미엄 수요</div></div>
       </div>
     </div>
   </div>
 
-  <!-- ERRC Impact -->
-  <div class="errc-impact">
-    <div class="errc-impact-card" style="background:var(--red-light);">
-      <div class="errc-impact-num" style="color:var(--red);"></div>
-      <div class="errc-impact-label"></div>
+  <div id="cat-neck" class="cat-content" style="display:none;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="background:var(--bg);border-radius:12px;padding:12px;"><div style="font-size:10px;font-weight:800;color:var(--green);margin-bottom:8px;">🇰🇷 KOREA — 쿠팡 TOP 3</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;"><div style="background:var(--white);border-radius:8px;padding:8px;"><div style="font-size:9px;color:var(--text-light);font-weight:700;">1위</div><div style="font-size:11px;font-weight:800;">하트만</div><div style="font-size:10px;color:var(--text-sub);">₩59,150<br>STS·우드포인트</div></div><div style="background:var(--white);border-radius:8px;padding:8px;"><div style="font-size:9px;color:var(--text-light);font-weight:700;">2위</div><div style="font-size:11px;font-weight:800;">이즈홈 EN-DRP</div><div style="font-size:10px;color:var(--text-sub);">₩39,300<br>STS·무광·우드</div></div><div style="background:var(--white);border-radius:8px;padding:8px;"><div style="font-size:9px;color:var(--text-light);font-weight:700;">3위</div><div style="font-size:11px;font-weight:800;">라쿠진</div><div style="font-size:10px;color:var(--text-sub);">₩74,900<br>STS·프리미엄</div></div></div><div style="font-size:10px;color:var(--text-sub);margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">→ 금속 무광 100% (STS·TI) · 우드 포인트 차별화</div></div>
+          <div style="background:var(--bg);border-radius:12px;padding:12px;"><div style="font-size:10px;font-weight:800;color:var(--green);margin-bottom:8px;">🇺🇸 USA — 아마존 TOP 3</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;"><div style="background:var(--white);border-radius:8px;padding:8px;"><div style="font-size:9px;color:var(--text-light);font-weight:700;">1위</div><div style="font-size:11px;font-weight:800;">COSORI Smart</div><div style="font-size:10px;color:var(--text-sub);">$69.99<br>앱제어·블랙무광</div></div><div style="background:var(--white);border-radius:8px;padding:8px;"><div style="font-size:9px;color:var(--text-light);font-weight:700;">2위</div><div style="font-size:11px;font-weight:800;">보덤</div><div style="font-size:10px;color:var(--text-sub);">$39.97<br>심플·엔트리급</div></div><div style="background:var(--white);border-radius:8px;padding:8px;"><div style="font-size:9px;color:var(--text-light);font-weight:700;">3위</div><div style="font-size:11px;font-weight:800;">쿠진아트</div><div style="font-size:10px;color:var(--text-sub);">$79.98<br>STS·온도조절</div></div></div><div style="font-size:10px;color:var(--text-sub);margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">→ 스마트 기능 탑재 시작 · $40~80 집중</div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;"><div style="background:var(--bg);border-radius:12px;padding:10px;"><div style="font-size:10px;font-weight:800;color:var(--green);margin-bottom:6px;">🇨🇳 CHINA</div><div style="font-size:10px;color:var(--text);font-weight:700;">SUPOR · MIDEA · 틸리빙</div></div><div style="background:var(--bg);border-radius:12px;padding:10px;"><div style="font-size:10px;font-weight:800;color:var(--green);margin-bottom:6px;">🇯🇵 JAPAN</div><div style="font-size:10px;color:var(--text);font-weight:700;">에페오스 · 야마젠</div></div><div style="background:var(--bg);border-radius:12px;padding:10px;"><div style="font-size:10px;font-weight:800;color:var(--green);margin-bottom:6px;">🇪🇺 EUROPE</div><div style="font-size:10px;color:var(--text);font-weight:700;">RHD · vmotal · 타임모어</div></div></div>
+        </div>
+      </div>
+      <div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+          <div class="highlight-box"><div class="highlight-label">소재</div><div class="highlight-value" style="font-size:13px;">금속(STS 88%·TI 12%) 100%<br>무광 마감 88%</div></div>
+          <div class="highlight-box"><div class="highlight-label">컨트롤</div><div class="highlight-value" style="font-size:13px;">조그스위치/다이얼<br>디스플레이 보편화</div></div>
+          <div class="highlight-box"><div class="highlight-label">핸들</div><div class="highlight-value" style="font-size:13px;">Open Handle 95%<br>ㄱ형 주류</div></div>
+          <div class="highlight-box"><div class="highlight-label">가격대</div><div class="highlight-value" style="font-size:13px;">₩39,000~75,000<br>$40~140 (해외)</div></div>
+        </div>
+      </div>
     </div>
-    <div class="errc-impact-card" style="background:var(--orange-light);">
-      <div class="errc-impact-num" style="color:var(--orange);"></div>
-      <div class="errc-impact-label"></div>
-    </div>
-    <div class="errc-impact-card" style="background:var(--blue-light);">
-      <div class="errc-impact-num" style="color:var(--blue);"></div>
-      <div class="errc-impact-label"></div>
-    </div>
-    <div class="errc-impact-card" style="background:var(--green-light);">
-      <div class="errc-impact-num" style="color:var(--green);"></div>
-      <div class="errc-impact-label"></div>
+    <div style="background:var(--green-light); border-radius:16px; padding:24px; margin-top:20px;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;"><span style="font-size:16px;">📊</span><div style="font-size:14px; font-weight:800; color:var(--green);">글로벌 구스넥 포트 시장 분석 결론</div></div>
+      <div style="display:flex; flex-direction:column; gap:16px; font-size:13px; line-height:1.6; color:var(--text-sub);">
+        <div><div style="font-size:13px; font-weight:800; color:var(--text); margin-bottom:4px;">1. 프리미엄 소재 및 감성 디자인의 표준화</div><div style="padding-left:20px;">88% 무광 금속재질이 시장을 지배함. 차가운 금속 소재에 우드(나무) 포인트 핸들을 더해 감성적인 차별화를 꾀하는 추세가 증가함.</div></div>
+        <div><div style="font-size:13px; font-weight:800; color:var(--text); margin-bottom:4px;">2. 스마트 정밀 조작기능 보편화</div><div style="padding-left:20px;">전문가급 제어를 위해 조그 다이얼과 디스플레이 탑재가 보편화됨. 특히 미국 1위 제품(COSORI)처럼 앱 제어 등 스마트 기능이 도입되기 시작함.</div></div>
+        <div><div style="font-size:13px; font-weight:800; color:var(--text); margin-bottom:4px;">3. 목적 최적화 폼팩터 (오픈 핸들)</div><div style="padding-left:20px;">세밀한 핸드드립 물줄기 조절을 위해 전체 제품의 95%가 붓기 각도 제어에 유리한 '오픈 핸들(ㄱ자형, Y자형)'을 채택함.</div></div>
+      
+      </div>
     </div>
   </div>
 
-  <!-- Strategy Canvas Table -->
-  <div class="card card-pad" style="margin-top:20px;">
-    <div style="font-size:14px;font-weight:800;margin-bottom:4px;"></div>
-    <div style="font-size:11px;color:var(--text-sub);margin-bottom:20px;"></div>
-    <div style="position:relative;overflow-x:auto;">
-      <table style="width:100%;border-collapse:collapse;min-width:700px;">
-        <thead>
-          <tr style="background:var(--bg);">
-            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text-sub);border-radius:8px 0 0 8px;">경쟁 요소</th>
-            <th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:700;color:var(--text-sub);">현재 시장 평균</th>
-            <th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:700;color:var(--blue);">ERRC 목표 포지션</th>
-            <th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:700;color:var(--text-sub);border-radius:0 8px 8px 0;">전략 액션</th>
-          </tr>
-        </thead>
+  <div id="cat-tea" class="cat-content" style="display:none;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="background:var(--bg);border-radius:12px;padding:12px;"><div style="font-size:10px;font-weight:800;color:var(--orange);margin-bottom:8px;">🇰🇷 KOREA — 쿠팡 TOP 3</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;"><div style="background:var(--white);border-radius:8px;padding:8px;"><div style="font-size:9px;color:var(--text-light);font-weight:700;">1위</div><div style="font-size:11px;font-weight:800;">키친아트 쏘렐</div><div style="font-size:10px;color:var(--text-sub);">₩42,000<br>STS+유리·터치</div></div><div style="background:var(--white);border-radius:8px;padding:8px;"><div style="font-size:9px;color:var(--text-light);font-weight:700;">2위</div><div style="font-size:11px;font-weight:800;">키친아트 유리</div><div style="font-size:10px;color:var(--text-sub);">₩35,900<br>STS+유리·터치</div></div><div style="background:var(--white);border-radius:8px;padding:8px;"><div style="font-size:9px;color:var(--text-light);font-weight:700;">3위</div><div style="font-size:11px;font-weight:800;">신일 무선티포트</div><div style="font-size:10px;color:var(--text-sub);">₩55,500<br>STS+유리·<span style="color:var(--orange);">조그+터치</span></div></div></div><div style="font-size:10px;color:var(--text-sub);margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">→ 키친아트 독주 · 디스플레이 전 제품 탑재</div></div>
+        </div>
+      </div>
+      <div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+          <div class="highlight-box"><div class="highlight-label">핵심 특징</div><div class="highlight-value" style="font-size:13px;">STS+유리 혼합<br>거름망 내장</div></div>
+          <div class="highlight-box"><div class="highlight-label">가격대</div><div class="highlight-value" style="font-size:13px;">₩35,000~55,500<br>$39~90 (미국)</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--orange-light); border-radius:16px; padding:24px; margin-top:20px;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;"><span style="font-size:16px;">📊</span><div style="font-size:14px; font-weight:800; color:var(--orange);">글로벌 티포트 시장 분석 결론</div></div>
+      <div style="display:flex; flex-direction:column; gap:16px; font-size:13px; line-height:1.6; color:var(--text-sub);">
+        <div><div style="font-size:13px; font-weight:800; color:var(--text); margin-bottom:4px;">1. '유리+STS' 결합 소재 주류</div><div style="padding-left:20px;">차를 우려내는 목적에 맞게 내부를 직관적으로 확인할 수 있는 '유리+스테인리스' 결합 소재가 사실상 주류를 이룸.</div></div>
+        <div><div style="font-size:13px; font-weight:800; color:var(--text); margin-bottom:4px;">2. 디지털 디스플레이 및 터치 조작 기본화</div><div style="padding-left:20px;">내장형 거름망(인퓨저)이 필수적이며, 한국과 미국 등 상위권 전 제품에 온도 조절을 위한 디지털 디스플레이와 터치 패널이 탑재됨.</div></div>
+        <div><div style="font-size:13px; font-weight:800; color:var(--text); margin-bottom:4px;">3. 국가별 가격대 형성</div><div style="padding-left:20px;">한국은 키친아트 등 특정 브랜드 독주 체제로 3~5만 원대 가성비 위주로 형성되었으며, 미국은 약 $39~90(4~11만 원대)로 다기능(온도제어,앱연동 등) 제품들이 넓게 분포함.</div></div>
+        
+      </div>
+    </div>
+  </div>
+
+  <div id="cat-baby" class="cat-content" style="display:none;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div style="grid-column: 1 / -1;">
+        <div style="background:var(--bg);border-radius:12px;padding:14px;"><div style="font-size:10px;font-weight:800;color:var(--purple);margin-bottom:10px;">🇰🇷 KOREA ONLY — TOP 3</div><div style="display:flex;flex-direction:column;gap:8px;"><div style="background:var(--white);border-radius:10px;padding:12px;display:flex;justify-content:space-between;align-items:flex-start;"><div><div style="font-size:10px;color:var(--purple);font-weight:800;">네이버 1위</div><div style="font-size:13px;font-weight:800;margin-top:2px;">Reliv Lab 일체형 분유포트</div><div style="font-size:11px;color:var(--text-sub);margin-top:4px;">STS 내부 · 플라스틱 외부 · 무광 · 터치 · 출수구 상부</div></div><div style="font-size:14px;font-weight:800;color:var(--purple);white-space:nowrap;margin-left:12px;">₩219,000</div></div><div style="background:var(--white);border-radius:10px;padding:12px;display:flex;justify-content:space-between;align-items:flex-start;"><div><div style="font-size:10px;color:var(--purple);font-weight:800;">쿠팡 2위</div><div style="font-size:13px;font-weight:800;margin-top:2px;">보르도 주전자형 분유포트</div><div style="font-size:11px;color:var(--text-sub);margin-top:4px;">유리+STS · 오픈핸들 · 유광 · 온도 디스플레이 · 받침전면</div></div><div style="font-size:14px;font-weight:800;color:var(--purple);white-space:nowrap;margin-left:12px;">₩95,000</div></div><div style="background:var(--white);border-radius:10px;padding:12px;display:flex;justify-content:space-between;align-items:flex-start;"><div><div style="font-size:10px;color:var(--purple);font-weight:800;">쿠팡 3위</div><div style="font-size:13px;font-weight:800;margin-top:2px;">보르도 일체형 분유포트</div><div style="font-size:11px;color:var(--text-sub);margin-top:4px;">디스펜서 일체형 · 플라스틱+유리+STS · 무광 · 본체상부 터치</div></div><div style="font-size:14px;font-weight:800;color:var(--purple);white-space:nowrap;margin-left:12px;">₩169,000</div></div></div></div>
+      </div>
+    </div>
+    <div style="background:var(--purple-light); border-radius:16px; padding:24px; margin-top:20px;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;"><span style="font-size:16px;">📊</span><div style="font-size:14px; font-weight:800; color:var(--purple);">한국 분유포트 시장 분석 결론</div></div>
+      <div style="display:flex; flex-direction:column; gap:16px; font-size:13px; line-height:1.6; color:var(--text-sub);">
+        <div><div style="font-size:13px; font-weight:800; color:var(--text); margin-bottom:4px;">1. 한국(KOREA ONLY) 특화 초고가 시장</div><div style="padding-left:20px;">온도 조절 포트가 분유포트를 겸하는 글로벌 시장과 달리, 한국은 10~21만 원대에 달하는 초고가 전용 프리미엄 시장이 독자적으로 형성됨.</div></div>
+        <div><div style="font-size:13px; font-weight:800; color:var(--text); margin-bottom:4px;">2. 주전자형 vs 일체형 디스펜서 구조 혼재</div><div style="padding-left:20px;">일반적인 주전자 형태(유리+STS, 약 9만 원대)와 정수기처럼 버튼으로 출수하는 일체형 디스펜서 구조(플라스틱 외관, 16~21만 원대)가 섞여서 경쟁 중임.</div></div>
+        <div><div style="font-size:13px; font-weight:800; color:var(--text); margin-bottom:4px;">3. 가시성 높은 정밀 온도 패널 필수</div><div style="padding-left:20px;">아이의 안전(화상, 적정 온도)과 직결되므로 상단이나 전면에 명확한 온도 디스플레이와 터치 패널을 필수적으로 적용함.</div></div>
+        <div style="margin-top:4px; padding-top:16px; border-top:1px dashed var(--purple);"><strong style="color:var(--purple);">💡</strong> 한국 육아 시장 특성상 고가의 전용 일체형 기기 수요가 존재하나, 본질적으로는 정밀한 온도 제어와 장시간 보온이 가능한 스마트 티포트/기본형 포트로 충분히 대체 및 통합 흡수가 가능한 특수 시장임.</div>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<div id="tab-expert" class="tab-content"><div class="card">
+  <div style="font-size:14px;font-weight:800;margin-bottom:4px;">전문가 매거진별 추천 이유 심층 분석</div>
+  <div style="font-size:11px;color:var(--text-sub);margin-bottom:16px;">Wirecutter · Forbes Vetted · Consumer Reports · Which?</div>
+  <div style="display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:10px;width:fit-content;margin-bottom:20px;">
+    <button class="exp-btn" onclick="switchExp('exp-std',this)" style="padding:6px 14px;border-radius:7px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:var(--white);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.07);">기본형</button>
+    <button class="exp-btn" onclick="switchExp('exp-neck',this)" style="padding:6px 14px;border-radius:7px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:var(--text-sub);">구스넥</button>
+    <button class="exp-btn" onclick="switchExp('exp-tea',this)" style="padding:6px 14px;border-radius:7px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:var(--text-sub);">티포트</button>
+    <button class="exp-btn" onclick="switchExp('exp-baby',this)" style="padding:6px 14px;border-radius:7px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:var(--text-sub);">분유포트</button>
+  </div>
+
+  <div id="exp-std" class="exp-content" style="display:block;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+      <div><div style="font-size:12px;font-weight:800;border-left:3px solid var(--blue);padding-left:8px;margin-bottom:10px;">🔍 Wirecutter</div><div style="display:flex;flex-direction:column;gap:8px;"><div style="background:var(--green-light);border-radius:12px;padding:12px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;"><span style="font-size:12px;font-weight:800;">Cuisinart CPK-17P1</span><span class="badge b-green">Top Pick</span></div><div style="font-size:11px;color:var(--text-sub);">$89.95 · 6단계 온도 · 30분 보온</div></div><div style="background:var(--bg);border-radius:12px;padding:12px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;"><span style="font-size:12px;font-weight:800;">Breville IQ Kettle</span><span class="badge b-blue">Also Great</span></div><div style="font-size:11px;color:var(--text-sub);">~$219.95 · Forbes Best Kettle 동시 선정</div></div><div style="background:var(--bg);border-radius:12px;padding:10px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><span style="font-size:12px;font-weight:800;">Hamilton Beach 40880</span><span class="badge" style="background:var(--bg);color:var(--text-sub);border:1px solid var(--border);">Budget</span></div><div style="font-size:11px;color:var(--text-sub);">$29.99 — 단순 끓임. 자동 꺼짐</div></div><div style="background:var(--bg);border-radius:12px;padding:10px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><span style="font-size:12px;font-weight:800;">Zwilling Enfinigy Pro</span><span class="badge" style="background:var(--bg);color:var(--text-sub);border:1px solid var(--border);">Worth</span></div><div style="font-size:11px;color:var(--text-sub);">$129.95 — 쿨터치+터치스크린+무광</div></div></div></div>
+      <div><div style="font-size:12px;font-weight:800;border-left:3px solid var(--orange);padding-left:8px;margin-bottom:10px;">🔍 Consumer Reports</div><div style="background:var(--bg);border-radius:12px;padding:12px;"><div style="font-size:11px;font-weight:800;color:var(--orange);margin-bottom:8px;">Top 4 선정 (실험실 테스트)</div><div style="display:flex;flex-direction:column;gap:8px;"><div style="display:flex;justify-content:space-between;font-size:11px;border-bottom:1px solid var(--border);padding-bottom:6px;"><span style="font-weight:700;">Cuisinart CPK-17P1</span><span style="color:var(--text-sub);">온도 정확도+속도</span></div><div style="display:flex;justify-content:space-between;font-size:11px;border-bottom:1px solid var(--border);padding-bottom:6px;"><span style="font-weight:700;">Amazon Basics Stainless</span><span style="color:var(--text-sub);">가성비</span></div><div style="display:flex;justify-content:space-between;font-size:11px;border-bottom:1px solid var(--border);padding-bottom:6px;"><span style="font-weight:700;">OXO Cordless Glass</span><span style="color:var(--text-sub);">그립감·가시성</span></div><div style="display:flex;justify-content:space-between;font-size:11px;"><span style="font-weight:700;">Secura SWK-1701DB</span><span style="color:var(--text-sub);">안전·내구성</span></div></div></div></div>
+      <div><div style="font-size:12px;font-weight:800;border-left:3px solid var(--purple);padding-left:8px;margin-bottom:10px;">🔍 Which? (UK)</div><div style="background:var(--bg);border-radius:12px;padding:12px;"><div style="font-size:11px;font-weight:800;color:var(--purple);margin-bottom:8px;">영국 소비자 기준 추천</div><div style="display:flex;flex-direction:column;gap:8px;"><div style="font-size:11px;border-bottom:1px solid var(--border);padding-bottom:6px;"><span style="font-weight:700;">KitchenAid Artisan Dual Wall</span><br><span style="color:var(--text-sub);">£99.99 — 이중벽·에너지효율</span></div><div style="font-size:11px;border-bottom:1px solid var(--border);padding-bottom:6px;"><span style="font-weight:700;">Ninja KT201UK</span><br><span style="color:var(--text-sub);">£79.99 — 멀티 온도+보온</span></div><div style="font-size:11px;border-bottom:1px solid var(--border);padding-bottom:6px;"><span style="font-weight:700;">BOSCH TWK 시리즈</span><br><span style="color:var(--text-sub);">£39~50 — 기본기 탄탄</span></div><div style="font-size:11px;"><span style="font-weight:700;">Russell Hobbs / KENWOOD</span><br><span style="color:var(--text-sub);">£25~35 — 가성비 라인</span></div></div></div></div>
+    </div>
+  </div>
+  <div id="exp-neck" class="exp-content" style="display:none;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div><div style="font-size:12px;font-weight:800;border-left:3px solid var(--green);padding-left:8px;margin-bottom:10px;">🔍 Wirecutter + Forbes Vetted</div><div style="display:flex;flex-direction:column;gap:8px;"><div style="background:var(--bg);border-radius:12px;padding:12px;"><div style="font-size:12px;font-weight:800;margin-bottom:4px;">OXO Brew Adjustable Temperature</div><div style="font-size:11px;color:var(--text-sub);">$99.95 — ±1°C 정밀 온도 제어</div></div><div style="background:var(--green-light);border-radius:12px;padding:12px;"><div style="font-size:12px;font-weight:800;margin-bottom:4px;color:var(--green);">Fellow Stagg EKG</div><div style="font-size:11px;color:var(--text-sub);">~$170 — Forbes "최고의 구스넥." 아이코닉 실루엣</div></div><div style="background:var(--bg);border-radius:12px;padding:12px;"><div style="font-size:12px;font-weight:800;margin-bottom:4px;">Cuisinart GK-1 Digital Gooseneck</div><div style="font-size:11px;color:var(--text-sub);">$79.95 — 구스넥 입문 최선</div></div></div></div>
+      <div><div style="background:var(--green-light);border-radius:12px;padding:16px;height:100%;"><div style="font-size:12px;font-weight:800;color:var(--green);margin-bottom:8px;">💡 구스넥 전문가 평가 특징</div><div style="font-size:12px;color:var(--text-sub);line-height:1.6;">Wirecutter와 Forbes 모두 구스넥을 '기본형'과 완전히 분리된 독립 카테고리로 다루며, <strong>1도 단위의 미세 온도 조절 기능</strong>을 가장 중요한 필수 추천 스펙으로 평가하고 있습니다.</div></div></div>
+    </div>
+  </div>
+  <div id="exp-tea" class="exp-content" style="display:none;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div><div style="font-size:12px;font-weight:800;border-left:3px solid var(--yellow);padding-left:8px;margin-bottom:10px;">🔍 Wirecutter</div><div style="background:var(--yellow-light);border-radius:12px;padding:16px;"><div style="font-size:12px;font-weight:800;margin-bottom:6px;color:#c97d00;">Breville BTM800XL One-Touch Tea Maker</div><div style="font-size:11px;color:var(--text-sub);line-height:1.6;">약 $330 (약 ₩430,000)<br>티 바스켓 자동 하강→우림→상승. 5종 차 프리셋. 단순한 포트가 아닌 "차 전용 의식(ritual) 기기"로 높은 평가를 받음.</div></div></div>
+      <div><div style="background:var(--bg);border-radius:12px;padding:16px;height:100%;"><div style="font-size:12px;font-weight:800;color:var(--text);margin-bottom:8px;">💡 티포트 전문가 평가 특징</div><div style="font-size:12px;color:var(--text-sub);line-height:1.6;">CR, Forbes, Which? 에서는 티포트 전용 리뷰를 거의 다루지 않으며, Wirecutter에서만 프리미엄 자동화 기기(Breville)를 제한적으로 언급하고 있습니다. 일반 매거진에서는 <strong>온도 조절이 되는 기본형/구스넥으로 대체 가능</strong>하다고 보는 시각이 강합니다.</div></div></div>
+    </div>
+  </div>
+  <div id="exp-baby" class="exp-content" style="display:none;">
+    <div style="background:var(--red-light);border-radius:16px;padding:24px;text-align:center;border:1px dashed var(--red);"><div style="font-size:24px;margin-bottom:8px;">📭</div><div style="font-size:14px;font-weight:800;color:var(--red);margin-bottom:8px;">글로벌 매거진 전용 리뷰 미존재</div><div style="font-size:12px;color:var(--text-sub);line-height:1.6;max-width:500px;margin:0 auto;">Wirecutter, Forbes Vetted, Consumer Reports, Which? 등 주요 글로벌 소비자 매거진에서 '분유포트' 전용 리뷰나 추천 카테고리는 존재하지 않습니다.<br><br>(※ 참고: Consumer Reports의 '분유 제조기' 리뷰는 일반적인 온도 조절 가열포트로 충분히 대체 가능하며, 전용 기기 구매는 효과적이지 않다고 지적하고 있습니다.)</div></div>
+  </div>
+
+  <div style="background:var(--bg); border:1px solid var(--border); border-radius:16px; padding:20px; margin-top:24px;">
+    <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:12px;">📌 전문가 추천 기준 핵심 발견 (공통)</div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+      <div class="progress-wrap" style="margin-bottom:0; gap:12px;">
+        <div class="progress-item"><span class="progress-label">온도 정밀성</span><div class="progress-bar-bg"><div class="progress-bar-fill" style="width:95%;background:var(--green)"></div></div><span class="progress-value" style="color:var(--green)">필수</span></div>
+        <div class="progress-item"><span class="progress-label">내부 STS 소재</span><div class="progress-bar-bg"><div class="progress-bar-fill" style="width:80%;background:var(--blue)"></div></div><span class="progress-value" style="color:var(--blue)">80%</span></div>
+        <div class="progress-item"><span class="progress-label">보온 기능</span><div class="progress-bar-bg"><div class="progress-bar-fill" style="width:80%;background:var(--orange)"></div></div><span class="progress-value" style="color:var(--orange)">80%</span></div>
+        <div class="progress-item"><span class="progress-label">안전 (쿨터치·인증)</span><div class="progress-bar-bg"><div class="progress-bar-fill" style="width:70%;background:var(--text-light)"></div></div><span class="progress-value" style="color:var(--text-sub)">70%</span></div>
+        <div class="progress-item"><span class="progress-label">디자인/무광마감</span><div class="progress-bar-bg"><div class="progress-bar-fill" style="width:55%;background:var(--text-light)"></div></div><span class="progress-value" style="color:var(--text-sub)">55%</span></div>
+      </div>
+      <div style="font-size:12px;color:var(--text-sub);line-height:1.7; padding-left:16px; border-left:1px dashed var(--border);"><strong>온도 정밀성이 Wirecutter·CR·Which? 공통 Top Pick 필수 기준</strong>입니다. $30 가성비 제품과 $200+ 프리미엄 라인업으로 양극화되어 있으며, 정작 대중적인 $60~100 구간에는 전문가가 추천할 만한 제품이 희소합니다(Cuisinart $89, OXO $80 정도만 해당). 구스넥은 커피/티 애호가를 위한 별도의 전문 카테고리로 확고하게 성장 중입니다.</div>
+    </div>
+  </div>
+</div></div>
+
+<div id="tab-award" class="tab-content">
+  <div class="card">
+    <div style="font-size:14px;font-weight:800;margin-bottom:4px;">전기포트 디자인 어워드 트렌드 진화</div>
+    <div style="font-size:11px;color:var(--text-sub);margin-bottom:20px;">1962→2026: 도구에서 오브제로, 단순 가열에서 '음용 경험'으로</div>
+    <div style="position:relative;padding-left:32px;margin-top:10px;">
+      <div style="position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(180deg, var(--text-light) 0%, var(--blue) 35%, var(--green) 65%, var(--purple) 100%);border-radius:2px;"></div>
+      <div style="position:relative;margin-bottom:32px;"><div style="position:absolute;left:-30px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--text-light);border:2px solid var(--white);"></div><div><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="font-size:10px;font-weight:700;color:var(--text-sub);background:var(--white);border:1px solid var(--border);border-radius:6px;padding:2px 8px;">~ 2015</span><span style="font-size:13px;font-weight:800;">기능주의: 물 끓이는 '기계적 도구'</span></div><div style="background:var(--bg);border-radius:12px;padding:12px;font-size:12px;line-height:1.6;color:var(--text-sub);"><strong style="color:var(--text);">특징:</strong> 브라운, 필립스 등 글로벌 제조사가 주도한 시기로, 빠른 가열과 안전성 등 기계적 성능이 어워드의 주된 평가 기준이었습니다.</div></div></div>
+      <div style="position:relative;margin-bottom:32px;"><div style="position:absolute;left:-30px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--blue);border:2px solid var(--white);"></div><div><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-light);border:1px solid var(--blue);border-radius:6px;padding:2px 8px;">2016–2019</span><span style="font-size:13px;font-weight:800;">전환점: 발뮤다·펠로우가 만든 '취향 가전'</span></div><div style="background:var(--blue-light);border-radius:12px;padding:12px;font-size:12px;line-height:1.6;color:var(--text-sub);"><strong style="color:var(--blue);">변화:</strong> 2016년 발뮤다 더 팟(The Pot)과 펠로우(Fellow)의 등장은 가열포트를 '음용 전문가의 도구'로 재정의했습니다.</div></div></div>
+      <div style="position:relative;margin-bottom:32px;"><div style="position:absolute;left:-30px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--green);border:2px solid var(--white);"></div><div><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="font-size:10px;font-weight:700;color:var(--green);background:var(--green-light);border:1px solid var(--green);border-radius:6px;padding:2px 8px;">2020–2022</span><span style="font-size:13px;font-weight:800;">확장: 일상화된 홈카페와 '감성 품질'</span></div><div style="background:var(--green-light);border-radius:12px;padding:12px;font-size:12px;line-height:1.6;color:var(--text-sub);"><strong style="color:var(--green);">트렌드:</strong> 코로나19 이후 실내 생활이 늘며 어워드의 기준이 '정서적 만족'으로 이동했습니다.</div></div></div>
+      <div style="position:relative;"><div style="position:absolute;left:-32px;top:2px;width:16px;height:16px;border-radius:50%;background:var(--purple);border:3px solid var(--white);box-shadow:0 0 0 4px rgba(124,92,252,.15);"></div><div><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="font-size:10px;font-weight:700;color:var(--purple);background:var(--purple-light);border:1px solid var(--purple);border-radius:6px;padding:2px 8px;">2023–2026 ▶ NOW</span><span style="font-size:13px;font-weight:800;">미래: 보이지 않는 기술, 완성된 '음용 경험'</span></div><div style="background:var(--purple-light);border-radius:16px;padding:16px;border:1px solid rgba(124,92,252,.2);"><div style="font-size:12px;color:var(--text-sub);line-height:1.7;margin-bottom:12px;">기술은 본체 뒤로 완벽히 숨고(Hidden UI) 독창적인 조형미만 남는 단계입니다.</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"><div style="background:var(--white);border-radius:10px;padding:10px;box-shadow:0 2px 6px rgba(0,0,0,.04);"><div style="font-size:10px;font-weight:800;margin-bottom:2px;color:var(--purple);">Invisible UI</div><div style="font-size:9px;color:var(--text-sub);">평소엔 숨겨진 온도 디스플레이</div></div><div style="background:var(--white);border-radius:10px;padding:10px;box-shadow:0 2px 6px rgba(0,0,0,.04);"><div style="font-size:10px;font-weight:800;margin-bottom:2px;color:var(--purple);">Artistic Form</div><div style="font-size:9px;color:var(--text-sub);">예술품을 닮은 기하학적 조형</div></div><div style="background:var(--white);border-radius:10px;padding:10px;box-shadow:0 2px 6px rgba(0,0,0,.04);"><div style="font-size:10px;font-weight:800;margin-bottom:2px;color:var(--purple);">Silent Experience</div><div style="font-size:9px;color:var(--text-sub);">휴식의 가치를 높이는 저소음 기술</div></div></div></div></div></div>
+    </div>
+  </div>
+</div>
+</section>
+<div style="margin-top:20px;" class="card"><div style="font-size:15px;font-weight:800;margin-bottom:16px;">브랜드 지형도</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;">
+<div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--blue);margin-bottom:10px;">시장 강자</div><div class="brand-row" style="flex-direction:column;align-items:flex-start;"><div class="brand-pill"><div class="dot" style="background:var(--blue);"></div>Philips</div><div class="brand-pill"><div class="dot" style="background:var(--blue);"></div>Tefal</div><div class="brand-pill"><div class="dot" style="background:var(--blue);"></div>COSORI</div><div class="brand-pill"><div class="dot" style="background:var(--blue);"></div>Midea</div><div class="brand-pill"><div class="dot" style="background:var(--blue);"></div>키친아트</div></div></div>
+<div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--green);margin-bottom:10px;">전문가 선택</div><div class="brand-row" style="flex-direction:column;align-items:flex-start;"><div class="brand-pill"><div class="dot" style="background:var(--green);"></div>Cuisinart</div><div class="brand-pill"><div class="dot" style="background:var(--green);"></div>Breville</div><div class="brand-pill"><div class="dot" style="background:var(--green);"></div>Fellow</div><div class="brand-pill"><div class="dot" style="background:var(--green);"></div>Zwilling</div><div class="brand-pill"><div class="dot" style="background:var(--green);"></div>OXO</div></div></div>
+<div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--orange);margin-bottom:10px;">어워드 강자</div><div class="brand-row" style="flex-direction:column;align-items:flex-start;"><div class="brand-pill"><div class="dot" style="background:var(--orange);"></div>Midea (15개)</div><div class="brand-pill"><div class="dot" style="background:var(--orange);"></div>Philips (13개)</div><div class="brand-pill"><div class="dot" style="background:var(--orange);"></div>BALMUDA</div><div class="brand-pill"><div class="dot" style="background:var(--orange);"></div>WMF</div><div class="brand-pill"><div class="dot" style="background:var(--orange);"></div>Toshiba</div></div></div>
+<div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--purple);margin-bottom:10px;">3렌즈 교차</div><div class="brand-row" style="flex-direction:column;align-items:flex-start;"><div class="brand-pill"><div class="dot" style="background:var(--purple);"></div>Philips ★★★</div><div class="brand-pill"><div class="dot" style="background:var(--purple);"></div>Cuisinart ★★</div><div class="brand-pill"><div class="dot" style="background:var(--purple);"></div>Midea ★★</div><div class="brand-pill"><div class="dot" style="background:var(--purple);"></div>Breville ★★</div><div class="brand-pill"><div class="dot" style="background:var(--purple);"></div>Fellow ★★</div></div></div>
+</div></div>
+</section>
+
+<section class="section" id="core-insights">
+  <div class="section-header"><div><div class="section-title">핵심 인사이트</div><div class="section-sub">3가지 렌즈 분석을 통해 도출된 핵심 돌파 전략</div></div></div>
+  <div style="display:flex; gap:4px; background:var(--bg); padding:4px; border-radius:12px; margin-bottom:20px; width:fit-content;">
+    <button class="insight-btn" onclick="switchInsight('insight-1', this)" style="padding:8px 18px; border-radius:9px; border:none; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; background:var(--white); color:var(--text); box-shadow:0 2px 8px rgba(0,0,0,.07);">시장 렌즈</button>
+    <button class="insight-btn" onclick="switchInsight('insight-2', this)" style="padding:8px 18px; border-radius:9px; border:none; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; background:transparent; color:var(--text-sub);">전문가 렌즈</button>
+    <button class="insight-btn" onclick="switchInsight('insight-3', this)" style="padding:8px 18px; border-radius:9px; border:none; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; background:transparent; color:var(--text-sub);">어워드 렌즈</button>
+  </div>
+  <div id="insight-1" class="insight-content" style="display:block;">
+    <div class="card" style="border-left: 4px solid var(--blue);"><div style="font-size:16px; font-weight:800; color:var(--blue); margin-bottom:8px;">1. 시장 렌즈 핵심 인사이트</div><div style="font-size:13px; font-weight:700; margin-bottom:4px;">저렴한 가격대가 주류인 기본형 포트 vs 특화 카테고리의 스펙 프리미엄화</div><div style="font-size:13px; color:var(--text-sub); line-height:1.6; margin-bottom:12px;">현재 2~4만 원대의 대중적인 기본형 제품은 유광 플라스틱이나 일반 스테인리스 모델이 장악하고 있음. 반면, 구스넥(무광 스텐, 터치/버튼식)과 티포트(투명 유리, 터치 디스플레이) 같은 특화 카테고리는 이미 프리미엄 사양을 확고한 기본 스펙으로 채택하고 있음</div><div style="background:var(--blue-light); border-radius:10px; padding:16px;"><div style="font-size:13px; font-weight:800; color:var(--blue); margin-bottom:6px;">💡프리미엄 기능, 소재를 기본형에 적용</div><div style="font-size:13px; color:var(--text-sub); line-height:1.6;">특화포트에서 소비자 지불 의향이 검증된 '무광 STS 마감 + 온도 조절/터치 및 디스플레이' 사양을 기본형 제품에 선제적으로 도입하여 프리미엄으로 차별화</div></div></div>
+  </div>
+  <div id="insight-2" class="insight-content" style="display:none;">
+    <div class="card" style="border-left: 4px solid var(--green);"><div style="font-size:16px; font-weight:800; color:var(--green); margin-bottom:8px;">2. 전문가 렌즈 핵심 인사이트</div><div style="font-size:13px; font-weight:700; margin-bottom:4px;">'단순 가열'의 종말과 '스마트 온도 제어 포트'의 승리</div><div style="font-size:13px; color:var(--text-sub); line-height:1.6; margin-bottom:12px;">글로벌 주요 매거진(Consumer Reports, Wirecutter 등)은 고가의 분유 제조기 같은 전용 기기나 단순 끓임 포트 대신, '다단계 온도 프리셋'과 '보온 기능'을 갖춘 스마트 모델들을 Top Pick으로 일제히 추천하고 있음</div><div style="background:var(--green-light); border-radius:10px; padding:16px;"><div style="font-size:13px; font-weight:800; color:var(--green); margin-bottom:6px;">💡"목적별 기기 분산 대신, 정밀 제어로 통합 흡수"</div><div style="font-size:13px; color:var(--text-sub); line-height:1.6;">'미세 온도 제어(1도 단위 또는 5~6단계)'와 '장시간 보온' 기능을 완벽하게 구현한 고성능 포트 하나로 육아 및 홈카페 수요를 한 번에 흡수</div></div></div>
+  </div>
+  <div id="insight-3" class="insight-content" style="display:none;">
+    <div class="card" style="border-left: 4px solid var(--orange);"><div style="font-size:16px; font-weight:800; color:var(--orange); margin-bottom:8px;">3. 어워드 렌즈 핵심 인사이트</div><div style="font-size:13px; font-weight:700; margin-bottom:4px;">주방 가전에서 '감성적 라이프스타일 오브제'로의 진화</div><div style="font-size:13px; color:var(--text-sub); line-height:1.6; margin-bottom:12px;">발뮤다, 펠로우, 필립스 ECO 등 글로벌 리딩 브랜드들은 차가운 기계적 느낌을 완전히 배제하고 있음. 무광 모노톤, 웜화이트 컬러, 우드 패턴 등을 적용해 전기포트를 주방 인테리어에 스며드는 감성 소품으로 탈바꿈.</div><div style="background:var(--orange-light); border-radius:10px; padding:16px;"><div style="font-size:13px; font-weight:800; color:var(--orange); margin-bottom:6px;">💡기능주의를 완벽히 감추는 감성 품질(CMF) 확보</div><div style="font-size:13px; color:var(--text-sub); line-height:1.6;">'에코/웜톤 컬러 + 무광 텍스처 + 우드 포인트 등 따뜻한 요소를 적용. 홈카페 무드를 완성하는 따뜻한 감성 오브제로 포지셔닝.</div></div></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     ▼ 교차 매트릭스 상세 분석 (삽입 섹션) ▼
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section" id="deep-cross">
+  <div class="section-header"><div><div class="section-title">카테고리별 3렌즈 교차 상세 분석</div><div class="section-sub">디자인 속성별 시장·전문가·어워드 렌즈 정합도 및 갭·기회 도출</div></div></div>
+
+
+
+<!-- 카테고리 탭 -->
+  <div style="display:flex; gap:4px; background:var(--bg); padding:4px; border-radius:12px; margin-bottom:20px; width:fit-content;">
+    <button class="deep-cat-tab" onclick="switchDeepCat('std', this)" style="display:flex;align-items:center;gap:7px;padding:8px 18px;border-radius:9px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;background:var(--white);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.07);"></span>기본형 전기포트</button>
+    <button class="deep-cat-tab" onclick="switchDeepCat('neck', this)" style="display:flex;align-items:center;gap:7px;padding:8px 18px;border-radius:9px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:var(--text-sub);"></span>구스넥 드립포트</button>
+    <button class="deep-cat-tab" onclick="switchDeepCat('tea', this)" style="display:flex;align-items:center;gap:7px;padding:8px 18px;border-radius:9px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:var(--text-sub);"></span>티포트 (인퓨저)</button>
+    <button class="deep-cat-tab" onclick="switchDeepCat('baby', this)" style="display:flex;align-items:center;gap:7px;padding:8px 18px;border-radius:9px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:var(--text-sub);"></span>분유포트</button>
+  </div>
+
+
+  <!-- ═══ 기본형 상세 ═══ -->
+  <div id="dcat-std" class="deep-cat-section dactive">
+    <div class="deep-matrix-wrap" style="margin-top:20px">
+      <table class="deep-matrix">
+        <thead><tr><th style="width:120px">디자인 속성</th><th style="min-width:210px"><span style="color:var(--blue)">●</span> 시장 렌즈</th><th style="min-width:210px"><span style="color:var(--green)">●</span> 전문가 렌즈</th><th style="min-width:190px"><span style="color:var(--orange)">●</span> 어워드 렌즈</th><th style="min-width:190px">갭 / 기회</th></tr></thead>
         <tbody>
-          <!-- 행 템플릿 — 필요한 만큼 복제 -->
-          <tr style="border-bottom:1px solid var(--border);">
-            <td style="padding:10px 14px;font-size:12px;font-weight:700;"></td>
-            <td style="padding:10px 14px;text-align:center;">
-              <div style="display:flex;align-items:center;gap:8px;">
-                <div style="flex:1;background:var(--border);height:6px;border-radius:3px;overflow:hidden;">
-                  <div style="width:0%;background:#8b95a1;height:100%;border-radius:3px;"></div>
-                </div>
-                <span style="font-size:11px;font-weight:700;color:var(--text-light);width:32px;text-align:right;"></span>
-              </div>
-            </td>
-            <td style="padding:10px 14px;text-align:center;">
-              <div style="display:flex;align-items:center;gap:8px;">
-                <div style="flex:1;background:var(--border);height:6px;border-radius:3px;overflow:hidden;">
-                  <div style="width:0%;background:var(--green);height:100%;border-radius:3px;"></div>
-                </div>
-                <span style="font-size:11px;font-weight:700;color:var(--green);width:32px;text-align:right;"></span>
-              </div>
-            </td>
-            <td style="padding:10px 14px;text-align:center;">
-              <span style="font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;background:rgba(0,0,0,.06);color:var(--blue);"></span>
-              <div style="font-size:10px;color:var(--text-light);margin-top:3px;"></div>
-            </td>
-          </tr>
+          <tr><td class="dm-attr">외부 소재</td><td><div class="dm-l1">플라스틱 위주(한·중·일), 유리(미국)</div><div class="dm-sub">독일 Emerio만 STS. 한국 100% 플라스틱, 미국 100% 유리</div></td><td><div class="dm-l2">STS 외부 선호 (Wirecutter·Forbes·CR)</div><div class="dm-sub">Cuisinart/Breville STS 외부<br>Which? 저가 플라스틱도 추천 / CR OXO 유리 포함</div></td><td><div class="dm-l3">STS + 특수 마감</div><div class="dm-sub">WMF STS 무광 / Midea STS 계열<br>에코 소재 시도 (Philips 에코 에디션)</div></td><td><div class="dm-verdict dm-v-gap">🔴 소재 갭</div><div class="dm-verdict-detail">한국 Top3 = 플라스틱<br>전문가+어워드 = STS 무광 선호<br>→ "STS 무광 × ₩4~7만" 미탐색 구간</div></td></tr>
+          <tr><td class="dm-attr">표면 마감</td><td><div class="dm-l1">유광 우세</div><div class="dm-sub">한국: 테팔 로프트만 무광<br>미국 COSORI·셰프맨: 무광 / 독일 Bosch: 무광</div></td><td><div class="dm-l2">무광 강세</div><div class="dm-sub">Wirecutter·Forbes: Cuisinart/Breville 무광<br>CR 혼재 / Which? 다양</div></td><td><div class="dm-l3">무광 수렴</div><div class="dm-sub">WMF, Midea 무광 수상</div></td><td><div class="dm-verdict dm-v-conv">🟣 수렴 중</div><div class="dm-verdict-detail">프리미엄 구간 무광화 진행<br>한국 기본형 유광 우세 → 무광 전환 시 프리미엄 인식 상승</div></td></tr>
+          <tr><td class="dm-attr">형상 타입</td><td><div class="dm-l1">테이퍼 38% / 유선형 38% / 직선형 22%</div><div class="dm-sub">한국: 테이퍼+유선 / 미국: 직선+유선 / 중국: 직선 강세</div></td><td><div class="dm-l2">형태보다 기능 우선</div><div class="dm-sub">테이퍼(Cuisinart)+직선(Breville) 혼재<br>인체공학 핸들 평가 기준</div></td><td><div class="dm-l3">미니멀·혁신형 실험</div><div class="dm-sub">BALMUDA 구체형 / Midea 기하학적 / WMF 직선형</div></td><td><div class="dm-verdict dm-v-opp">🟡 형태 기회</div><div class="dm-verdict-detail">어워드 혁신형 → 대중화 흐름<br>미니멀 직선형+STS 무광 조합 가능</div></td></tr>
+          <tr><td class="dm-attr">온도 제어</td><td><div class="dm-l1">미탑재가 표준 (Top3 전원 없음)</div><div class="dm-sub">한국·미국 Top3 단순 끓임<br>Tiger PTV(조그 다이얼) ₩8~11만 — Top3 외</div></td><td><div class="dm-l2">온도 정밀성 = 추천 필수 기준</div><div class="dm-sub">Wirecutter 6단계 / Breville 5단계<br>Which? 온도조절 베스트 별도 선정<br>CR 핵심 테스트 항목</div></td><td><div class="dm-l3">정밀 제어 혁신 포인트</div><div class="dm-sub">Tiger PTQ 조그 다이얼 / Midea 다단계 가열</div></td><td><div class="dm-verdict dm-v-gap">🔴 기능 갭 (최대)</div><div class="dm-verdict-detail"><strong>가장 큰 갭.</strong> 시장 = 단순 끓임<br>전문가 = 온도제어 필수<br>→ ₩4~8만 온도제어 기본형 공백</div></td></tr>
+          <tr><td class="dm-attr">디스플레이</td><td><div class="dm-l1">91% 미탑재 (Top3 전원 없음)</div><div class="dm-sub">중국 CHIGO만 바디터치식</div></td><td><div class="dm-l2">가성비 미탑재 허용</div><div class="dm-sub">Breville·Zwilling만 탑재 / Cuisinart Top Pick 없음<br>LED 인디케이터 대체 허용</div></td><td><div class="dm-l3">구스넥·티포트 표준화 → 기본형 확산 예정</div><div class="dm-sub">기본형 어워드 디스플레이 사례 희소</div></td><td><div class="dm-verdict dm-v-conv">🟣 수렴 예정</div><div class="dm-verdict-detail">단기 필수 아님<br>중기: LED → 디지털 전환 예상</div></td></tr>
+          <tr><td class="dm-attr">가격 포지션</td><td><div class="dm-l1">한 ₩2~4만 / 미 $24~35 / 독 €18~28</div><div class="dm-sub">한국 플라스틱 집중 / 미국 유리 $24~35 / 독일 보급형</div></td><td><div class="dm-l2">$25~220 양극화 — $60~100 희소</div><div class="dm-sub">$60~100 추천: Cuisinart $89 / OXO $80 <strong>2개만</strong></div></td><td><div class="dm-l3">가격 무관 (디자인 가치)</div><div class="dm-sub">WMF·Tiger 중고가 수상</div></td><td><div class="dm-verdict dm-v-gap">🔴 가격 갭</div><div class="dm-verdict-detail">$60~100(₩8~13만) 추천 희소<br>→ ₩6~9만 STS+온도제어 진출 기회</div></td></tr>
+          <tr><td class="dm-attr">포인트 요소</td><td><div class="dm-l1">미국: LED 무드등 / 한국: 거의 없음</div><div class="dm-sub">COSORI·셰프맨·Amazon Basics 무드등<br>테팔 로프트 세로 리브+크롬링</div></td><td><div class="dm-l2">수위창 백라이트 / 기능 연계 포인트</div><div class="dm-sub">Cuisinart CPK-17P1 수위창 백라이트<br>기능적 포인트 선호</div></td><td><div class="dm-l3">혁신 형태 자체 / 에코 마감</div><div class="dm-sub">BALMUDA 형태 / Philips 에코 소재 / Midea 크롬</div></td><td><div class="dm-verdict dm-v-opp">🟡 감성 기회</div><div class="dm-verdict-detail">LED 무드등(미국 검증) vs 수위창 백라이트(전문가)<br>→ 기능+감성 통합 전략 여지</div></td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <div class="insight-bar" style="margin-top:16px;">
-    <div class="ins-chip"><span class="ins-dot" style="background:var(--green);"></span></div>
-    <div class="ins-chip"><span class="ins-dot" style="background:var(--blue);"></span></div>
-    <div class="ins-chip"><span class="ins-dot" style="background:var(--orange);"></span></div>
-    <div class="ins-chip"><span class="ins-dot" style="background:var(--purple);"></span></div>
+  <!-- ═══ 구스넥 상세 ═══ -->
+  <div id="dcat-neck" class="deep-cat-section">
+    <div class="deep-matrix-wrap" style="margin-top:20px">
+      <table class="deep-matrix">
+        <thead><tr><th style="width:120px">디자인 속성</th><th style="min-width:210px"><span style="color:var(--blue)">●</span> 시장 렌즈</th><th style="min-width:210px"><span style="color:var(--green)">●</span> 전문가 렌즈</th><th style="min-width:190px"><span style="color:var(--orange)">●</span> 어워드 렌즈</th><th style="min-width:190px">갭 / 기회</th></tr></thead>
+        <tbody>
+          <tr><td class="dm-attr">외부 소재</td><td><div class="dm-l1">STS 무광 = 진입 조건 (전 지역)</div><div class="dm-sub">한·미·유럽·일본 전원 STS / 중국 일부 TI<br>우드 포인트 병행 증가</div></td><td><div class="dm-l2">STS 무광 = 추천 전제</div><div class="dm-sub">GK-1, OXO, Fellow 모두 STS 무광<br>소재로 차별화 불가 (이미 표준)</div></td><td><div class="dm-l3">STS 기본 + 특수소재 시도</div><div class="dm-sub">Fellow 매트 블랙 / BALMUDA 독자 마감<br>코르크·우드 수상 사례</div></td><td><div class="dm-verdict dm-v-ok">✅ 3렌즈 일치</div><div class="dm-verdict-detail">STS 무광은 이미 표준<br>차별화는 <strong>포인트 소재</strong>에서<br>→ 우드, 코르크, 특수 코팅으로 승부</div></td></tr>
+          <tr><td class="dm-attr">온도 제어</td><td><div class="dm-l1">다단계 온도제어 보편화</div><div class="dm-sub">한국 터치식 / 독일·일본 조그다이얼 증가</div></td><td><div class="dm-l2">정밀 온도 = 추천 핵심</div><div class="dm-sub">GK-1: 5도 단위 / OXO: ±1°C / Fellow: 조그 아이콘</div></td><td><div class="dm-l3">수상작 100% 정밀 제어</div><div class="dm-sub">Cocinare FLOW i7 / Fellow EKG</div></td><td><div class="dm-verdict dm-v-ok">✅ 3렌즈 일치</div><div class="dm-verdict-detail">온도 정밀성 이미 필수<br>차별화는 <strong>UX(조그 vs 터치 vs 앱)</strong>와 정밀도</div></td></tr>
+          <tr><td class="dm-attr">핸들 디자인</td><td><div class="dm-l1">Open Handle ㄱ형 주류</div><div class="dm-sub">전 지역 95% / 하트만만 Y형 / 중국 일부 Closed</div></td><td><div class="dm-l2">Open Handle 전제</div><div class="dm-sub">Fellow Y형이 아이코닉 요소</div></td><td><div class="dm-l3">핸들이 디자인 아이덴티티</div><div class="dm-sub">Fellow Y형 / HARIO ㄱ형 / BODUM 코르크</div></td><td><div class="dm-verdict dm-v-opp">🟡 아이덴티티 기회</div><div class="dm-verdict-detail">ㄱ형 표준 / Y형 Fellow 전유<br>→ 독자 핸들 실루엣 개발 필요</div></td></tr>
+          <tr><td class="dm-attr">조작 UX</td><td><div class="dm-l1">조그/터치 혼재, 받침상부 표준</div><div class="dm-sub">한국 터치 대세 / 독일·일본 조그 증가 / 미국 버튼</div></td><td><div class="dm-l2">조그 다이얼 = 프리미엄 기준</div><div class="dm-sub">OXO·Fellow 조그 / Cuisinart 터치버튼</div></td><td><div class="dm-l3">조그 다이얼 수상 패턴</div><div class="dm-sub">Fellow EKG, OXO — 아날로그 조작 긍정 평가</div></td><td><div class="dm-verdict dm-v-conv">🟣 수렴 중</div><div class="dm-verdict-detail">조그 다이얼이 프리미엄 표준으로 수렴<br>→ 독자 UX 또는 앱 연동 차별화</div></td></tr>
+          <tr><td class="dm-attr">오브제 / 감성</td><td><div class="dm-l1">우드 포인트 = 한국 차별화</div><div class="dm-sub">이즈홈·라쿠진 우드 / 독일 RHD·vmotal 우드<br>보덤 코르크</div></td><td><div class="dm-l2">Fellow = "커피 철학의 표현"</div><div class="dm-sub">Forbes: 기능 넘어 라이프스타일 정체성</div></td><td><div class="dm-l3">오브제화 = 최신 수상 트렌드</div><div class="dm-sub">BALMUDA MoonKettle / De'Longhi Eclettica<br>"기능 숨긴 조형미"</div></td><td><div class="dm-verdict dm-v-opp">🟡 포지셔닝 기회</div><div class="dm-verdict-detail">Fellow(전문성)·BALMUDA(오브제) 사이<br>"커피 성능 × 인테리어 조화" 공백<br>→ 한국 ₩6~10만</div></td></tr>
+          <tr><td class="dm-attr">가격 포지션</td><td><div class="dm-l1">한 ₩39K~75K / 미 $40~80 / 유럽 €50~125</div><div class="dm-sub">한국 ₩4~8만 주력 / 타임모어 €125 프리미엄</div></td><td><div class="dm-l2">$80~170 전문가 추천 구간</div><div class="dm-sub">GK-1 $80 / OXO $100 / Fellow $170+</div></td><td><div class="dm-l3">가격 무관 (조형 가치)</div></td><td><div class="dm-verdict dm-v-conv">🟣 구조 정착</div><div class="dm-verdict-detail">입문 $40~50 / 중급 $80~100 / 프리미엄 $150+<br>→ ₩10~15만 오브제+정밀 진출 가능</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ 티포트 상세 ═══ -->
+  <div id="dcat-tea" class="deep-cat-section">
+    <div class="deep-matrix-wrap" style="margin-top:20px">
+      <table class="deep-matrix">
+        <thead><tr><th style="width:120px">디자인 속성</th><th style="min-width:210px"><span style="color:var(--blue)">●</span> 시장 렌즈</th><th style="min-width:210px"><span style="color:var(--green)">●</span> 전문가 렌즈</th><th style="min-width:190px"><span style="color:var(--orange)">●</span> 어워드 렌즈</th><th style="min-width:190px">갭 / 기회</th></tr></thead>
+        <tbody>
+          <tr><td class="dm-attr">외부 소재</td><td><div class="dm-l1">STS+유리 = 전 지역 표준</div><div class="dm-sub">한·미·중·일·독 전원 STS+Glass<br>유광이 한국·중국·일본 주류</div></td><td><div class="dm-l2">STS+유리 표준 (미국 유리 강세)</div><div class="dm-sub">투명성으로 차 가시화 = 추천 포인트</div></td><td><div class="dm-l3">수상작 데이터 부족</div><div class="dm-sub">티포트 전용 수상 미확인</div></td><td><div class="dm-verdict dm-v-ok">✅ 3렌즈 일치</div><div class="dm-verdict-detail">STS+유리 업계 표준<br>마감(무광화)에서 차별화<br>→ 키친아트 유광 독주 → 무광 진입 기회</div></td></tr>
+          <tr><td class="dm-attr">핵심 기능</td><td><div class="dm-l1">거름망+디스플레이 전 제품 탑재 (한국)</div><div class="dm-sub">신일만 조그+터치 복합 / 받침상부 터치 표준</div></td><td><div class="dm-l2">자동 티 바스켓 (Breville $330)</div><div class="dm-sub">"차 전용 의식(ritual) 기기" 정의<br>$330은 진입장벽 → 가성비 공백</div></td><td><div class="dm-l3">어워드 기준 불명확</div><div class="dm-sub">혁신 시도 시 선점 가능</div></td><td><div class="dm-verdict dm-v-gap">🔴 기능 갭</div><div class="dm-verdict-detail">한국: 거름망+디스플레이 표준<br>글로벌: 자동화 $330 vs 없음<br>→ ₩5~9만 자동 인퓨저 공백</div></td></tr>
+          <tr><td class="dm-attr">전문가 커버리지</td><td><div class="dm-l1">한국 키친아트 독주, 글로벌 분산</div><div class="dm-sub">단일 강자 없음</div></td><td><div class="dm-l2">전 매거진 전용 리뷰 미존재</div><div class="dm-sub">Forbes·CR·Which? 전용 없음 / Wirecutter Competition만</div></td><td><div class="dm-l3">어워드 공백</div><div class="dm-sub">iF·Red Dot 전용 수상 미확인</div></td><td><div class="dm-verdict dm-v-future">🔮 미래 기회</div><div class="dm-verdict-detail">3렌즈 모두 저평가 → 역설적 선점 기회<br>→ 어워드+매거진 동시 공략 가능</div></td></tr>
+          <tr><td class="dm-attr">가격 포지션</td><td><div class="dm-l1">한 ₩35K~55.5K / 미 $35~90 / 독 €18~67</div></td><td><div class="dm-l2">$40~330 양극 / $60~150 공백</div><div class="dm-sub">CHOICE AUD$49~140 / Breville $330</div></td><td><div class="dm-l3">어워드 가격 기준 없음</div></td><td><div class="dm-verdict dm-v-gap">🔴 가격 갭</div><div class="dm-verdict-detail">한국 ₩35~56K → ₩7~10만 업그레이드 공백<br>글로벌 $60~150 추천 없음</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ 분유포트 상세 ═══ -->
+  <div id="dcat-baby" class="deep-cat-section">
+    <div class="deep-matrix-wrap" style="margin-top:20px">
+      <table class="deep-matrix">
+        <thead><tr><th style="width:120px">디자인 속성</th><th style="min-width:210px"><span style="color:var(--blue)">●</span> 시장 (한국)</th><th style="min-width:210px"><span style="color:var(--green)">●</span> 전문가 (글로벌)</th><th style="min-width:190px"><span style="color:var(--orange)">●</span> 어워드</th><th style="min-width:190px">갭 / 기회</th></tr></thead>
+        <tbody>
+          <tr><td class="dm-attr">카테고리 존재</td><td><div class="dm-l1">한국 단독 존재</div><div class="dm-sub">미·유럽·일·중 동일 카테고리 없음<br>→ 한국이 세계 유일 시장</div></td><td><div class="dm-l2">전 매거진 전용 리뷰 미존재</div><div class="dm-sub">CR 분유 제조기 리뷰는 별개 제품</div></td><td><div class="dm-l3">글로벌 수상작 없음</div><div class="dm-sub">→ 출시 시 최초 수상 가능</div></td><td><div class="dm-verdict dm-v-opp">🟡 블루오션</div><div class="dm-verdict-detail">3렌즈 모두 글로벌 공백<br>한국 검증 카테고리 → 글로벌 선점</div></td></tr>
+          <tr><td class="dm-attr">소재 / 안전</td><td><div class="dm-l1">STS 내부 표준, 일부 STS316L</div><div class="dm-sub">1위 Reliv: STS내부 / 2·3위 보르도: 유리+STS<br>STS316L = 최고급 식품용 안전 소재</div></td><td><div class="dm-l2">글로벌 기준 없음</div><div class="dm-sub">전용 리뷰 없어 기준 미수립</div></td><td><div class="dm-l3">STS316L+정밀온도 = 어워드 수상 요소</div><div class="dm-sub">안전성·소재혁신 심사 기준 부합</div></td><td><div class="dm-verdict dm-v-ok">✅ 강점 요소</div><div class="dm-verdict-detail">STS316L+정밀온도 = 어워드 포인트<br>→ "Baby-safe Premium" 포지셔닝</div></td></tr>
+          <tr><td class="dm-attr">온도 정밀성</td><td><div class="dm-l1">70°C±2°C 정밀 + 24시간 보온</div><div class="dm-sub">전 제품 디스플레이+온도 표시<br>24시간 보온 = 야간 수유 핵심</div></td><td><div class="dm-l2">글로벌 기준 없음 (공백)</div><div class="dm-sub">Wirecutter: 일반 포트로 "분유에 활용 가능" 언급만</div></td><td><div class="dm-l3">정밀 온도 = 어워드 핵심 기준</div><div class="dm-sub">구스넥 수상작 공통 수상 이유와 동일</div></td><td><div class="dm-verdict dm-v-opp">🟡 기술 강점</div><div class="dm-verdict-detail">70°C±2°C = 어워드 기준 충족<br>→ 출품 시 차별화 포인트</div></td></tr>
+          <tr><td class="dm-attr">디자인 형태</td><td><div class="dm-l1">일체형 디스펜서 vs 주전자형 양분</div><div class="dm-sub">1·3위 일체형(핸들 없음) / 2위 주전자형<br>아이보리·화이트 아기 감성</div></td><td><div class="dm-l2">글로벌 기준 없음</div></td><td><div class="dm-l3">BALMUDA 오브제화 → 응용 가능</div><div class="dm-sub">"기능 숨긴 오브제" → 아기방 인테리어</div></td><td><div class="dm-verdict dm-v-future">🔮 오브제화 기회</div><div class="dm-verdict-detail">실용형 → "기능 숨긴 오브제"<br>→ 아기방 인테리어 오브제 분유포트</div></td></tr>
+          <tr><td class="dm-attr">가격 포지션</td><td><div class="dm-l1">한국 ₩95K~219K (고가)</div><div class="dm-sub">기본형 대비 5~10배 / 전용 기능 프리미엄</div></td><td><div class="dm-l2">글로벌 비교 제품 없음</div><div class="dm-sub">유사 기능: Cuisinart CPK-17P1 $89.95</div></td><td><div class="dm-l3">수상 후 프리미엄 정당화 가능</div></td><td><div class="dm-verdict dm-v-opp">🟡 프리미엄 유지</div><div class="dm-verdict-detail">글로벌 $100~200 포지셔닝<br>"전 세계 유일 전용 분유포트" 스토리텔링</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 4개 카테고리 통합 요약 -->
+  <div style="margin-top:48px;"><div class="deep-section-label"><span class="deep-section-label-text">4개 카테고리 통합 요약</span><div class="deep-section-label-line"></div></div></div>
+  <div class="deep-sum-grid">
+    <div class="deep-sum-card" style="border-top:3px solid var(--blue)"><div class="deep-sum-cat" style="color:var(--blue)">기본형 전기포트</div><div class="deep-sum-title">STS+온도제어의 ₩5~8만 공백이 핵심</div><ul class="deep-sum-points"><li>시장: 플라스틱·원버튼·단순 끓임 주류</li><li>전문가: STS+6단계 온도+보온 필수 기준</li><li>어워드: 기술혁신(무음·3D가열) 최신 트렌드</li><li>→ $40~60(₩5~8만) STS 무광 + 온도제어 미탐색</li></ul></div>
+    <div class="deep-sum-card" style="border-top:3px solid var(--green)"><div class="deep-sum-cat" style="color:var(--green)">구스넥 드립포트</div><div class="deep-sum-title">STS·온도제어는 표준 → 오브제 독자성 필요</div><ul class="deep-sum-points"><li>3렌즈 일치: STS 무광·다단계 온도 이미 표준</li><li>차별화: 독자 핸들 실루엣 + 오브제 형태 언어</li><li>공백: Fellow(전문성)·BALMUDA(오브제) 사이</li><li>→ ₩6~10만 커피 성능 × 인테리어 오브제</li></ul></div>
+    <div class="deep-sum-card" style="border-top:3px solid var(--yellow)"><div class="deep-sum-cat" style="color:#c97d00">티포트 (인퓨저)</div><div class="deep-sum-title">전 매거진 공백 = 선점 가능 카테고리</div><ul class="deep-sum-points"><li>소재: STS+유리 이미 전 지역 확립</li><li>전문가: Forbes·CR·Which? 전용 리뷰 없음</li><li>어워드: iF·Red Dot 수상작 없음 → 선점 가능</li><li>→ 무광 오브제형 + 자동인퓨저 = 3렌즈 공략</li></ul></div>
+    <div class="deep-sum-card" style="border-top:3px solid var(--purple)"><div class="deep-sum-cat" style="color:var(--purple)">분유포트</div><div class="deep-sum-title">글로벌 3렌즈 모두 완전 공백 → 블루오션</div><ul class="deep-sum-points"><li>시장: 한국 단독, 글로벌 동일 카테고리 없음</li><li>전문가: 5개 매거진 전원 전용 리뷰 미존재</li><li>어워드: 전무 → 출품 시 최초 수상 가능</li><li>→ STS316L + 70°C 정밀 + 아기방 오브제 수출</li></ul></div>
   </div>
 </section>
+<!-- ═══════════════════════════════════════════════════════════════════
+     ▲ 교차 매트릭스 상세 분석 (삽입 섹션 끝) ▲
+     ═══════════════════════════════════════════════════════════════════ -->
 
-<!-- STRATEGY SUMMARY -->
-<div class="strat-strip">
-  <div class="strat-title"></div>
-  <div class="strat-sub"></div>
-  <div class="strat-grid">
-    <div>
-      <div class="strat-h"></div>
-      <p class="strat-p"></p>
-    </div>
-    <div>
-      <div class="strat-h"></div>
-      <p class="strat-p"></p>
-    </div>
-  </div>
+
+
+<div style="margin-top:16px;" class="card"><div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;"><div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#3182f6,#05c072,#ff6b35);display:flex;align-items:center;justify-content:center;font-size:18px;">🎯</div><div><div style="font-size:16px;font-weight:800;">3렌즈 통합 확신 영역</div><div style="font-size:12px;color:var(--text-sub);">3대 성공 요인</div></div></div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+<div style="background:var(--blue-light);border-radius:14px;padding:16px;"><div style="font-size:11px;font-weight:700;color:var(--blue);margin-bottom:6px;">소재의 신뢰</div><div style="font-size:15px;font-weight:800;margin-bottom:4px;">내부 STS 전면화</div><div style="font-size:12px;color:var(--text-sub);line-height:1.6;">시장: 구스넥 Top3 전원 STS<br>전문가: 내부 STS ~80%<br>어워드: WMF·Tiger·Fellow STS<br><strong style="color:var(--blue);">→ 플라 내부 = '비프리미엄' 신호</strong></div></div>
+<div style="background:var(--green-light);border-radius:14px;padding:16px;"><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:6px;">기능의 정밀성</div><div style="font-size:15px;font-weight:800;margin-bottom:4px;">다단계 온도제어</div><div style="font-size:12px;color:var(--text-sub);line-height:1.6;">시장: 구스넥 상위 전원 탑재<br>전문가: Top Pick 필수<br>어워드: 수상작 100% 정밀<br><strong style="color:var(--green);">→ 미탑재 기본형 = '도태 경로'</strong></div></div>
+<div style="background:var(--orange-light);border-radius:14px;padding:16px;"><div style="font-size:11px;font-weight:700;color:var(--orange);margin-bottom:6px;">감성의 완성</div><div style="font-size:15px;font-weight:800;margin-bottom:4px;">오브제화 × 라이프스타일</div><div style="font-size:12px;color:var(--text-sub);line-height:1.6;">시장: 분유포트·구스넥 우드<br>전문가: "커피 철학 표현"<br>어워드: BALMUDA·De'Longhi<br><strong style="color:var(--orange);">→ 전기포트 = '주방 인테리어'</strong></div></div>
+</div></div>
+</section>
+
+<section class="section" id="opportunity"><div class="section-header"><div><div class="section-title">전략적 기회 영역 4선</div><div class="section-sub">교차 매트릭스 '갭'과 '기회'에서 도출</div></div></div>
+<div class="opp-grid">
+<div class="opp-card"><div class="opp-num">01</div><div class="opp-badge"><span class="badge b-red">소재/마감 갭</span></div><div class="opp-title">기본형의 STS 무광화</div><div class="opp-desc">시장 Top3 플라스틱/유리 vs 전문가·어워드 STS 무광. ₩4~7만 미탐색 구간.</div><div class="opp-evidence"><div class="opp-ev-item"><div class="ev-dot" style="background:var(--blue);"></div>📊 시장: Top3 플라스틱/유리 (₩2~4만)</div><div class="opp-ev-item"><div class="ev-dot" style="background:var(--green);"></div>📰 Wirecutter Top Pick = STS 무광</div><div class="opp-ev-item"><div class="ev-dot" style="background:var(--orange);"></div>🏆 WMF·Tiger STS 어워드 수상</div></div></div>
+<div class="opp-card"><div class="opp-num">02</div><div class="opp-badge"><span class="badge b-red">기능 미반영 갭</span></div><div class="opp-title">기본형에 홈카페 기능 이식</div><div class="opp-desc">Cuisinart $89 = Wirecutter+CR 검증. 시장 Top3는 단순 끓임. ₩5~8만 공백.</div><div class="opp-evidence"><div class="opp-ev-item"><div class="ev-dot" style="background:var(--green);"></div>📰 Wirecutter + CR Top 4: 6단 온도 필수</div><div class="opp-ev-item"><div class="ev-dot" style="background:var(--blue);"></div>📊 한국 기본형 온도제어 ₩6만+ / ₩4~6만 공백</div><div class="opp-ev-item"><div class="ev-dot" style="background:var(--orange);"></div>🏆 Tiger PTQ·Midea 혁신 어워드 수상</div></div></div>
+<div class="opp-card"><div class="opp-num">03</div><div class="opp-badge"><span class="badge b-purple">형태적 기회</span></div><div class="opp-title">오브제형 구스넥</div><div class="opp-desc">Fellow = 바리스타 표준, BALMUDA = 오브제 표준. "커피 성능+인테리어" 공백.</div><div class="opp-evidence"><div class="opp-ev-item"><div class="ev-dot" style="background:var(--blue);"></div>📊 이즈홈·라쿠진 오브제 지향 상위 진입</div><div class="opp-ev-item"><div class="ev-dot" style="background:var(--orange);"></div>🏆 BALMUDA MoonKettle · De'Longhi Eclettica</div><div class="opp-ev-item"><div class="ev-dot" style="background:var(--green);"></div>📰 Forbes: Fellow "커피 철학의 표현"</div></div></div>
+<div class="opp-card"><div class="opp-num">04</div><div class="opp-badge"><span class="badge b-red">블루오션</span></div><div class="opp-title">글로벌 분유포트 수출</div><div class="opp-desc">글로벌 동일 카테고리 전무. STS316L+70°C±2°C+24시간 보온. ₩10~22만.</div><div class="opp-evidence"><div class="opp-ev-item"><div class="ev-dot" style="background:var(--blue);"></div>📊 한국 ₩95K~219K. 글로벌 동일 카테고리 없음</div><div class="opp-ev-item"><div class="ev-dot" style="background:var(--green);"></div>📰 전 매거진 분유포트 리뷰 미존재</div><div class="opp-ev-item"><div class="ev-dot" style="background:var(--orange);"></div>🏆 Haier 소수 수상. STS316L+정밀온도 공략 유효</div></div></div>
+</div></section>
+
+
+
+
 </div>
-
-</div>
-
 <script>
-const secs = document.querySelectorAll('section[id]');
-const links = document.querySelectorAll('.nav-link');
-window.addEventListener('scroll', () => {
-  let cur = '';
-  secs.forEach(s => { if (window.scrollY >= s.offsetTop - 80) cur = s.id; });
-  links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + cur));
-}, {passive:true});
-links.forEach(l => l.addEventListener('click', e => {
-  e.preventDefault();
-  document.querySelector(l.getAttribute('href'))?.scrollIntoView({behavior:'smooth'});
-}));
+const sections=document.querySelectorAll('section[id],.hero[id]'),navLinks=document.querySelectorAll('.nav-link');function updateNav(){let c='';sections.forEach(s=>{if(window.scrollY>=s.offsetTop-80)c=s.id});navLinks.forEach(l=>{l.classList.toggle('active',l.getAttribute('href')==='#'+c)})}window.addEventListener('scroll',updateNav,{passive:!0});updateNav();navLinks.forEach(link=>{link.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(link.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth',block:'start'})})});
+function switchTab(id,btn){document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active')}
+function switchCat(id,btn){document.querySelectorAll('.cat-content').forEach(t=>t.style.display='none');document.querySelectorAll('.cat-btn').forEach(b=>{b.style.background='transparent';b.style.color='var(--text-sub)';b.style.boxShadow='none'});document.getElementById(id).style.display='block';btn.style.background='var(--white)';btn.style.color='var(--text)';btn.style.boxShadow='0 2px 8px rgba(0,0,0,.07)'}
+function switchCrossTab(cat){const cats=['std','neck','tea','baby'];cats.forEach(c=>{const el=document.getElementById('cross-'+c);const btn=document.getElementById('cross-btn-'+c);if(el)el.style.display='none';if(btn){btn.style.background='transparent';btn.style.color='var(--text-sub)';btn.style.border='1.5px solid var(--border)'}});const activeEl=document.getElementById('cross-'+cat);const activeBtn=document.getElementById('cross-btn-'+cat);if(activeEl)activeEl.style.display='block';if(activeBtn){const colorMap={std:['var(--blue-light)','var(--blue)','var(--blue)'],neck:['var(--green-light)','var(--green)','var(--green)'],tea:['var(--yellow-light)','#c97d00','var(--yellow)'],baby:['var(--purple-light)','var(--purple)','var(--purple)']};const[bg,color,border]=colorMap[cat];activeBtn.style.background=bg;activeBtn.style.color=color;activeBtn.style.border='1.5px solid '+border}}
+function switchExp(id,btn){document.querySelectorAll('.exp-content').forEach(el=>{el.style.display='none'});document.querySelectorAll('.exp-btn').forEach(el=>{el.style.background='transparent';el.style.color='var(--text-sub)';el.style.boxShadow='none'});const target=document.getElementById(id);if(target)target.style.display='block';if(btn){btn.style.background='var(--white)';btn.style.color='var(--text)';btn.style.boxShadow='0 2px 8px rgba(0,0,0,.07)'}}
+function switchInsight(id,btn){document.querySelectorAll('.insight-content').forEach(el=>{el.style.display='none'});document.querySelectorAll('.insight-btn').forEach(el=>{el.style.background='transparent';el.style.color='var(--text-sub)';el.style.boxShadow='none'});document.getElementById(id).style.display='block';btn.style.background='var(--white)';btn.style.color='var(--text)';btn.style.boxShadow='0 2px 8px rgba(0,0,0,.07)'}
+function switchDeepCat(cat,btn){document.querySelectorAll('.deep-cat-section').forEach(s=>s.classList.remove('dactive'));document.querySelectorAll('.deep-cat-tab').forEach(t=>{t.style.background='transparent';t.style.color='var(--text-sub)';t.style.boxShadow='none'});document.getElementById('dcat-'+cat).classList.add('dactive');btn.style.background='var(--white)';btn.style.color='var(--text)';btn.style.boxShadow='0 2px 8px rgba(0,0,0,.07)'}
+function animateBars(){document.querySelectorAll('.progress-bar-fill').forEach(bar=>{const w=bar.style.width;bar.style.width='0';setTimeout(()=>{bar.style.width=w},300)})}window.addEventListener('load',animateBars);
 </script>
 </body>
 </html>
