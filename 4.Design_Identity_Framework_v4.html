@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>가열포트 디자인 전략</title>
+<style>
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+:root{
+--blue:#3182f6;--blue-light:#e8f3ff;--green:#05c072;--green-light:#e6faf2;
+--orange:#ff6b35;--orange-light:#fff0e8;--purple:#7c5cfc;--purple-light:#ede9ff;
+--yellow:#f5a623;--yellow-light:#fff8e6;--red:#ff4545;--red-light:#fff0f0;
+--bg:#f2f4f6;--white:#fff;--text:#191f28;--text-sub:#4e5968;--text-light:#8b95a1;
+--border:#e8ebed;--shadow:0 2px 12px rgba(0,0,0,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:13px}
+
+.nav{position:sticky;top:0;z-index:200;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;gap:4px;height:52px;overflow-x:auto}
+.nav-brand{font-size:14px;font-weight:800;margin-right:10px;white-space:nowrap}
+.nav-sep{width:1px;height:14px;background:var(--border);flex-shrink:0}
+.nav-link{font-size:12px;font-weight:500;color:var(--text-sub);padding:5px 10px;border-radius:6px;cursor:pointer;transition:.15s;text-decoration:none;white-space:nowrap}
+.nav-link:hover{background:var(--bg);color:var(--text)}
+.nav-link.active{background:var(--blue-light);color:var(--blue)}
+
+.page{max-width:1280px;margin:0 auto;padding:0 24px 100px}
+.hero{padding:52px 0 36px}
+.hero h1{font-size:30px;font-weight:800;letter-spacing:-.8px;line-height:1.3}
+.hero h1 em{color:var(--blue);font-style:normal}
+.hero-sub{font-size:14px;color:var(--text-sub);margin-top:8px;max-width:680px}
+
+.section{margin-top:64px}
+.section-title{font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
+.section-sub{font-size:13px;color:var(--text-sub);margin-bottom:24px}
+
+.card{background:var(--white);border-radius:10px;box-shadow:var(--shadow)}
+.card-pad{padding:24px}
+
+/* WHY */
+.why-wrap{background:var(--white);border-radius:10px;box-shadow:var(--shadow);padding:28px 32px}
+.why-section{margin-bottom:28px}
+.why-section:last-child{margin-bottom:0}
+.why-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-light);margin-bottom:8px}
+.why-title{font-size:15px;font-weight:800;margin-bottom:10px}
+.why-body{font-size:13px;color:var(--text-sub);line-height:1.8}
+.why-body strong{color:var(--text)}
+.why-arrow{display:inline-block;background:var(--bg);padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;color:var(--blue);margin-top:10px}
+
+/* ERRC */
+.errc-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;overflow:hidden;border-radius:10px;box-shadow:var(--shadow)}
+.errc-cell{padding:22px 24px}
+.errc-cell h3{font-size:14px;font-weight:800;margin-bottom:12px}
+.errc-item{font-size:12px;color:var(--text-sub);line-height:1.7;padding:6px 0;border-bottom:1px solid var(--border)}
+.errc-item:last-child{border:none}
+.errc-item strong{color:var(--text)}
+.errc-tag{display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:4px}
+
+/* IDENTITY */
+.id-grid{display:grid;grid-template-columns:1fr;gap:20px}
+.id-block{background:var(--white);border-radius:10px;box-shadow:var(--shadow);padding:24px 28px}
+.id-num{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--text-light);margin-bottom:4px}
+.id-title{font-size:16px;font-weight:800;margin-bottom:6px}
+.id-desc{font-size:13px;color:var(--text-sub);line-height:1.8}
+.id-desc strong{color:var(--text)}
+
+/* PRINCIPLES */
+.prin-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.prin-card{background:var(--white);border-radius:10px;padding:20px;box-shadow:var(--shadow)}
+.prin-bar{width:32px;height:3px;border-radius:1px;margin-bottom:10px}
+.prin-num{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--text-light);margin-bottom:4px}
+.prin-title{font-size:14px;font-weight:800;margin-bottom:10px}
+.prin-rule{font-size:11.5px;color:var(--text-sub);line-height:1.7;padding:5px 0;border-bottom:1px solid var(--border)}
+.prin-rule:last-child{border:none}
+.prin-rule strong{color:var(--text)}
+
+/* MATRIX */
+.mx-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.mx-table{border-collapse:separate;border-spacing:0;width:100%;min-width:940px}
+.mx-table thead th{position:sticky;top:52px;z-index:10;padding:12px 14px;font-size:12px;font-weight:800;text-align:center;background:var(--white);border-bottom:2px solid var(--border)}
+.mx-table thead th:first-child{text-align:left}
+.mx-cat{display:inline-block;padding:3px 12px;border-radius:4px;font-size:11px;font-weight:700;color:#fff}
+.mx-group td{padding:8px 14px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--text-light);background:var(--bg);border-top:2px solid var(--border)}
+.mx-row td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-sub);line-height:1.6;vertical-align:top;background:var(--white)}
+.mx-row td:first-child{font-weight:700;color:var(--text);white-space:nowrap;min-width:110px}
+.mx-row td:not(:first-child){min-width:240px}
+.mx-row.unified td:not(:first-child){background:rgba(49,130,246,.02)}
+.chip{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;margin-right:3px;margin-bottom:2px}
+.chip-dna{background:var(--blue-light);color:var(--blue)}
+.chip-diff{background:var(--orange-light);color:var(--orange)}
+
+/* DIRECTION */
+.dir-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.dir-card{background:var(--white);border-radius:10px;padding:22px;box-shadow:var(--shadow);text-align:center}
+.dir-icon{font-size:30px;margin-bottom:10px}
+.dir-name{font-size:14px;font-weight:800;margin-bottom:6px}
+.dir-desc{font-size:11.5px;color:var(--text-sub);line-height:1.65}
+.dir-keys{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+
+.brand-sig{margin-top:28px;background:#191f28;border-radius:10px;padding:36px;text-align:center}
+.brand-sig .label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:10px}
+.brand-sig .headline{font-size:20px;font-weight:800;color:#fff;line-height:1.5}
+.brand-sig .headline em{color:var(--blue);font-style:normal}
+.brand-sig .sub{font-size:12px;color:rgba(255,255,255,.4);margin-top:12px}
+
+@media(max-width:900px){
+.prin-grid,.dir-grid{grid-template-columns:1fr}
+.errc-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+<span class="nav-brand">Design Strategy</span>
+<span class="nav-sep"></span>
+<a class="nav-link active" href="#why">교차 인사이트</a>
+<a class="nav-link" href="#errc">ERRC</a>
+<a class="nav-link" href="#identity">디자인 아이덴티티</a>
+<a class="nav-link" href="#prin">디자인 원칙</a>
+<a class="nav-link" href="#matrix">매트릭스</a>
+<a class="nav-link" href="#dir">최종 방향</a>
+</nav>
+
+<div class="page">
+
+<section class="hero">
+<h1>시장·전문가·어워드 <em>3렌즈 교차</em>에서<br>도출한 가열포트 디자인 전략</h1>
+<p class="hero-sub">239개 제품 · 100K 리뷰 · 118개 어워드 → 교차 인사이트 → ERRC → 디자인 아이덴티티 → 카테고리별 매트릭스</p>
+</section>
+
+
+<!-- ══════════════════════════════════ -->
+<!-- WHY MATRIX -->
+<!-- ══════════════════════════════════ -->
+<section class="section" id="why">
+<div class="section-title">3렌즈 교차 인사이트</div>
+<div class="section-sub">시장(소비자) · 전문가 · 어워드(디자이너) 세 관점이 공통으로 가리키는 디자인 방향</div>
+
+<div class="why-wrap">
+
+<div class="why-section">
+<div class="why-label">INSIGHT 01 — CMF</div>
+<div class="why-title">무광 프리미엄의 완벽한 수렴</div>
+<div class="why-body">
+전문가 매거진(Wirecutter·Forbes)의 Top Pick과 글로벌 어워드 수상작(WMF·Midea) 모두 <strong>유광을 배제하고 차분한 극무광(Matte) 스테인리스</strong>를 프리미엄의 표준으로 삼고 있습니다. 반면 현재 한국·중국 시장 Top3는 여전히 유광 플라스틱이 주류로, 이 간극이 가장 명확한 차별화 기회입니다. 소비자 리뷰에서 부정률 14.3%를 차지하는 초기 냄새 문제는 내부 소재를 풀STS 또는 티타늄으로 전환해 원천 차단해야 하며, 차가운 금속 느낌을 중화하는 우드 포인트와 LED 무드등은 소비자 매력 품질(98%)과 어워드 트렌드가 교차 검증한 감성 요소입니다.
+</div>
+<div class="why-arrow">→ 극무광 STS 외부 + 티타늄 내부 + 우드·빛의 감성 포인트</div>
+</div>
+
+<div class="why-section">
+<div class="why-label">INSIGHT 02 — 기능·UI</div>
+<div class="why-title">정밀 성능과 보이지 않는 기술의 결합</div>
+<div class="why-body">
+전문가 매거진이 공통으로 요구하는 <strong>다단계 정밀 온도 제어</strong>는 미탑재 시 추천 리스트에서 도태되는 필수 스펙이지만, 현재 기본형 시장의 78%는 단순 원버튼이고 91%는 디스플레이조차 없는 기능적 정체 상태입니다. 이 고성능 조작부를 탑재하되, 최신 어워드가 지향하는 <strong>'보이지 않는 기술(Invisible UI)'</strong> — 평소에는 매끈한 표면이다가 켤 때만 빛으로 나타나는 히든 패널 — 로 구현해야 합니다. 동시에 부정 리뷰 1위인 뚜껑 개폐 불량(18.8%)과 누수 방지는 당연 품질로서 반드시 해결해야 할 기본기입니다.
+</div>
+<div class="why-arrow">→ 히든 터치 UI로 정밀 온도 제어 + 무결점 뚜껑·밀봉 기본기</div>
+</div>
+
+<div class="why-section">
+<div class="why-label">INSIGHT 03 — 형태</div>
+<div class="why-title">안정감 위에 입혀진 심리스(Seamless)</div>
+<div class="why-body">
+소비자와 전문가 모두 물리적 안정감이 검증된 <strong>테이퍼형(위로 좁아짐)과 유선형(부드러운 곡선)</strong>을 선호하며, 여기에 어워드가 지향하는 <strong>심리스 미니멀리즘</strong> — 부품 간 파팅 라인을 없애 하나의 단단한 조각품(모놀리스)처럼 보이게 하는 조형 — 을 결합해야 합니다. 이중벽 쿨터치 안전 구조 역시 단순한 스펙이 아닌, 부드러운 곡면 형태의 디자인으로 시각화하여 통합합니다. 다만 일부 어워드 수상작의 난해한 형태 파괴는 세척 편의성(소비자 만족도 99% 요구)을 해치므로 지양합니다.
+</div>
+<div class="why-arrow">→ 테이퍼/유선형 뼈대 + 심리스 모놀리스 디테일 + 쿨터치 곡면 통합</div>
+</div>
+
+</div>
+</section>
+
+
+<!-- ══════════════════════════════════ -->
+<!-- ERRC -->
+<!-- ══════════════════════════════════ -->
+<section class="section" id="errc">
+<div class="section-title">ERRC 디자인 전략 캔버스</div>
+<div class="section-sub">교차 인사이트에서 도출한 4액션</div>
+
+<div class="errc-grid">
+
+<div class="errc-cell" style="background:#fff0f0">
+<h3>✕ Eliminate</h3>
+<div class="errc-item"><strong>유광 외부 마감</strong> — 저가 상징. 3렌즈 전원 배제<span class="errc-tag" style="background:var(--red-light);color:var(--red)">CMF</span></div>
+<div class="errc-item"><strong>외부 플라스틱</strong> — 냄새·변색 원인<span class="errc-tag" style="background:var(--red-light);color:var(--red)">CMF</span></div>
+<div class="errc-item"><strong>돌출 기계식 다이얼/버튼</strong> — 오브제 조형 파괴<span class="errc-tag" style="background:var(--red-light);color:var(--red)">UI</span></div>
+<div class="errc-item"><strong>표면 인쇄 텍스트/로고</strong> — 시각 노이즈<span class="errc-tag" style="background:var(--red-light);color:var(--red)">DETAIL</span></div>
+</div>
+
+<div class="errc-cell" style="background:#fff8e6">
+<h3>▽ Reduce</h3>
+<div class="errc-item"><strong>파팅 라인</strong> — 접합부 최소화, 심리스 일체감<span class="errc-tag" style="background:var(--yellow-light);color:var(--yellow)">FORM</span></div>
+<div class="errc-item"><strong>기계 알림음</strong> — 빛으로 상태 전달<span class="errc-tag" style="background:var(--yellow-light);color:var(--yellow)">UX</span></div>
+<div class="errc-item"><strong>조작부 시각 면적</strong> — OFF 시 숨김, ON 시 발광<span class="errc-tag" style="background:var(--yellow-light);color:var(--yellow)">UI</span></div>
+<div class="errc-item"><strong>컬러 수</strong> — 모노톤 + 웜화이트로 압축<span class="errc-tag" style="background:var(--yellow-light);color:var(--yellow)">CMF</span></div>
+</div>
+
+<div class="errc-cell" style="background:#e6faf2">
+<h3>△ Raise</h3>
+<div class="errc-item"><strong>극무광 STS 외부 100%</strong> — 프리미엄 CMF 표준<span class="errc-tag" style="background:var(--green-light);color:var(--green)">CMF</span></div>
+<div class="errc-item"><strong>내부 티타늄/풀STS</strong> — 초격차 안심 소재<span class="errc-tag" style="background:var(--green-light);color:var(--green)">CMF</span></div>
+<div class="errc-item"><strong>이중벽 쿨터치</strong> — 곡면 조형으로 시각화<span class="errc-tag" style="background:var(--green-light);color:var(--green)">FORM</span></div>
+<div class="errc-item"><strong>뚜껑 밀봉 + 개폐 정밀도</strong> — 부정 1위 원천 해결<span class="errc-tag" style="background:var(--green-light);color:var(--green)">DETAIL</span></div>
+<div class="errc-item"><strong>정밀 온도 제어</strong> — 전 카테고리 표준<span class="errc-tag" style="background:var(--green-light);color:var(--green)">UI</span></div>
+</div>
+
+<div class="errc-cell" style="background:#e8f3ff">
+<h3>★ Create</h3>
+<div class="errc-item"><strong>앰비언트 무드등</strong> — 온도를 빛의 색·리듬으로<span class="errc-tag" style="background:var(--blue-light);color:var(--blue)">UX</span></div>
+<div class="errc-item"><strong>히든 LED 디스플레이</strong> — ON 시 산세리프 발광<span class="errc-tag" style="background:var(--blue-light);color:var(--blue)">UI</span></div>
+<div class="errc-item"><strong>우드/코르크 포인트</strong> — 따뜻한 오브제<span class="errc-tag" style="background:var(--blue-light);color:var(--blue)">CMF</span></div>
+<div class="errc-item"><strong>모놀리스 조형</strong> — 심리스 덩어리감<span class="errc-tag" style="background:var(--blue-light);color:var(--blue)">FORM</span></div>
+</div>
+
+</div>
+</section>
+
+
+<!-- ══════════════════════════════════ -->
+<!-- DESIGN IDENTITY -->
+<!-- ══════════════════════════════════ -->
+<section class="section" id="identity">
+<div class="section-title">디자인 아이덴티티</div>
+<div class="section-sub">ERRC에서 도출된 전략을 하나의 디자인 언어로 통합</div>
+
+<div class="id-grid">
+
+<!-- Philosophy -->
+<div class="id-block" style="background:#191f28;color:#fff">
+<div class="id-num" style="color:rgba(255,255,255,.4)">01 PHILOSOPHY</div>
+<div class="id-title" style="font-size:18px;line-height:1.4">물을 끓이는 일상을 <span style="color:var(--blue)">시각적 힐링</span>으로 재구성하고,<br>숨겨진 기술과 완벽한 소재로 <span style="color:var(--blue)">무결점의 정서적 안도감</span>을 제공합니다</div>
+</div>
+
+<!-- Concept -->
+<div class="id-block" style="background:var(--white)">
+<div class="id-num">02 CONCEPT</div>
+<div class="id-title" style="font-size:20px;letter-spacing:-.5px">"Illuminated Titanium Object"</div>
+<div class="id-desc" style="color:var(--text-light)">빛으로 소통하는 미니멀 티타늄 오브제</div>
+</div>
+
+<!-- 나머지 아이덴티티 -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+
+<div class="id-block">
+<div class="id-num">03 FORM FACTOR</div>
+<div class="id-title">심리스 미니멀리즘</div>
+<div class="id-desc"><strong>이음새를 최소화한 단단하고 매끄러운 덩어리(모놀리스) 조형.</strong> 대중적인 테이퍼형/유선형 실루엣을 뼈대로 삼고, 화상 방지(쿨터치) 이중벽 구조를 부드러운 곡면으로 디자인에 녹여냅니다.</div>
+</div>
+
+<div class="id-block">
+<div class="id-num">04 CMF</div>
+<div class="id-title">티타늄 내부 × 극무광 외부 × 우드 포인트</div>
+<div class="id-desc">물 닿는 내부는 냄새와 위생 불안을 원천 차단하는 <strong>최고급 티타늄</strong>. 외관 전체는 프리미엄 표준인 <strong>극무광 스테인리스</strong>. 차가운 금속 느낌을 지우는 <strong>우드 포인트</strong>를 손잡이 등에 결합합니다. <span style="color:var(--text-light)">(티포트는 시각화를 위해 투명 유리 바디 유지)</span></div>
+</div>
+
+<div class="id-block">
+<div class="id-num">05 DETAIL</div>
+<div class="id-title">무결점 기본기</div>
+<div class="id-desc">리뷰 부정 1위(18.8%)인 뚜껑 고장을 막는 <strong>견고한 원터치 스프링 힌지</strong>와 완벽한 누수 방지 밀봉 설계에 원가를 집중합니다.</div>
+</div>
+
+<div class="id-block">
+<div class="id-num">06 TYPOGRAPHY</div>
+<div class="id-title">빛으로 존재하는 텍스트</div>
+<div class="id-desc">제품 표면의 인쇄 로고·숫자를 없애고, 전원을 켤 때만 은은하게 나타나는 <strong>모던 산세리프 폰트의 LED</strong>를 적용합니다.</div>
+</div>
+
+</div>
+
+<div class="id-block">
+<div class="id-num">07 EXPERIENCE</div>
+<div class="id-title">히든 터치 + 앰비언트 라이트</div>
+<div class="id-desc">돌출된 기계식 버튼을 지우고 디자인에 스며든 <strong>히든 터치 패널</strong>로 미세 온도를 직관 제어합니다. 작동 소음을 줄이고, 물이 끓는 온도와 상태 변화를 베이스 하단이나 수위창의 <strong>부드러운 조명(앰비언트 라이트)</strong>으로 전달하여 시각적 힐링을 선사합니다.</div>
+</div>
+
+</div>
+</section>
+
+
+<!-- ══════════════════════════════════ -->
+<!-- PRINCIPLES -->
+<!-- ══════════════════════════════════ -->
+<section class="section" id="prin">
+<div class="section-title">디자인 원칙 — 4축</div>
+<div class="section-sub">아이덴티티를 각 구성 요소의 설계 판단 기준으로 번역</div>
+
+<div class="prin-grid">
+
+<div class="prin-card">
+<div class="prin-bar" style="background:var(--blue)"></div>
+<div class="prin-num">FORM</div>
+<div class="prin-title">형태</div>
+<div class="prin-rule"><strong>심리스 모놀리스</strong> — 파팅 라인 최소. 하나의 덩어리</div>
+<div class="prin-rule"><strong>안정적 실루엣</strong> — 테이퍼/유선형. 무게 중심 하단</div>
+<div class="prin-rule"><strong>쿨터치 조형화</strong> — 이중벽을 곡면으로 통합</div>
+</div>
+
+<div class="prin-card">
+<div class="prin-bar" style="background:var(--green)"></div>
+<div class="prin-num">CMF</div>
+<div class="prin-title">소재·마감</div>
+<div class="prin-rule"><strong>극무광 100%</strong> — 유광 배제. 전 카테고리</div>
+<div class="prin-rule"><strong>내부 초격차</strong> — 티타늄/풀STS. 플라스틱 제로</div>
+<div class="prin-rule"><strong>자연소재 포인트</strong> — 핸들·노브에 우드</div>
+<div class="prin-rule"><strong>모노톤</strong> — 블랙·실버·웜화이트</div>
+</div>
+
+<div class="prin-card">
+<div class="prin-bar" style="background:var(--orange)"></div>
+<div class="prin-num">DETAIL</div>
+<div class="prin-title">디테일</div>
+<div class="prin-rule"><strong>무결점 뚜껑</strong> — 스프링 + 밀봉</div>
+<div class="prin-rule"><strong>빛의 텍스트</strong> — 인쇄 최소. 산세리프 LED</div>
+<div class="prin-rule"><strong>노이즈 제로</strong> — 장식·돌출 불허</div>
+</div>
+
+<div class="prin-card">
+<div class="prin-bar" style="background:var(--purple)"></div>
+<div class="prin-num">UI / UX</div>
+<div class="prin-title">조작·경험</div>
+<div class="prin-rule"><strong>히든 터치</strong> — OFF 매끈, ON LED 패널</div>
+<div class="prin-rule"><strong>정밀 온도</strong> — 다단계 프리셋. 직관 터치</div>
+<div class="prin-rule"><strong>앰비언트 라이트</strong> — 온도를 빛의 색·리듬으로</div>
+</div>
+
+</div>
+</section>
+
+
+<!-- ══════════════════════════════════ -->
+<!-- IDENTITY MATRIX -->
+<!-- ══════════════════════════════════ -->
+<section class="section" id="matrix">
+<div class="section-title">카테고리별 아이덴티티 매트릭스</div>
+<div class="section-sub">12대 요소 × 3카테고리 — <span class="chip chip-dna">동일 = 브랜드 DNA</span> <span class="chip chip-diff">차별 = 카테고리 개성</span></div>
+
+<div class="card" style="padding:2px;overflow:hidden">
+<div class="mx-wrap">
+<table class="mx-table">
+<thead>
+<tr>
+<th style="width:120px">요소</th>
+<th><span class="mx-cat" style="background:var(--blue)">기본형</span></th>
+<th><span class="mx-cat" style="background:var(--orange)">티포트</span></th>
+<th><span class="mx-cat" style="background:var(--green)">구스넥</span></th>
+</tr>
+</thead>
+<tbody>
+
+<tr class="mx-group"><td colspan="4">FORM</td></tr>
+
+<tr class="mx-row">
+<td>① 뚜껑</td>
+<td><span class="chip chip-diff">차별</span><strong>원터치 스프링</strong><br>시장 DNA 계승 + 밀봉 극대화</td>
+<td><span class="chip chip-diff">차별</span><strong>분리형</strong><br>인퓨저 탈착. 노브에 우드</td>
+<td><span class="chip chip-diff">차별</span><strong>분리형</strong><br>좁은 개구부. 상면 플러시 심리스</td>
+</tr>
+
+<tr class="mx-row">
+<td>② 바디</td>
+<td><span class="chip chip-dna">DNA</span><strong>테이퍼 / 유선형</strong><br>이중벽 곡면 통합</td>
+<td><span class="chip chip-dna">DNA</span><strong>유선형</strong><br>투명 유리와 조화</td>
+<td><span class="chip chip-dna">DNA</span><strong>테이퍼 / 유선형</strong><br>하단 안정 + 스파우트 연결</td>
+</tr>
+
+<tr class="mx-row">
+<td>③ 핸들</td>
+<td><span class="chip chip-diff">차별</span><strong>Closed ㄷ형</strong> + 우드<br>1.7L 하중 대응</td>
+<td><span class="chip chip-diff">차별</span><strong>Closed C형</strong> + 우드<br>유리 무게 + 다기 곡선미</td>
+<td><span class="chip chip-diff">차별</span><strong>Open ㄱ형</strong> + 우드<br>정밀 수류 제어(95%)</td>
+</tr>
+
+<tr class="mx-row">
+<td>④ 스파우트</td>
+<td><span class="chip chip-diff">차별</span><strong>짧은 스파우트</strong></td>
+<td><span class="chip chip-diff">차별</span><strong>짧은 스파우트</strong></td>
+<td><span class="chip chip-diff">차별</span><strong>구스넥 S-커브</strong><br>곡률·끝단이 핵심</td>
+</tr>
+
+<tr class="mx-group"><td colspan="4">CMF</td></tr>
+
+<tr class="mx-row">
+<td>⑤ 외부 소재</td>
+<td><span class="chip chip-dna">DNA</span><strong>극무광 STS</strong></td>
+<td><span class="chip chip-diff">차별</span><strong>투명 유리</strong> + STS 프레임<br>금속부만 무광</td>
+<td><span class="chip chip-dna">DNA</span><strong>극무광 STS</strong></td>
+</tr>
+
+<tr class="mx-row unified">
+<td>⑥ 내부 소재</td>
+<td colspan="3" style="text-align:center"><span class="chip chip-dna">전 카테고리 동일</span><strong>티타늄 / 풀 STS</strong> — 플라스틱 제로</td>
+</tr>
+
+<tr class="mx-row unified">
+<td>⑦ 표면 마감</td>
+<td colspan="3" style="text-align:center"><span class="chip chip-dna">전 카테고리 동일</span><strong>극무광 100%</strong></td>
+</tr>
+
+<tr class="mx-row unified">
+<td>⑧ 컬러</td>
+<td colspan="3" style="text-align:center"><span class="chip chip-dna">전 카테고리 동일</span><strong>매트 블랙 · 매트 실버 · 웜화이트</strong></td>
+</tr>
+
+<tr class="mx-group"><td colspan="4">DETAIL · UI / UX</td></tr>
+
+<tr class="mx-row">
+<td>⑨ 수위창</td>
+<td><span class="chip chip-diff">차별</span><strong>전면 슬릿형</strong><br>LED 연동</td>
+<td><span class="chip chip-diff">차별</span><strong>통유리 바디</strong><br>바디 자체가 수위창</td>
+<td><span class="chip chip-diff">차별</span><strong>없음</strong><br>STS 밀폐. 심리스</td>
+</tr>
+
+<tr class="mx-row">
+<td>⑩ 디스플레이</td>
+<td><span class="chip chip-diff">차별</span><strong>히든 LED</strong> (핸들/바디)</td>
+<td><span class="chip chip-diff">차별</span><strong>히든 LED</strong> (베이스)</td>
+<td><span class="chip chip-diff">차별</span><strong>히든 LED</strong> (베이스)</td>
+</tr>
+
+<tr class="mx-row unified">
+<td>⑪ 조작부</td>
+<td><span class="chip chip-dna">DNA</span><strong>히든 터치</strong><br>다단계 프리셋</td>
+<td><span class="chip chip-dna">DNA</span><strong>히든 터치</strong><br>+ 티 프리셋</td>
+<td><span class="chip chip-dna">DNA</span><strong>히든 터치</strong><br>+ 1°C 정밀</td>
+</tr>
+
+<tr class="mx-row">
+<td>⑫ 베이스</td>
+<td><span class="chip chip-diff">차별</span><strong>일체감</strong><br>바디와 연속. 슬림</td>
+<td><span class="chip chip-diff">차별</span><strong>분리감 UI 허브</strong><br>터치+디스플레이 집중</td>
+<td><span class="chip chip-diff">차별</span><strong>분리감 UI 허브</strong><br>조작 허브. 시그니처</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
+<div class="card card-pad">
+<div style="font-size:13px;font-weight:800;margin-bottom:8px"><span class="chip chip-dna">DNA</span> 브랜드 통일 — 7개</div>
+<div style="font-size:12px;color:var(--text-sub);line-height:1.9">바디 형상 · 내부 소재 · 표면 마감 · 컬러 · 핸들 우드 · 히든 터치 · 앰비언트 라이트</div>
+</div>
+<div class="card card-pad">
+<div style="font-size:13px;font-weight:800;margin-bottom:8px"><span class="chip chip-diff">차별</span> 카테고리 고유 — 5개</div>
+<div style="font-size:12px;color:var(--text-sub);line-height:1.9">뚜껑 · 핸들 · 스파우트 · 외부 소재 · 수위창 · 디스플레이 위치 · 베이스</div>
+</div>
+</div>
+</section>
+
+
+<!-- ══════════════════════════════════ -->
+<!-- DIRECTION -->
+<!-- ══════════════════════════════════ -->
+<section class="section" id="dir">
+<div class="section-title">최종 디자인 방향</div>
+
+<div class="dir-grid">
+<div class="dir-card" style="background:var(--blue-light)">
+<div class="dir-icon">🪨</div>
+<div class="dir-name" style="color:var(--blue)">기본형</div>
+<div class="dir-desc">"가장 정제된 모놀리스"<br>무광 STS 일체감 + 쿨터치 곡면 + 원터치 밀봉</div>
+<div class="dir-keys"><span class="chip chip-dna">극무광</span><span class="chip chip-dna">테이퍼형</span><span class="chip chip-diff">원터치</span><span class="chip chip-dna">우드</span><span class="chip chip-dna">히든LED</span></div>
+</div>
+<div class="dir-card" style="background:var(--orange-light)">
+<div class="dir-icon">🫖</div>
+<div class="dir-name" style="color:var(--orange)">티포트</div>
+<div class="dir-desc">"빛과 유리의 힐링 리추얼"<br>투명 유리 × 무광 STS. 차 우림을 빛으로 시각화</div>
+<div class="dir-keys"><span class="chip chip-diff">투명유리</span><span class="chip chip-dna">무광프레임</span><span class="chip chip-diff">C형</span><span class="chip chip-dna">우드노브</span><span class="chip chip-dna">라이트</span></div>
+</div>
+<div class="dir-card" style="background:var(--green-light)">
+<div class="dir-icon">☕</div>
+<div class="dir-name" style="color:var(--green)">구스넥</div>
+<div class="dir-desc">"전문가의 도구, 오브제의 품격"<br>무광 STS 심리스 + S-커브 + 베이스 UI 허브</div>
+<div class="dir-keys"><span class="chip chip-dna">극무광</span><span class="chip chip-diff">S-커브</span><span class="chip chip-diff">Openㄱ형</span><span class="chip chip-dna">우드</span><span class="chip chip-diff">UI허브</span></div>
+</div>
+</div>
+
+<div class="brand-sig">
+<div class="label">Brand Design Identity</div>
+<div class="headline"><em>꺼져 있으면 오브제</em>, <em style="color:var(--yellow)">켜지면 빛으로 말하는</em><br><span style="opacity:.6">무광의 따뜻한 모놀리스</span></div>
+<div class="sub">극무광 STS × 티타늄 내부 × 우드 포인트 × 히든 LED × 앰비언트 라이트 — 5대 DNA</div>
+</div>
+</section>
+
+</div>
+
+<script>
+document.querySelectorAll('.nav-link').forEach(l=>{
+l.addEventListener('click',e=>{e.preventDefault();
+const t=document.querySelector(l.getAttribute('href'));
+if(t)t.scrollIntoView({behavior:'smooth'});
+});
+});
+window.addEventListener('scroll',()=>{
+let cur='';
+document.querySelectorAll('section[id]').forEach(s=>{if(scrollY>=s.offsetTop-80)cur=s.id});
+document.querySelectorAll('.nav-link').forEach(l=>l.classList.toggle('active',l.getAttribute('href')==='#'+cur));
+},{passive:true});
+</script>
+</body>
+</html>
